@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  nfl-stats-app:
+    container_name: sports-data-api
+    build: ../
+    volumes:
+      - .:/app
+    environment:
+      PYTHONUNBUFFERED: 1
