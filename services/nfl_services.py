@@ -101,3 +101,37 @@ def get_nfl_player_snap_count():
     updated_data.append(modified_data)
   convert_data = json.dumps(updated_data, indent=2)
   return convert_data
+
+def get_nfl_fantasy_points_leaders():
+  df = pd.read_csv('nfl_data/nfl_fantasy_points_total.csv')
+  df.columns = df.columns.str.lower()
+  fantasy_points_data = df.to_dict(orient='records')
+  updated_data = []
+
+  for data in fantasy_points_data:
+    modified_data = {
+      'rank': data.get('rk'),
+      'name': data.get('name'),
+      'team': data.get('team'),
+      'position': data.get('pos'),
+      'games_played': data.get('gms'),
+      'passing': {
+        'yards': data.get('yds'),
+        'touchdowns': data.get('td'),
+        'interceptions': data.get('int')
+      },
+      'rushing': {
+        'yards': data.get('yds.1'),
+        'touchdowns': data.get('td.1')
+      },
+      'receiving': {
+        'yards': data.get('yds.2'),
+        'touchdowns': data.get('td.2'),
+        'receptions': data.get('rec')
+      },
+      'fantasy_points_per_game': data.get('fpts/g'),
+      'total_fantasy_points': data.get('fpts')
+    }
+    updated_data.append(modified_data)
+  convert_data = json.dumps(updated_data, indent=2)
+  return convert_data
