@@ -32,6 +32,32 @@ def get_nfl_team_offense_stats():
     'differential': data.get('to diff')
     }
     updated_data.append(modified_data)
-    convert_data = json.dumps(updated_data, indent=2)
+  convert_data = json.dumps(updated_data, indent=2)
 
+  return convert_data
+
+def get_nfl_player_snap_count():
+  df = pd.read_csv('nfl_data/nfl_snap_count.csv')
+  df.columns = df.columns.str.lower()
+  player_snap_data = df.to_dict(orient='records')
+  updated_data = []
+
+  for data in player_snap_data:
+    modified_data = {
+      'player': data.get('player'),
+      'position': data.get('pos'),
+      'team': data.get('team'),
+      'games_played': data.get('games'),
+      'total_snaps': data.get('snaps'),
+      'total_snaps_per_game': data.get('snaps/gm'),
+      'snap_percentage': data.get('snap %'),
+      'rush_percentage': data.get('rush %'),
+      'target_percentage': data.get('tgt %'),
+      'touch_percentage': data.get('touch %'),
+      'util_percentage': data.get('util %'),
+      'total_fantasy_points': data.get('fantasy pts'),
+      'points_per_100_snaps': data.get('pts/100 snaps')
+    }
+    updated_data.append(modified_data)
+  convert_data = json.dumps(updated_data, indent=2)
   return convert_data
