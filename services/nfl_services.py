@@ -153,3 +153,20 @@ def get_nfl_dk_salary_data():
     updated_data.append(modified_data)
   convert_data = json.dumps(updated_data, indent=2)
   return convert_data
+
+def get_nfl_odds():
+  df = pd.read_csv('nfl_data/nfl_odds.csv')
+  df.columns = df.columns.str.lower()
+  odds_data = df.to_dict(orient='records')
+  updated_data = []
+
+  for data in odds_data:
+    modified_data = {
+      'team_name': data.get('team'),
+      'team': data.get('teamabbrev'),
+      'spread': data.get('spread'),
+      'over_under': data.get('over-under')
+    }
+    updated_data.append(modified_data)
+  convert_data = json.dumps(updated_data, indent=2)
+  return convert_data
