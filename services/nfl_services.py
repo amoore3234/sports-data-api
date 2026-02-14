@@ -135,3 +135,21 @@ def get_nfl_fantasy_points_leaders():
     updated_data.append(modified_data)
   convert_data = json.dumps(updated_data, indent=2)
   return convert_data
+
+def get_nfl_dk_salary_data():
+  df = pd.read_csv('nfl_data/nfl_dk_salaries.csv')
+  df.columns = df.columns.str.lower()
+  dk_salary_data = df.to_dict(orient='records')
+  updated_data = []
+
+  for data in dk_salary_data:
+    modified_data = {
+      'player': data.get('name'),
+      'player_name_id': data.get('name + id'),
+      'salary': data.get('salary'),
+      'team': data.get('teamabbrev'),
+      'position': data.get('position')
+    }
+    updated_data.append(modified_data)
+  convert_data = json.dumps(updated_data, indent=2)
+  return convert_data
