@@ -160,13 +160,42 @@ def get_nfl_odds():
   odds_data = df.to_dict(orient='records')
   updated_data = []
 
-  for data in odds_data:
+  for i in range(len(odds_data)):
+    modified_data = {}
+    data = odds_data[i]
+
+    modified_data['opponent'] = odds_data[i + 1].get('teamabbrev')
+
+    modified_data['team_name'] = data.get('team')
+    modified_data['team'] = data.get('teamabbrev')
+    modified_data['spread'] = data.get('spread')
+    modified_data['over_under'] = data.get('over-under')
+
+    updated_data.append(modified_data)
+  convert_data = json.dumps(updated_data, indent=2)
+  return convert_data
+
+def get_nfl_teams():
+  df = pd.read_csv('nfl_data/nfl_teams.csv')
+  df.columns = df.columns.str.lower()
+  teams_data = df.to_dict(orient='records')
+  updated_data = []
+
+  for data in teams_data:
     modified_data = {
       'team_name': data.get('team'),
-      'team': data.get('teamabbrev'),
-      'spread': data.get('spread'),
-      'over_under': data.get('over-under')
+      'team': data.get('abbrev'),
+      'opponent': data.get('opponent')
     }
     updated_data.append(modified_data)
   convert_data = json.dumps(updated_data, indent=2)
   return convert_data
+
+# def get_nfl_fantasy_projects():
+#   nfl_dk_salary_df = get_nfl_dk_salary_data()
+#   nfl_odds_df = get_nfl_odds()
+
+#   generated_projections = []
+
+#   for salary_data in json.loads(nfl_dk_salary_df):
+#     for odds_data in json.loads(nfl_odds_df):
