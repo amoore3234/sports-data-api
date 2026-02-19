@@ -5,6 +5,22 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 
+def player_expected_score():
+
+  data = {
+  'Player': ['Collin Morikawa', 'Collin Morikawa', 'Shane Lowry', 'Shane Lowry'],
+  'SG_Total': [7.938, 2.788, 1.25, 0.526]
+  }
+  df = pd.DataFrame(data)
+
+  player_stats = df.groupby('Player')['SG_Total'].agg(['mean', 'std']).reset_index()
+
+  course_rating = 73.4
+
+  player_stats[['Expected_Score', 'Ceiling', 'Floor']] = player_stats.apply(calculate_potential, rating=course_rating, axis=1)
+
+  print(player_stats[['Player', 'Expected_Score', 'Ceiling', 'Floor']])
+
 def player_expected_score_at_course():
   """Calculates a player's projected scores per round at a specific PGA course.
 
@@ -16,16 +32,20 @@ def player_expected_score_at_course():
   phoenix_open_data = pd.read_csv('pga_data/wm_phoenix_open_stats.csv')
   genesis_invitational_data = pd.read_csv('pga_data/genesis_invitational_stats.csv')
   cognizant_class_data = pd.read_csv('pga_data/cognizant_classic_stats.csv')
+  arnold_palmer_data = pd.read_csv('pga_data/arnold_palmer_stats.csv')
+  dk_data = pd.read_csv('pga_data/dk_salaries.csv')
+  df_salary = pd.DataFrame(dk_data)
   phoenix_df = pd.DataFrame(phoenix_open_data)
   genesis_invitational_df = pd.DataFrame(genesis_invitational_data)
-  cognizant_classic_df = pd.DataFrame(cognizant_class_data)
   pebble_beach_df = pd.DataFrame(pebble_data)
-  tournaments = [phoenix_df, genesis_invitational_df, cognizant_classic_df, pebble_beach_df]
+  cognizant_classic_df = pd.DataFrame(cognizant_class_data)
+  arnold_palmer_df = pd.DataFrame(arnold_palmer_data)
+  tournaments = [phoenix_df, genesis_invitational_df, cognizant_classic_df, pebble_beach_df, arnold_palmer_df]
   tournament_df = pd.concat(tournaments, ignore_index=True)
 
   # A course's scoring average and difficulty.
-  target_rating = 74.0
-  target_slope = 138
+  target_rating = 76.8
+  target_slope = 155
 
   # Calculate a player's current average Strokes Gained and Scrambling statistics per round.
   round_one_total_sg = tournament_df[tournament_df['Rounds'] == 1].groupby('Player')['SG Total'].transform('mean')
@@ -97,12 +117,51 @@ def player_expected_score_at_course():
 
   # Drop columns that contain null values and columns that are not needed for the final stat sheet.
   remove_nan_df = new_tournament_df.dropna(subset=['Final_Score'])
-  tournament_results_df = remove_nan_df.drop(columns=['SG Total', 'Scrambling', 'Rounds', 'Projected_Round_One_Result',
+  lineup_creation_df = remove_nan_df.drop(columns=['SG Total', 'Scrambling', 'Rounds', 'Projected_Round_One_Result',
     'Projected_Round_Two_Result', 'Projected_Round_Three_Result', 'Projected_Round_Four_Result'])
 
-  print(tournament_results_df)
+  salary_lookup = df_salary.set_index('Name')['Salary'].to_dict()
+  name_id = df_salary.set_index('Name')['Name + ID'].to_dict()
 
-  tournament_results_df.to_csv('pga_data/projected_tournament_results.csv', index=False)
+  lineup_creation_df['Salary'] = lineup_creation_df['Player'].map(salary_lookup)
+  lineup_creation_df['Name_ID'] = lineup_creation_df['Player'].map(name_id)
+
+  lineup_count = 0
+  lineup_list = []
+
+  while lineup_count < 30:
+    lineup = {}
+    available_indices = list(lineup_creation_df.index)
+    player_key = 1
+    player_salary = 0
+    while player_key <= 6:
+      idx = np.random.choice(available_indices)
+      lineup[player_key] = lineup_creation_df.loc[idx, 'Name_ID']
+      player_salary += lineup_creation_df.loc[idx, 'Salary']
+      available_indices.remove(idx)
+      player_key += 1
+    if player_salary <= 50000 and player_salary >= 49000:
+      lineup_list.append(lineup)
+      lineup_count += 1
+  temp_df = pd.DataFrame({1: [], 2: [], 3: [], 4:[], 5:[], 6:[]})
+  lineups_df = pd.DataFrame(lineup_list)
+  lineup_df = pd.concat([temp_df, lineups_df], ignore_index=True)
+  lineup_df.to_csv('pga_data/lineups.csv', index=False)
+
+  print(lineup_list)
+
+  lineup_creation_df.to_csv('pga_data/tournament_results.csv', index=False)
+
+def calculate_potential(row, rating):
+  mean_sg = row['mean']
+  std_sg = row['std']
+
+  expected_score = rating - mean_sg
+
+  ceiling = expected_score - (2 * std_sg)
+  floor = expected_score + (2 * std_sg)
+
+  return pd.Series([round(expected_score, 1), round(ceiling, 1), round(floor, 1)])
 
 def predict_top_10_performance():
   """Predicts a player's future top 10 performance probabilities.
@@ -122,12 +181,14 @@ def predict_top_10_performance():
   genesis_invitational_data = pd.read_csv('pga_data/genesis_invitational_stats.csv')
   cognizant_class_data = pd.read_csv('pga_data/cognizant_classic_stats.csv')
   season_average_sg_total = pd.read_csv('pga_data/season_average_sg_total.csv')
+  arnold_palmer_data = pd.read_csv('pga_data/arnold_palmer_stats.csv')
   phoenix_df = pd.DataFrame(phoenix_open_data)
   genesis_invitational_df = pd.DataFrame(genesis_invitational_data)
   pebble_beach_df = pd.DataFrame(pebble_data)
   cognizant_classic_df = pd.DataFrame(cognizant_class_data)
   season_average_sg_total_df = pd.DataFrame(season_average_sg_total)
-  tournaments = [phoenix_df, genesis_invitational_df, cognizant_classic_df, pebble_beach_df]
+  arnold_palmer_df = pd.DataFrame(arnold_palmer_data)
+  tournaments = [phoenix_df, genesis_invitational_df, cognizant_classic_df, pebble_beach_df, arnold_palmer_df]
   tournament_df = pd.concat(tournaments, ignore_index=True)
 
   # Calculate a player's current average Strokes Gained statistics per round.
@@ -172,21 +233,22 @@ def predict_top_10_performance():
 
   # Take the Strokes Gained total for the first two rounds to determine the top ten finishers.
   new_tournament_df['Current_SG_Total'] = round(new_tournament_df['Projected_First_Two_Rounds_SG_Totals'] + new_tournament_df['Projected_Final_Two_Rounds_SG_Totals'], 1)
-  new_tournament_df['Top_Ten_Finish'] = (new_tournament_df['Current_SG_Total'] > 2.0).astype(int)
+  top_10_threshold = new_tournament_df['Current_SG_Total'].nlargest(10).min()
+  print(top_10_threshold)
+  new_tournament_df['Top_Ten_Finish'] = (new_tournament_df['Current_SG_Total'] > 3).astype(int)
 
   # Include players' current season averages into the Data Frame as a baseline for make future predictions.
   new_tournament_df = pd.merge(new_tournament_df, season_average_sg_total_df[['Player', 'Season_Average_SG_Total']],
                          on='Player',
                          how='left')
   new_tournament_df[['Season_Average_SG_Total']] = new_tournament_df[['Season_Average_SG_Total']].fillna(0.0)
-  new_tournament_df.drop(columns=['Rounds', 'SG Total', 'Scrambling', 'Projected_First_Two_Rounds_SG_Totals',
-    'Projected_Final_Two_Rounds_SG_Totals', 'Round_One_SG_Total', 'Round_Two_SG_Total', 'Round_Three_SG_Total',
+  new_tournament_df.drop(columns=['Rounds', 'SG Total', 'Scrambling','Round_One_SG_Total', 'Round_Two_SG_Total', 'Round_Three_SG_Total',
     'Round_Four_SG_Total'], inplace=True)
 
   new_tournament_df.to_csv('pga_data/sg_totals_with_top_performers.csv', index=False)
 
   # Prepare and train the model by including season Strokes Gained total stats, SG totals for the first two rounds, and top ten finishs.
-  X = new_tournament_df[['Season_Average_SG_Total', 'Current_SG_Total']]
+  X = new_tournament_df[['Season_Average_SG_Total', 'Current_SG_Total', 'Projected_First_Two_Rounds_SG_Totals']]
   y = new_tournament_df['Top_Ten_Finish']
 
   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -215,7 +277,7 @@ def predict_top_10_performance():
       'Probability': probabilities
   }).sort_values(by='Probability', ascending=False)
 
-  print(leaderboard.head(10))
+  print(leaderboard)
   leaderboard.to_csv('pga_data/top_ten_probabilities.csv', index=False)
 
   # Predict and Evaluate

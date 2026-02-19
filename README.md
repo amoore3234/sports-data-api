@@ -10,10 +10,15 @@ An API that returns sports statistics
 - [Getting Started](#getting-started)
   - [Spinning Up The Job Board API Container](#spinning-up-the-job-board-api-container)
   - [Running The Server Locally](#running-the-server-locally)
+<<<<<<< HEAD
 - [NFL Statistics](#nfl-statistics)
 - [PGA Statistics](#pga-statistics)
 - [MLB Statistics](#mlb-statistics)
 - [Resources](#resources)
+=======
+- [NFL Statistics](nfl-statistics)
+- [PGA Statistics](pga-statistics)
+>>>>>>> 265c35e (Include additional stats and predictions for the pga_service)
 
 # Introduction
 This project utilizes machine learning concepts to return advanced statics to monitor a players' performance, trends, and predictions.
