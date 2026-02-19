@@ -19,21 +19,19 @@ def player_expected_score():
   print(player_stats[['Player', 'Expected_Score', 'Ceiling', 'Floor']])
 
 def player_expected_score_with_course_difficulty():
-  data = {
-  'Player': ['Collin Morikawa', 'Collin Morikawa', 'Shane Lowry', 'Shane Lowry'],
-  'SG_Total': [7.938, 2.788, 1.25, 0.526]
-  }
+  data = pd.read_csv('pga_data/pebble_beach_stats.csv')
   df = pd.DataFrame(data)
 
-  target_rating = 73.4
-  target_slope = 137
+  target_rating = 76.4
+  target_slope = 144
 
   df['Tournament_Potential'] = df.apply(calculate_slope_potential, rating=target_rating, slope=target_slope, axis=1)
-  print(df[['Player', 'SG_Total', 'Tournament_Potential']])
+  df.to_csv('pga_data/pebble_beach_potential.csv', index=False)
+  print(df[['Player', 'SG Total', 'Tournament_Potential']])
 
 
 def calculate_slope_potential(row, rating, slope):
-  base_potential = rating - row['SG_Total']
+  base_potential = rating - row['SG Total'] - row['Scrambling'] * 4.5
 
   slope_adjustment = slope / 113
 
