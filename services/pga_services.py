@@ -1,0 +1,237 @@
+import pandas as pd
+import numpy as np
+import csv
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix
+
+def player_expected_score_at_course():
+  """Calculates a player's projected scores per round at a specific PGA course.
+
+  Returns:
+      csv: A report of projected scores per round for each player.
+  """
+  # Prepare the data
+  pebble_data = pd.read_csv('pga_data/pebble_beach_stats.csv')
+  phoenix_open_data = pd.read_csv('pga_data/wm_phoenix_open_stats.csv')
+  genesis_invitational_data = pd.read_csv('pga_data/genesis_invitational_stats.csv')
+  cognizant_class_data = pd.read_csv('pga_data/cognizant_classic_stats.csv')
+  phoenix_df = pd.DataFrame(phoenix_open_data)
+  genesis_invitational_df = pd.DataFrame(genesis_invitational_data)
+  cognizant_classic_df = pd.DataFrame(cognizant_class_data)
+  pebble_beach_df = pd.DataFrame(pebble_data)
+  tournaments = [phoenix_df, genesis_invitational_df, cognizant_classic_df, pebble_beach_df]
+  tournament_df = pd.concat(tournaments, ignore_index=True)
+
+  # A course's scoring average and difficulty.
+  target_rating = 74.0
+  target_slope = 138
+
+  # Calculate a player's current average Strokes Gained and Scrambling statistics per round.
+  round_one_total_sg = tournament_df[tournament_df['Rounds'] == 1].groupby('Player')['SG Total'].transform('mean')
+  round_one_scrambling = tournament_df[tournament_df['Rounds'] == 1].groupby('Player')['Scrambling'].transform('mean')
+  round_two_total_sg = tournament_df[tournament_df['Rounds'] == 2].groupby('Player')['SG Total'].transform('mean')
+  round_two_scrambling = tournament_df[tournament_df['Rounds'] == 2].groupby('Player')['Scrambling'].transform('mean')
+  round_three_total_sg = tournament_df[tournament_df['Rounds'] == 3].groupby('Player')['SG Total'].transform('mean')
+  round_three_scrambling = tournament_df[tournament_df['Rounds'] == 3].groupby('Player')['Scrambling'].transform('mean')
+  round_four_total_sg = tournament_df[tournament_df['Rounds'] == 4].groupby('Player')['SG Total'].transform('mean')
+  round_four_scrambling = tournament_df[tournament_df['Rounds'] == 4].groupby('Player')['Scrambling'].transform('mean')
+
+  # Calcaluate a player's base scoring performance per round.
+  base_patential_round_one = target_rating - round_one_total_sg - round_one_scrambling * 4.5
+  base_patential_round_two = target_rating - round_two_total_sg - round_two_scrambling * 4.5
+  base_patential_round_three = target_rating - round_three_total_sg - round_three_scrambling * 4.5
+  base_patential_round_four = target_rating - round_four_total_sg - round_four_scrambling * 4.5
+
+  # Calculate a player's projected scoring results per round based on course difficulty
+  round_one_result = target_rating + ((base_patential_round_one - target_rating) * (target_slope / 113))
+  round_two_result = target_rating + ((base_patential_round_two - target_rating) * (target_slope / 113))
+  round_three_result = target_rating + ((base_patential_round_three - target_rating) * (target_slope / 113))
+  round_four_result = target_rating + ((base_patential_round_four - target_rating) * (target_slope / 113))
+
+  # Create columns that contain the projected scoring results per round for each player.
+  tournament_df['Projected_Round_One_Result'] = round(round_one_result, 0)
+  round_one_drop = tournament_df.dropna(subset=['Projected_Round_One_Result'])
+  round_one_drop.drop_duplicates(subset=['Player'], inplace=True)
+  round_one_results = list(round_one_drop['Projected_Round_One_Result'])
+
+  tournament_df['Projected_Round_Two_Result'] = round(round_two_result, 0)
+  round_two_drop = tournament_df.dropna(subset=['Projected_Round_Two_Result'])
+  round_two_drop.drop_duplicates(subset=['Player'], inplace=True)
+  round_two_results = list(round_two_drop['Projected_Round_Two_Result'])
+
+  tournament_df['Projected_Round_Three_Result'] = round(round_three_result, 0)
+  round_three_drop = tournament_df.dropna(subset=['Projected_Round_Three_Result'])
+  round_three_drop.drop_duplicates(subset=['Player'], inplace=True)
+  round_three_results = list(round_three_drop['Projected_Round_Three_Result'])
+
+  tournament_df['Projected_Round_Four_Result'] = round(round_four_result, 0)
+  round_four_drop = tournament_df.dropna(subset=['Projected_Round_Four_Result'])
+  round_four_drop.drop_duplicates(subset=['Player'], inplace=True)
+  round_four_results = list(round_four_drop['Projected_Round_Four_Result'])
+
+  # Return the final projected scoring results for the first two rounds and the final two rounds.
+  first_two_rounds_results = [round(i + j, 1) for i, j in zip(round_one_results, round_two_results)]
+  final_two_rounds_results = [round(x + y, 1) for x, y in zip(round_three_results, round_four_results)]
+
+  # Create a list that does not contain duplicate player entries.
+  clean_list = list(dict.fromkeys(list(tournament_df['Player'])))
+
+  # Create a new Data Frame that contains projected scores for each player.
+  new_tournament_df = tournament_df.iloc[:len(clean_list)].copy()
+  new_tournament_df['Player'] = clean_list
+  new_tournament_df['Projected_First_Two_Rounds_Result'] = first_two_rounds_results
+  new_tournament_df['Projected_Final_Two_Rounds_Result'] = final_two_rounds_results
+
+  # This calculates a dynamic cut line based on the projected scoring results for the first two rounds.
+  # It takes the top 70 scores in the series and returns the score needed to make the cut.
+  dynamic_cut = new_tournament_df['Projected_First_Two_Rounds_Result'].nsmallest(70).max()
+
+  new_tournament_df['Made_Cut'] = new_tournament_df['Projected_First_Two_Rounds_Result'] <= dynamic_cut
+
+  # This only returns the list of players that are projected to make the cut and their projected final scores.
+  mask = new_tournament_df['Made_Cut'] == True
+  new_tournament_df.loc[mask, 'Final_Score'] = (
+    round(new_tournament_df['Projected_First_Two_Rounds_Result'] + new_tournament_df['Projected_Final_Two_Rounds_Result'], 1)
+  )
+
+  # Drop columns that contain null values and columns that are not needed for the final stat sheet.
+  remove_nan_df = new_tournament_df.dropna(subset=['Final_Score'])
+  tournament_results_df = remove_nan_df.drop(columns=['SG Total', 'Scrambling', 'Rounds', 'Projected_Round_One_Result',
+    'Projected_Round_Two_Result', 'Projected_Round_Three_Result', 'Projected_Round_Four_Result'])
+
+  print(tournament_results_df)
+
+  tournament_results_df.to_csv('pga_data/projected_tournament_results.csv', index=False)
+
+def predict_top_10_performance():
+  """Predicts a player's future top 10 performance probabilities.
+
+  The logic trains a Random Forest Classifier model to generate
+  probability metrics of a player for predicting a top 10 finish
+  for a given tournament.
+
+  Key metrics:
+  - Season Strokes Gained Total: A player's average Strokes Gained total per round for the current season.
+  - Confusion Matrix: A table used to evaluate the performance of a classification model.
+  - Classification Report: A report that includes precision, recall, f1-score, and support.
+  - Feature Importance: A metric that indicates the importance of each feature tested within the model.
+  """
+  pebble_data = pd.read_csv('pga_data/pebble_beach_stats.csv')
+  phoenix_open_data = pd.read_csv('pga_data/wm_phoenix_open_stats.csv')
+  genesis_invitational_data = pd.read_csv('pga_data/genesis_invitational_stats.csv')
+  cognizant_class_data = pd.read_csv('pga_data/cognizant_classic_stats.csv')
+  season_average_sg_total = pd.read_csv('pga_data/season_average_sg_total.csv')
+  phoenix_df = pd.DataFrame(phoenix_open_data)
+  genesis_invitational_df = pd.DataFrame(genesis_invitational_data)
+  pebble_beach_df = pd.DataFrame(pebble_data)
+  cognizant_classic_df = pd.DataFrame(cognizant_class_data)
+  season_average_sg_total_df = pd.DataFrame(season_average_sg_total)
+  tournaments = [phoenix_df, genesis_invitational_df, cognizant_classic_df, pebble_beach_df]
+  tournament_df = pd.concat(tournaments, ignore_index=True)
+
+  # Calculate a player's current average Strokes Gained statistics per round.
+  round_one_total_sg = tournament_df[tournament_df['Rounds'] == 1].groupby('Player')['SG Total'].transform('mean')
+  round_two_total_sg = tournament_df[tournament_df['Rounds'] == 2].groupby('Player')['SG Total'].transform('mean')
+  round_three_total_sg = tournament_df[tournament_df['Rounds'] == 3].groupby('Player')['SG Total'].transform('mean')
+  round_four_total_sg = tournament_df[tournament_df['Rounds'] == 4].groupby('Player')['SG Total'].transform('mean')
+
+  # Create columns that contains the total Strokes Gained per round for each player.
+  tournament_df['Round_One_SG_Total'] = round(round_one_total_sg, 1)
+  round_one_drop = tournament_df.dropna(subset=['Round_One_SG_Total'])
+  round_one_drop.drop_duplicates(subset=['Player'], inplace=True)
+  round_one_results = list(round_one_drop['Round_One_SG_Total'])
+
+  tournament_df['Round_Two_SG_Total'] = round(round_two_total_sg, 1)
+  round_two_drop = tournament_df.dropna(subset=['Round_Two_SG_Total'])
+  round_two_drop.drop_duplicates(subset=['Player'], inplace=True)
+  round_two_results = list(round_two_drop['Round_Two_SG_Total'])
+
+  tournament_df['Round_Three_SG_Total'] = round(round_three_total_sg, 1)
+  round_three_drop = tournament_df.dropna(subset=['Round_Three_SG_Total'])
+  round_three_drop.drop_duplicates(subset=['Player'], inplace=True)
+  round_three_results = list(round_three_drop['Round_Three_SG_Total'])
+
+  tournament_df['Round_Four_SG_Total'] = round(round_four_total_sg, 1)
+  round_four_drop = tournament_df.dropna(subset=['Round_Four_SG_Total'])
+  round_four_drop.drop_duplicates(subset=['Player'], inplace=True)
+  round_four_results = list(round_four_drop['Round_Four_SG_Total'])
+
+  # Return the final Stroke Gained total for the first two rounds and the final two rounds.
+  first_two_rounds_results = [round(i + j, 1) for i, j in zip(round_one_results, round_two_results)]
+  final_two_rounds_results = [round(x + y, 1) for x, y in zip(round_three_results, round_four_results)]
+
+  # Create a list that does not contain duplicate player entries.
+  clean_list = list(dict.fromkeys(list(tournament_df['Player'])))
+
+  # Create a new Data Frame that contains Stroke Gained for each player.
+  new_tournament_df = tournament_df.iloc[:len(clean_list)].copy()
+  new_tournament_df['Player'] = clean_list
+  new_tournament_df['Projected_First_Two_Rounds_SG_Totals'] = first_two_rounds_results
+  new_tournament_df['Projected_Final_Two_Rounds_SG_Totals'] = final_two_rounds_results
+
+  # Take the Strokes Gained total for the first two rounds to determine the top ten finishers.
+  new_tournament_df['Current_SG_Total'] = round(new_tournament_df['Projected_First_Two_Rounds_SG_Totals'] + new_tournament_df['Projected_Final_Two_Rounds_SG_Totals'], 1)
+  new_tournament_df['Top_Ten_Finish'] = (new_tournament_df['Current_SG_Total'] > 2.0).astype(int)
+
+  # Include players' current season averages into the Data Frame as a baseline for make future predictions.
+  new_tournament_df = pd.merge(new_tournament_df, season_average_sg_total_df[['Player', 'Season_Average_SG_Total']],
+                         on='Player',
+                         how='left')
+  new_tournament_df[['Season_Average_SG_Total']] = new_tournament_df[['Season_Average_SG_Total']].fillna(0.0)
+  new_tournament_df.drop(columns=['Rounds', 'SG Total', 'Scrambling', 'Projected_First_Two_Rounds_SG_Totals',
+    'Projected_Final_Two_Rounds_SG_Totals', 'Round_One_SG_Total', 'Round_Two_SG_Total', 'Round_Three_SG_Total',
+    'Round_Four_SG_Total'], inplace=True)
+
+  new_tournament_df.to_csv('pga_data/sg_totals_with_top_performers.csv', index=False)
+
+  # Prepare and train the model by including season Strokes Gained total stats, SG totals for the first two rounds, and top ten finishs.
+  X = new_tournament_df[['Season_Average_SG_Total', 'Current_SG_Total']]
+  y = new_tournament_df['Top_Ten_Finish']
+
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+  # Create the model.
+  # Include parameters to avoid overfitting to develop a more accurate prediction.
+  rf_model = RandomForestClassifier(
+    n_estimators=500,
+    max_depth=5,
+    class_weight='balanced',
+    min_samples_leaf=3,
+    random_state=42)
+
+  rf_model.fit(X_train, y_train)
+
+  # Get probabilities for all classes (0 = Field, 1 = Top 10)
+  # [:, 1] grabs only the probability of finishing in the Top 10
+  probabilities = rf_model.predict_proba(X_test)[:, 1]
+
+  test_indices = X_test.index
+
+  # Create the Leaderboard
+  leaderboard = pd.DataFrame({
+      'Player': new_tournament_df.loc[test_indices, 'Player'],
+      'Actual_Top_10': y_test,
+      'Probability': probabilities
+  }).sort_values(by='Probability', ascending=False)
+
+  print(leaderboard.head(10))
+  leaderboard.to_csv('pga_data/top_ten_probabilities.csv', index=False)
+
+  # Predict and Evaluate
+  y_pred = rf_model.predict(X_test)
+
+  print("Confusion Matrix:")
+  print(confusion_matrix(y_test, y_pred))
+  print("\nClassification Report:")
+  print(classification_report(y_test, y_pred))
+
+  # View Feature Importance
+  importances = pd.DataFrame({
+      'Metric': X.columns,
+      'Importance': rf_model.feature_importances_
+  }).sort_values(by='Importance', ascending=False)
+
+  print("\nFeature Importances:")
+  print(importances)
+
