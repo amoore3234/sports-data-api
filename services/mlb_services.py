@@ -1,0 +1,243 @@
+from pybaseball import statcast_pitcher_percentile_ranks, pitching_stats, batting_stats, statcast, cache, playerid_lookup, schedule_and_record
+cache.enable()
+import pandas as pd
+import warnings
+import contextlib
+import os
+
+# Disable the SettingWithCopy/ChainedAssignment warnings
+pd.options.mode.chained_assignment = None 
+
+# Suppress all other Python/Library warnings (Deprecation, etc.)
+warnings.filterwarnings('ignore')
+
+def get_mlb_pitcher_profile() -> list[dict]:
+  """Creates statistics for a MLB pitcher.
+
+  Returns:
+    list: A list statistics for multiple MLB pitchers around the league.
+  """
+
+  # Prepare the datasets.
+  pitcher_rank = statcast_pitcher_percentile_ranks(2025)
+  pitcher_stats_data = pitcher_rank.to_dict(orient='records')
+  pitcher_statistics = pitching_stats(2025)
+  # The statcast function can be slow, so limit the date range to the last 10 days.
+  # Modify once the season starts
+  # end = date.today().isoformat()
+  # start = (date.today() - timedelta(days=20)).isoformat()
+  statcast_data = statcast(start_dt='2025-03-30', end_dt='2025-05-02')
+
+  pitcher_profiles = []
+
+  for pitcher_profile in pitcher_stats_data:
+    # Modify the player names to be in the format of "First Last" instead of "Last, First"
+    player_name = pitcher_profile.get('player_name')
+    name_array = player_name.split()
+    if len(name_array) > 0:
+      if len(name_array) > 2:
+        player_name = f"{name_array[1]} {name_array[0].replace(',', '')} {name_array[2]}"
+      else:
+        player_name = f"{name_array[1]} {name_array[0].replace(',', '')}"
+
+    # Generate advance metrics for a pitcher's profile.
+    profile = {
+      'pitcher_id': pitcher_profile.get('player_id'),
+      'pitcher_name': player_name,
+      'pitcher_hard_hit_percent': pitcher_profile.get('hard_hit_percent') / 100,
+      'pitcher_whiff_percent': pitcher_profile.get('whiff_percent') / 100,
+      'pitcher_fastball_velocity': pitcher_profile.get('fb_velocity'),
+      'pitcher_fastball_spin': pitcher_profile.get('fb_spin'),
+      'pitcher_exit_velocity': pitcher_profile.get('exit_velocity'),
+      'pitcher_strike_K_percent': pitcher_profile.get('k_percent') / 100,
+      'pitcher_strike_K_BB_percent': pitcher_profile.get('bb_percent') / 100,
+      'pitcher_expected_xERA': pitcher_profile.get('xera')
+    }
+
+    pitcher_profiles.append(profile)
+
+  pitcher_data = statcast_data[['pitcher', 'p_throws', 'stand']].drop_duplicates()
+  pitcher_advanced_data = pitcher_statistics[['Name', 'WHIP', 'ERA', 'Team', 'BB', 'IP']].drop_duplicates()
+
+  # Include additional metrics to a pitcher's profile from different datasets.
+  for pitcher in pitcher_profiles:
+    found_pitcher_name = pitcher_advanced_data.loc[pitcher_advanced_data['Name'] == pitcher['pitcher_name']]
+    if not found_pitcher_name.empty:
+      pitcher['pitcher_team'] = found_pitcher_name.iloc[0]['Team']
+      pitcher['pitcher_ERA'] = found_pitcher_name.iloc[0]['ERA']
+      pitcher['pitcher_WHIP'] = found_pitcher_name.iloc[0]['WHIP']
+      pitcher['pitcher_BB_per_9'] = (found_pitcher_name.iloc[0]['BB'] / found_pitcher_name.iloc[0]['IP']) * 9
+
+    found_pitcher_id = pitcher_data.loc[pitcher_data['pitcher'] == pitcher['pitcher_id'], 'p_throws']
+    if not found_pitcher_id.empty:
+      pitcher['pitcher_throwing_hand'] = found_pitcher_id.iloc[0]
+
+  return pitcher_profiles
+
+def get_mlb_batter_profile() -> dict:
+  """Creates statistics for a MLB batter.
+
+  Returns:
+    list: A list statistics for multiple MLB batters around the league.
+  """
+
+  # Prepare the datasets.
+  batter_rank = batting_stats(2025)
+  batter_stats = batter_rank.to_dict(orient='records')
+  statcast_data = statcast(start_dt='2025-03-30', end_dt='2025-05-02')
+
+  batter_profiles = []
+
+  # Generate advance metrics for a batter's profile.
+  for batter_profile in batter_stats:
+    profile = {
+      'batter_id': batter_profile.get('IDfg'),
+      'batter_name': batter_profile.get('Name'),
+      'batter_team': batter_profile.get('Team'),
+      'batter_actual_wOBA': batter_profile.get('wOBA'),
+      'batter_expected_xwOBA': batter_profile.get('xwOBA'),
+      'batter_BABIP': batter_profile.get('BABIP'),
+      'batter_bat_speed': batter_profile.get('Spd'),
+      'batter_barrel_percent': batter_profile.get('Barrel%'),
+      'batter_ISO': batter_profile.get('ISO')
+    }
+
+    batter_profiles.append(profile)
+
+  batter_data = statcast_data[['batter','stand', 'events', 'bb_type']].drop_duplicates()
+
+  # Include additional metrics to a batter's profile from different datasets.
+  for batter in batter_profiles:
+    name_array = batter['batter_name'].split()
+
+    id = silent_lookup(name_array[1], name_array[0])
+    batter_details = batter_data.loc[batter_data['batter'] == id]
+    if not batter_details.empty:
+
+      # Generate a batter's platoon splits 
+      plate_appearance_data = batter_details.dropna(subset=['events'])
+      plate_appearance_data['is_hit'] = plate_appearance_data['events'].isin(['single', 'double', 'triple', 'home_run'])
+      platoon_stats = plate_appearance_data.groupby('stand').agg(
+        Plate_Appearance=('events', 'count'),
+        Hits=('is_hit', 'sum')
+      )
+      platoon_stats_avg = platoon_stats['Hits'] / platoon_stats['Plate_Appearance']
+      plate_appearance_stats_avg = platoon_stats_avg.to_dict()
+      batter['platoon_stats'] = plate_appearance_stats_avg
+
+      # Generate a batter's line drive rate
+      line_drive = batter_details.dropna(subset=['bb_type'])
+      line_drive_rate = (line_drive[line_drive['bb_type'] == 'line_drive']).shape[0] / batter_details.shape[0]
+      batter['batter_line_drive_rate'] = line_drive_rate
+
+    # Find a batter's batting stance
+    found_match = batter_data.loc[batter_data['batter'] == id, 'stand']
+    if not found_match.empty:
+      batter['batter_stance'] = found_match.iloc[0]
+
+  return batter_profiles
+
+def get_mlb_pitcher_national_averages() -> dict:
+  """Calculates the national averages for MLB pitchers.
+  
+  Returns:
+    dict: A dictionary containing the national averages for various MLB statistics.
+  """
+  pitcher_stats = pitching_stats(2025)
+
+  pitching_averages = {
+    'league_pitcher_strike_K_average_percent': pitcher_stats['Strikes'].sum() / pitcher_stats['Pitches'].sum(),
+    'league_pitcher_BB9_average': (pitcher_stats['BB'].sum() / pitcher_stats['IP'].sum()) * 9,
+    'league_pitcher_WHIP_average': (pitcher_stats['H'].sum() + pitcher_stats['BB'].sum()) / pitcher_stats['IP'].sum(),
+    'league_pitcher_ERA_average': (pitcher_stats['ER'].sum() / pitcher_stats['IP'].sum()) * 9
+  }
+
+  return pitching_averages
+
+def get_mlb_batter_national_averages() -> dict:
+  """Calculates the national averages for MLB batters.
+  
+  Returns:
+    dict: A dictionary containing the national averages for various MLB statistics.
+  """
+  batter_stats = batting_stats(2025)
+
+  batting_averages = {
+    'league_batting_wOBA_average': (batter_stats['wOBA'] * batter_stats['PA']).sum() / batter_stats['PA'].sum(),
+    'league_batting_BABIP_average': calculate_average_babip(batter_stats),
+    'league_batting_ISO_average': calculate_average_iso(batter_stats)
+  }
+
+  return batting_averages
+
+def get_mlb_park_stats() -> list[dict]:
+  mlb_teams = [
+    'ARI', 'ATL', 'BAL', 'BOS', 'CHC', 'CHW', 
+    'CIN', 'CLE', 'COL', 'DET', 'HOU', 'KCR',
+    'LAA', 'LAD', 'MIA', 'MIL', 'MIN', 'NYM',
+    'NYY', 'OAK', 'PHI', 'PIT', 'SDP', 'SEA',
+    'SFG', 'STL', 'TBR', 'TEX', 'TOR', 'WSN'
+  ]
+
+  park_stats = []
+
+  for team in mlb_teams:
+    ball_park_factors = get_ball_park_factors(team, 2025)
+
+    park_stat = {
+      'team': team,
+      'ball_park_factor': ball_park_factors
+    }
+    park_stats.append(park_stat)
+
+  return park_stats
+
+def get_ball_park_factors(team, year):
+  """Calculates the ball park factors for MLB stadiums.
+
+  Returns:
+    dict: A dictionary containing the ball park factors for MLB stadiums.
+  """
+  schedule_data = schedule_and_record(year, team)
+  
+  # Calculate the average runs scored at home games
+  home_games = schedule_data[schedule_data['Home_Away'] == 'Home']
+  home_runs_per_game = (home_games['R'].sum() + home_games['RA'].sum()) / len(home_games)
+
+  # Calculate the average runs scored at road games
+  road_games = schedule_data[schedule_data['Home_Away'] == '@']
+  road_runs_per_game = (road_games['R'].sum() + road_games['RA'].sum()) / len(road_games)
+
+  ball_park_factor = home_runs_per_game / road_runs_per_game
+
+  return ball_park_factor
+
+def calculate_average_babip(batter_stats):
+  league_hits = batter_stats['H'].sum()
+  league_home_runs = batter_stats['HR'].sum()
+  league_at_bats = batter_stats['AB'].sum()
+  league_strikeouts = batter_stats['SO'].sum()
+  league_sacrafice_flies = batter_stats['SF'].sum()
+
+  return (league_hits - league_home_runs) / (league_at_bats - league_strikeouts - league_home_runs + league_sacrafice_flies)
+
+def calculate_average_iso(batter_stats):
+  league_average_2b = batter_stats['2B'].sum()
+  league_average_3b = batter_stats['3B'].sum()
+  league_average_home_run = batter_stats['HR'].sum()
+  league_average_at_bats = batter_stats['AB'].sum()
+
+  return ((1 * league_average_2b) + (2 * league_average_3b) + (3 * league_average_home_run)) / league_average_at_bats
+
+def silent_lookup(lastname, firstname):
+  # Suppress the output for the playerid_lookup function
+  with contextlib.redirect_stdout(open(os.devnull, 'w')):
+    try:
+      results = playerid_lookup(lastname, firstname, fuzzy=True)
+      if not results.empty:
+        results['mlb_played_last'] = pd.to_numeric(results['mlb_played_last'], errors='coerce')
+        results = results.dropna(subset=['mlb_played_last'])
+        id = results.sort_values('mlb_played_last', ascending=False).iloc[0]['key_mlbam']
+        return id
+    except Exception:
+      return pd.DataFrame()
