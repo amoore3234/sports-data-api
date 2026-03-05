@@ -12,6 +12,7 @@ An API that returns sports statistics
   - [Running The Server Locally](#running-the-server-locally)
 - [NFL Statistics](#nfl-statistics)
 - [PGA Statistics](#pga-statistics)
+- [MLB Statistics](#mlb-statistics)
 - [Resources](#resources)
 
 # Introduction
@@ -78,8 +79,19 @@ The `env_template` file contains default variables to store credentials and othe
     - `docker compose --env-file .env -f docker/docker-compose.yml up --build -d`
 
 ## Running the Server Locally
-If you want to run the server locally to send API requests, you can use the command below and replace "main" with the name of your file that you want to run. In this application, the file we will want to run is app.py since the file contains the endpoints we want to retrieve data. Ex: app:app.
-    - `python3 app.py`
+If you want to run the server locally to send API requests, you can use the command below and replace "main" with the name of your file that you want to run. In this application, the file we will want to run is app.py since the file contains the endpoints we want to retrieve data.
+  - `python3 app.py`
+
+You may run into an issue where the project uses the CMake command to find a package configuration file provided by "Arrow". The Apache Arrow dependency is required to to utilize functions within the pybaseball library. If this is the case, you may need to install the Apache Arrow library on your system.
+
+  - For macOS:
+    - `brew install apache-arrow`
+  - For Ubuntu/Debian/Linux
+    - `sudo apt-get update`
+    - `sudo apt-get install -y libarrow-dev`
+
+If the application continues to fail after installing the Apache Arrow library, then you can revert to running the application via docker compose.
+
 
 # NFL Statistics
 The nfl_services.py file contains a variety of methods that returns advanced statistics for monitoring player's and team's performances each week.
@@ -87,9 +99,22 @@ The nfl_services.py file contains a variety of methods that returns advanced sta
 # PGA Statistics
 The pga_services.py file contains metrics that predicts a player's golf performance at a given course. The logic includes a list of player's past performances from different tournaments using their Strokes Gained stats to determine future performance. The script also calculates a player's potential top 10 performance for future tournaments by comparing their current Strokes Gained stats against the world's talented players.
 
+# MLB Statistics
+The mlb_services.py file contains statistics that analyzes a pictcher's and batter's in-game performance.
+
+**Key Metrics:**
+
+  - ***wOBA (Weighted On-Base Average):*** This measures a player's overall offensive impact when a player reaches base. The forumula includes Formula includes walks, hit-by-pitch, singles, doubles, triples, and home runs.
+  - ***xwOBA (Expected Weighted On-Base Average):*** It measures a player's offensive performance based on the quality of a ball being hit. The metric takes account of a ball's exit velocity and launch angle.
+  - ***BABIP (Batting Average on Balls In Play):*** Determines how lucky or unlucky a player has been performing at bat. This metric can tell us how consistant a player has been getting hits over time.
+  - ***WHIP (Walks plus Hits per Inning Pitched):*** This measures a pitcher's efficiency in preventing batters from reaching base.
+  - ***Barrel %:*** Measures how frequently a batter hits a ball. This analyzes a player's exit velocity and launch angle.
+  - ***ISO (Isolated Power):*** Measures a batter's raw power.
+  - ***Platoon Stats:*** This anaylzes the handedness between a pitcher and batter for measuring splits to optimize matchups. Ex: left-hand pitcher vs. right-handed batter. 
+
 # Resource
-[PGA Tour](https://www.pgatour.com/)
-[Course Rating and Slope Database](https://ncrdb.usga.org/courseTeeInfo?CourseID=14408)
-[Fantasy Data](https://fantasydata.com/)
-[Fantasy Pros](https://www.fantasypros.com/)
-[Odds Data](https://www.rotowire.com/betting/nfl/odds)
+- [PGA Tour](https://www.pgatour.com/)
+- [Course Rating and Slope Database](https://ncrdb.usga.org/courseTeeInfo?CourseID=14408)
+- [Fantasy Data](https://fantasydata.com/)
+- [Fantasy Pros](https://www.fantasypros.com/)
+- [Odds Data](https://www.rotowire.com/betting/nfl/odds)

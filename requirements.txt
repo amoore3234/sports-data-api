@@ -1,13 +1,3 @@
-FastAPI
-Uvicorn[standard]
-python-dotenv
-psycopg2-binary
-pydantic
-pytest
-fastapi_keycloak_middleware
-PyJWT
-requests
-python-jose[cryptography]
-httpx
-asyncpg
-pandas
+pandas==2.2.3
+pybaseball
+scikit-learn
