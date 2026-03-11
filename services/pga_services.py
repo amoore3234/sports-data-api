@@ -248,7 +248,7 @@ def predict_top_10_performance():
   new_tournament_df.to_csv('pga_data/sg_totals_with_top_performers.csv', index=False)
 
   # Prepare and train the model by including season Strokes Gained total stats, SG totals for the first two rounds, and top ten finishs.
-  X = new_tournament_df[['Season_Average_SG_Total', 'Current_SG_Total', 'Projected_First_Two_Rounds_SG_Totals']]
+  X = new_tournament_df[['Season_Average_SG_Total', 'Current_SG_Total']]
   y = new_tournament_df['Top_Ten_Finish']
 
   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)

@@ -5,5 +5,6 @@ services:
     build: ../
     volumes:
       - .:/app
+      - ./pga_data:/app/pga_data
     environment:
       PYTHONUNBUFFERED: 1
