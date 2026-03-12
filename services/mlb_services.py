@@ -1,6 +1,7 @@
 from pybaseball import statcast_pitcher_percentile_ranks, pitching_stats, batting_stats, statcast, cache, playerid_lookup, schedule_and_record
 cache.enable()
 import pandas as pd
+import numpy as np
 import warnings
 import contextlib
 import os
@@ -226,6 +227,21 @@ def generate_mlb_lineup():
   salary_data = pd.read_csv('mlb_data/mlb_salaries.csv')
   salary_data_df = pd.DataFrame(salary_data)
 
+  game_matchups = []
+  game_schedule = salary_data_df['Game Info'].unique()
+  for game in game_schedule:
+    team_schedule = game.split(' ')
+    team_matchup = team_schedule[0]
+    teams = team_matchup.split('@')
+
+    final_matchup = {
+      'home_team': teams[1],
+      'away_team': teams[0]
+    }
+    game_matchups.append(final_matchup)
+  game_matchups_df = pd.DataFrame(game_matchups)
+  print(f"Team Schedule: {game_matchups_df}")
+
   pitcher_profile_df = pd.DataFrame(pitcher_profiles)
   pitcher_lineup_df = pitcher_profile_df.dropna()
 
@@ -237,8 +253,6 @@ def generate_mlb_lineup():
 
   batter_lineup_df['elite_wOBA'] = batter_lineup_df['batter_expected_xwOBA'] > batter_national_average['league_batting_wOBA_average']
   elite_batters = batter_lineup_df[batter_lineup_df['elite_wOBA'] == True]
-  print(elite_batters.head())
-  print(elite_pitchers.head())
 
   salary_lookup = salary_data_df.set_index('Name')['Salary'].to_dict()
   position_lookup = salary_data_df.set_index('Name')['Position'].to_dict()
@@ -247,10 +261,40 @@ def generate_mlb_lineup():
   pitcher_lineup_df['salary'] = pitcher_lineup_df['pitcher_name'].map(salary_lookup)
   pitcher_lineup_df['position'] = pitcher_lineup_df['pitcher_name'].map(position_lookup)
   pitcher_lineup_df['name_id'] = pitcher_lineup_df['pitcher_name'].map(name_id_lookup)
+  pitcher_lineup_df = pitcher_lineup_df.dropna()
+  print(f"Pitcher Lineup: {pitcher_lineup_df.head()}")
 
   batter_lineup_df['salary'] = batter_lineup_df['batter_name'].map(salary_lookup)
   batter_lineup_df['position'] = batter_lineup_df['batter_name'].map(position_lookup)
   batter_lineup_df['name_id'] = batter_lineup_df['batter_name'].map(name_id_lookup)
+  batter_lineup_df = batter_lineup_df.dropna()
+  print(f"Batter Lineup: {batter_lineup_df.head()}")
+
+  lineup_count = 0
+  lineup_list = []
+  player_salary_cap = 50000
+  while lineup_count < 2:
+    starting_lineup = {}
+    pitcher_indices = list(pitcher_lineup_df.index)
+    batter_indices = list(batter_lineup_df.index)
+    player_salary = 0
+
+    pitcher_one_idx = np.random.choice(pitcher_indices)
+    starting_lineup['pitcher_one'] = pitcher_lineup_df.loc[pitcher_one_idx]['name_id']
+    pitcher_indices.remove(pitcher_one_idx)
+    player_salary += pitcher_lineup_df.loc[pitcher_one_idx]['salary']
+
+    pitcher_two_idx = np.random.choice(pitcher_indices)
+    starting_lineup['pitcher_two'] = pitcher_lineup_df.loc[pitcher_two_idx]['name_id']
+    pitcher_indices.remove(pitcher_two_idx)
+    player_salary += pitcher_lineup_df.loc[pitcher_two_idx]['salary']
+
+    lineup_list.append(starting_lineup)
+    lineup_count += 1
+
+  print(f"Lineup List: {lineup_list}")
+
+
 
 def calculate_average_babip(batter_stats):
   league_hits = batter_stats['H'].sum()
