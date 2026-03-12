@@ -234,8 +234,8 @@ def predict_top_10_performance():
   # Take the Strokes Gained total for the first two rounds to determine the top ten finishers.
   new_tournament_df['Current_SG_Total'] = round(new_tournament_df['Projected_First_Two_Rounds_SG_Totals'] + new_tournament_df['Projected_Final_Two_Rounds_SG_Totals'], 1)
   top_10_threshold = new_tournament_df['Current_SG_Total'].nlargest(10).min()
-  print(top_10_threshold)
-  new_tournament_df['Top_Ten_Finish'] = (new_tournament_df['Current_SG_Total'] > 3).astype(int)
+
+  new_tournament_df['Top_Ten_Finish'] = (new_tournament_df['Current_SG_Total'] > 4).astype(int)
 
   # Include players' current season averages into the Data Frame as a baseline for make future predictions.
   new_tournament_df = pd.merge(new_tournament_df, season_average_sg_total_df[['Player', 'Season_Average_SG_Total']],

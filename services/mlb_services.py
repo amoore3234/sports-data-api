@@ -134,7 +134,7 @@ def get_mlb_batter_profile() -> dict:
     found_match = batter_data.loc[batter_data['batter'] == id, 'stand']
     if not found_match.empty:
       batter['batter_stance'] = found_match.iloc[0]
-
+  print(f"Batter Profile: {batter_profiles[0]}")
   return batter_profiles
 
 def get_mlb_pitcher_national_averages() -> dict:
@@ -149,7 +149,8 @@ def get_mlb_pitcher_national_averages() -> dict:
     'league_pitcher_strike_K_average_percent': pitcher_stats['Strikes'].sum() / pitcher_stats['Pitches'].sum(),
     'league_pitcher_BB9_average': (pitcher_stats['BB'].sum() / pitcher_stats['IP'].sum()) * 9,
     'league_pitcher_WHIP_average': (pitcher_stats['H'].sum() + pitcher_stats['BB'].sum()) / pitcher_stats['IP'].sum(),
-    'league_pitcher_ERA_average': (pitcher_stats['ER'].sum() / pitcher_stats['IP'].sum()) * 9
+    'league_pitcher_ERA_average': (pitcher_stats['ER'].sum() / pitcher_stats['IP'].sum()) * 9,
+    'league_pitcher_k_bb_average': (pitcher_stats['K-BB%'].sum()) / len(pitcher_stats)
   }
 
   return pitching_averages
@@ -195,6 +196,10 @@ def get_mlb_park_stats() -> list[dict]:
 def get_ball_park_factors(team, year):
   """Calculates the ball park factors for MLB stadiums.
 
+  Args:
+    team (str): The abbreviation of an MLB team
+    year (int): The year for which to calculate the ball park factors.
+
   Returns:
     dict: A dictionary containing the ball park factors for MLB stadiums.
   """
@@ -211,6 +216,41 @@ def get_ball_park_factors(team, year):
   ball_park_factor = home_runs_per_game / road_runs_per_game
 
   return ball_park_factor
+
+def generate_mlb_lineup():
+  pitcher_profiles = get_mlb_pitcher_profile()
+  batter_profiles = get_mlb_batter_profile()
+  pitcher_national_average = get_mlb_pitcher_national_averages()
+  batter_national_average = get_mlb_batter_national_averages()
+  # ball_park_factors = get_mlb_park_stats()
+  salary_data = pd.read_csv('mlb_data/mlb_salaries.csv')
+  salary_data_df = pd.DataFrame(salary_data)
+
+  pitcher_profile_df = pd.DataFrame(pitcher_profiles)
+  pitcher_lineup_df = pitcher_profile_df.dropna()
+
+  batter_profile_df = pd.DataFrame(batter_profiles)
+  batter_lineup_df = batter_profile_df.dropna()
+
+  pitcher_lineup_df['elite_strikeout_K'] = pitcher_lineup_df['pitcher_strike_K_percent'] > pitcher_national_average['league_pitcher_k_bb_average']
+  elite_pitchers = pitcher_lineup_df[pitcher_lineup_df['elite_strikeout_K'] == True]
+
+  batter_lineup_df['elite_wOBA'] = batter_lineup_df['batter_expected_xwOBA'] > batter_national_average['league_batting_wOBA_average']
+  elite_batters = batter_lineup_df[batter_lineup_df['elite_wOBA'] == True]
+  print(elite_batters.head())
+  print(elite_pitchers.head())
+
+  salary_lookup = salary_data_df.set_index('Name')['Salary'].to_dict()
+  position_lookup = salary_data_df.set_index('Name')['Position'].to_dict()
+  name_id_lookup = salary_data_df.set_index('Name')['Name + ID'].to_dict()
+
+  pitcher_lineup_df['salary'] = pitcher_lineup_df['pitcher_name'].map(salary_lookup)
+  pitcher_lineup_df['position'] = pitcher_lineup_df['pitcher_name'].map(position_lookup)
+  pitcher_lineup_df['name_id'] = pitcher_lineup_df['pitcher_name'].map(name_id_lookup)
+
+  batter_lineup_df['salary'] = batter_lineup_df['batter_name'].map(salary_lookup)
+  batter_lineup_df['position'] = batter_lineup_df['batter_name'].map(position_lookup)
+  batter_lineup_df['name_id'] = batter_lineup_df['batter_name'].map(name_id_lookup)
 
 def calculate_average_babip(batter_stats):
   league_hits = batter_stats['H'].sum()
