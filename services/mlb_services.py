@@ -273,11 +273,11 @@ def generate_mlb_lineup():
 
   lineup_count = 0
   lineup_list = []
+  positions = []
   player_salary_cap = 50000
   while lineup_count < 2:
     starting_lineup = {}
     pitcher_indices = list(pitcher_lineup_df.index)
-    batter_indices = list(batter_lineup_df.index)
     player_salary = 0
 
     pitcher_one_idx = np.random.choice(pitcher_indices)
@@ -289,12 +289,10 @@ def generate_mlb_lineup():
     if pitcher_home_one_team:
       batter_lineup_df = batter_lineup_df.drop(batter_lineup_df[batter_lineup_df['batter_teamabbrev'] == pitcher_home_one_team.get('away_team')].index)
       batter_lineup_df.drop(batter_lineup_df[batter_lineup_df['batter_teamabbrev'] == pitcher_home_one_team.get('away_team')].index, inplace=True)
-      print(f"Updated Batter Lineup for away for pitcher one: {batter_lineup_df}")
 
     if pitcher_away_one_team:
       batter_lineup_df = batter_lineup_df.drop(batter_lineup_df[batter_lineup_df['batter_teamabbrev'] == pitcher_away_one_team.get('home_team')].index)
       batter_lineup_df.drop(batter_lineup_df[batter_lineup_df['batter_teamabbrev'] == pitcher_away_one_team.get('home_team')].index, inplace=True)
-      print(f"Updated Batter Lineup for home for pitcher one: {batter_lineup_df}")
 
     player_salary += pitcher_lineup_df.loc[pitcher_one_idx]['salary']
     pitcher_indices.remove(pitcher_one_idx)
@@ -316,16 +314,33 @@ def generate_mlb_lineup():
     player_salary += pitcher_lineup_df.loc[pitcher_two_idx]['salary']
     pitcher_indices.remove(pitcher_two_idx)
 
+    batter_indices = list(batter_lineup_df.index)
     batter_idx = np.random.choice(batter_indices)
     position = batter_lineup_df.loc[batter_idx]['position']
+    catcher_starters = batter_lineup_df[batter_lineup_df['position'] == 'C']
+    print(catcher_starters)
+    while position != 'C':
+      if len(position) > 2:
+        multiple_positions = position.split('/')
+        if multiple_positions[-1] == 'C':
+          position = multiple_positions[-1]
+          starting_lineup['catcher'] = batter_lineup_df.loc[batter_idx]['name_id']
+          print(f"List of multiple positions: {multiple_positions}")
+      else:
+        batter_idx = np.random.choice(batter_indices)
+        position = batter_lineup_df.loc[batter_idx]['position']
 
-    if len(position) > 2:
-      multiple_positions = position.split('/')
-      print(f"List of multiple positions: {multiple_positions}")
+        if position == 'C':
+          starting_lineup['catcher'] = batter_lineup_df.loc[batter_idx]['name_id']
+      
+      print(f"Searching for matching position: {position}")
+    
+    positions.append(position)
 
     lineup_list.append(starting_lineup)
     lineup_count += 1
 
+  print(f"Positions: {positions}")
   print(f"Lineup List: {lineup_list}")
 
 def calculate_average_babip(batter_stats):
