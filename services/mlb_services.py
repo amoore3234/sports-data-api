@@ -316,6 +316,13 @@ def generate_mlb_lineup():
     player_salary += pitcher_lineup_df.loc[pitcher_two_idx]['salary']
     pitcher_indices.remove(pitcher_two_idx)
 
+    batter_idx = np.random.choice(batter_indices)
+    position = batter_lineup_df.loc[batter_idx]['position']
+
+    if len(position) > 2:
+      multiple_positions = position.split('/')
+      print(f"List of multiple positions: {multiple_positions}")
+
     lineup_list.append(starting_lineup)
     lineup_count += 1
 
