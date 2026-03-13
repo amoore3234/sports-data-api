@@ -258,15 +258,15 @@ def generate_mlb_lineup():
   position_lookup = salary_data_df.set_index('Name')['Position'].to_dict()
   name_id_lookup = salary_data_df.set_index('Name')['Name + ID'].to_dict()
 
-  pitcher_lineup_df['salary'] = pitcher_lineup_df['pitcher_name'].map(salary_lookup)
-  pitcher_lineup_df['position'] = pitcher_lineup_df['pitcher_name'].map(position_lookup)
-  pitcher_lineup_df['name_id'] = pitcher_lineup_df['pitcher_name'].map(name_id_lookup)
+  pitcher_lineup_df['salary'] = elite_pitchers['pitcher_name'].map(salary_lookup)
+  pitcher_lineup_df['position'] = elite_pitchers['pitcher_name'].map(position_lookup)
+  pitcher_lineup_df['name_id'] = elite_pitchers['pitcher_name'].map(name_id_lookup)
   pitcher_lineup_df = pitcher_lineup_df.dropna()
   print(f"Pitcher Lineup: {pitcher_lineup_df.head()}")
 
-  batter_lineup_df['salary'] = batter_lineup_df['batter_name'].map(salary_lookup)
-  batter_lineup_df['position'] = batter_lineup_df['batter_name'].map(position_lookup)
-  batter_lineup_df['name_id'] = batter_lineup_df['batter_name'].map(name_id_lookup)
+  batter_lineup_df['salary'] = elite_batters['batter_name'].map(salary_lookup)
+  batter_lineup_df['position'] = elite_batters['batter_name'].map(position_lookup)
+  batter_lineup_df['name_id'] = elite_batters['batter_name'].map(name_id_lookup)
   batter_lineup_df = batter_lineup_df.dropna()
   print(f"Batter Lineup: {batter_lineup_df.head()}")
 
@@ -288,6 +288,7 @@ def generate_mlb_lineup():
     starting_lineup['pitcher_two'] = pitcher_lineup_df.loc[pitcher_two_idx]['name_id']
     pitcher_indices.remove(pitcher_two_idx)
     player_salary += pitcher_lineup_df.loc[pitcher_two_idx]['salary']
+
 
     lineup_list.append(starting_lineup)
     lineup_count += 1
