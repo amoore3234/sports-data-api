@@ -1,4 +1,5 @@
 from pybaseball import statcast_pitcher_percentile_ranks, pitching_stats, batting_stats, statcast, cache, playerid_lookup, schedule_and_record
+from datetime import date
 cache.enable()
 import pandas as pd
 import numpy as np
@@ -75,48 +76,48 @@ def get_mlb_pitcher_profile() -> list[dict]:
 
   return pitcher_profiles
 
-def get_mlb_batter_profile() -> dict:
-  """Creates statistics for a MLB batter.
+def get_mlb_batting_profile() -> dict:
+  """Creates statistics for a MLB batting.
 
   Returns:
-    list: A list statistics for multiple MLB batters around the league.
+    list: A list statistics for multiple MLB battings around the league.
   """
 
   # Prepare the datasets.
-  batter_rank = batting_stats(2025)
-  batter_stats = batter_rank.to_dict(orient='records')
+  batting_rank = batting_stats(2025)
+  batting_stats_profile = batting_rank.to_dict(orient='records')
   statcast_data = statcast(start_dt='2025-03-30', end_dt='2025-05-02')
 
-  batter_profiles = []
+  batting_profiles = []
 
-  # Generate advance metrics for a batter's profile.
-  for batter_profile in batter_stats:
+  # Generate advance metrics for a batting's profile.
+  for batting_profile in batting_stats_profile:
     profile = {
-      'batter_id': batter_profile.get('IDfg'),
-      'batter_name': batter_profile.get('Name'),
-      'batter_team': batter_profile.get('Team'),
-      'batter_actual_wOBA': batter_profile.get('wOBA'),
-      'batter_expected_xwOBA': batter_profile.get('xwOBA'),
-      'batter_BABIP': batter_profile.get('BABIP'),
-      'batter_bat_speed': batter_profile.get('Spd'),
-      'batter_barrel_percent': batter_profile.get('Barrel%'),
-      'batter_ISO': batter_profile.get('ISO')
+      'batting_id': batting_profile.get('IDfg'),
+      'batting_name': batting_profile.get('Name'),
+      'batting_team': batting_profile.get('Team'),
+      'batting_actual_wOBA': batting_profile.get('wOBA'),
+      'batting_expected_xwOBA': batting_profile.get('xwOBA'),
+      'batting_BABIP': batting_profile.get('BABIP'),
+      'batting_bat_speed': batting_profile.get('Spd'),
+      'batting_barrel_percent': batting_profile.get('Barrel%'),
+      'batting_ISO': batting_profile.get('ISO')
     }
 
-    batter_profiles.append(profile)
+    batting_profiles.append(profile)
 
-  batter_data = statcast_data[['batter','stand', 'events', 'bb_type']].drop_duplicates()
+  batting_data = statcast_data[['batter','stand', 'events', 'bb_type']].drop_duplicates()
 
-  # Include additional metrics to a batter's profile from different datasets.
-  for batter in batter_profiles:
-    name_array = batter['batter_name'].split()
+  # Include additional metrics to a batting's profile from different datasets.
+  for batting in batting_profiles:
+    name_array = batting['batting_name'].split()
 
     id = silent_lookup(name_array[1], name_array[0])
-    batter_details = batter_data.loc[batter_data['batter'] == id]
-    if not batter_details.empty:
+    batting_details = batting_data.loc[batting_data['batter'] == id]
+    if not batting_details.empty:
 
-      # Generate a batter's platoon splits
-      plate_appearance_data = batter_details.dropna(subset=['events'])
+      # Generate a batting's platoon splits
+      plate_appearance_data = batting_details.dropna(subset=['events'])
       plate_appearance_data['is_hit'] = plate_appearance_data['events'].isin(['single', 'double', 'triple', 'home_run'])
       platoon_stats = plate_appearance_data.groupby('stand').agg(
         Plate_Appearance=('events', 'count'),
@@ -124,18 +125,18 @@ def get_mlb_batter_profile() -> dict:
       )
       platoon_stats_avg = platoon_stats['Hits'] / platoon_stats['Plate_Appearance']
       plate_appearance_stats_avg = platoon_stats_avg.to_dict()
-      batter['platoon_stats'] = plate_appearance_stats_avg
+      batting['platoon_stats'] = plate_appearance_stats_avg
 
-      # Generate a batter's line drive rate
-      line_drive = batter_details.dropna(subset=['bb_type'])
-      line_drive_rate = (line_drive[line_drive['bb_type'] == 'line_drive']).shape[0] / batter_details.shape[0]
-      batter['batter_line_drive_rate'] = line_drive_rate
+      # Generate a batting's line drive rate
+      line_drive = batting_details.dropna(subset=['bb_type'])
+      line_drive_rate = (line_drive[line_drive['bb_type'] == 'line_drive']).shape[0] / batting_details.shape[0]
+      batting['batting_line_drive_rate'] = line_drive_rate
 
-    # Find a batter's batting stance
-    found_match = batter_data.loc[batter_data['batter'] == id, 'stand']
+    # Find a batting's batting stance
+    found_match = batting_data.loc[batting_data['batter'] == id, 'stand']
     if not found_match.empty:
-      batter['batter_stance'] = found_match.iloc[0]
-  return batter_profiles
+      batting['batting_stance'] = found_match.iloc[0]
+  return batting_profiles
 
 def get_mlb_pitcher_national_averages() -> dict:
   """Calculates the national averages for MLB pitchers.
@@ -155,18 +156,18 @@ def get_mlb_pitcher_national_averages() -> dict:
 
   return pitching_averages
 
-def get_mlb_batter_national_averages() -> dict:
-  """Calculates the national averages for MLB batters.
+def get_mlb_batting_national_averages() -> dict:
+  """Calculates the national averages for MLB hitting.
 
   Returns:
     dict: A dictionary containing the national averages for various MLB statistics.
   """
-  batter_stats = batting_stats(2025)
+  batting_stat = batting_stats(2025)
 
   batting_averages = {
-    'league_batting_wOBA_average': (batter_stats['wOBA'] * batter_stats['PA']).sum() / batter_stats['PA'].sum(),
-    'league_batting_BABIP_average': calculate_average_babip(batter_stats),
-    'league_batting_ISO_average': calculate_average_iso(batter_stats)
+    'league_batting_wOBA_average': (batting_stat['wOBA'] * batting_stat['PA']).sum() / batting_stat['PA'].sum(),
+    'league_batting_BABIP_average': calculate_average_babip(batting_stat),
+    'league_batting_ISO_average': calculate_average_iso(batting_stat)
   }
 
   return batting_averages
@@ -218,27 +219,27 @@ def get_ball_park_factors(team, year):
   return ball_park_factor
 
 def generate_mlb_lineup():
-  pitcher_profiles = get_mlb_pitcher_profile()
-  batter_profiles = get_mlb_batter_profile()
+  # pitcher_profiles = get_mlb_pitcher_profile()
+  # batting_profiles = get_mlb_batting_profile()
   # ball_park_factors = get_mlb_park_stats()
   salary_data = pd.read_csv('mlb_data/mlb_salaries.csv')
   salary_data_df = pd.DataFrame(salary_data)
 
-  pitcher_profile_df = pd.DataFrame(pitcher_profiles)
+  pitcher_profile_df = load_mlb_pitching_profiles()
   pitcher_lineup_df = pitcher_profile_df.dropna()
 
-  batter_profile_df = pd.DataFrame(batter_profiles)
-  batter_lineup_df = batter_profile_df.dropna()
+  batting_profile_df = load_mlb_batting_profiles()
+  batting_lineup_df = batting_profile_df.dropna()
 
-  elite_pitchers = apply_elite_statistical_pitcher_filters(pitcher_lineup_df, batter_lineup_df)
-  elite_hitters = apply_elite_statistical_batter_filters(pitcher_lineup_df, batter_lineup_df)
+  elite_pitchers = apply_elite_statistical_pitcher_filters(pitcher_lineup_df, batting_lineup_df)
+  elite_hitters = apply_elite_statistical_batting_filters(pitcher_lineup_df, batting_lineup_df)
 
   pitcher_lineup_df = generate_pitcher_starting_lineup(salary_data_df, pitcher_lineup_df, elite_pitchers)
-  batter_lineup_df = generate_batter_starting_lineup(salary_data_df, batter_lineup_df, elite_hitters)
+  batting_lineup_df = generate_batting_starting_lineup(salary_data_df, batting_lineup_df, elite_hitters)
 
-  generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batter_lineup_df)
+  generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df)
 
-def apply_elite_statistical_pitcher_filters(pitcher_lineup_df, batter_lineup_df):
+def apply_elite_statistical_pitcher_filters(pitcher_lineup_df, batting_lineup_df):
   pitcher_national_average = get_mlb_pitcher_national_averages()
 
   pitcher_lineup_df['elite_strikeout_K'] = pitcher_lineup_df['pitcher_strike_K_percent'] > pitcher_national_average['league_pitcher_k_bb_average']
@@ -246,15 +247,15 @@ def apply_elite_statistical_pitcher_filters(pitcher_lineup_df, batter_lineup_df)
 
   return elite_pitchers
 
-def apply_elite_statistical_batter_filters(pitcher_lineup_df, batter_lineup_df):
-  batter_national_average = get_mlb_batter_national_averages()
+def apply_elite_statistical_batting_filters(pitcher_lineup_df, batting_lineup_df):
+  batting_national_average = get_mlb_batting_national_averages()
 
-  batter_lineup_df['elite_wOBA'] = batter_lineup_df['batter_expected_xwOBA'] > batter_national_average['league_batting_wOBA_average']
-  elite_hitters = batter_lineup_df[batter_lineup_df['elite_wOBA'] == True]
+  batting_lineup_df['elite_wOBA'] = batting_lineup_df['batting_expected_xwOBA'] > batting_national_average['league_batting_wOBA_average']
+  elite_hitters = batting_lineup_df[batting_lineup_df['elite_wOBA'] == True]
 
   return elite_hitters
 
-def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batter_lineup_df):
+def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df):
   lineup_count = 0
   lineup_list = []
   positions = []
@@ -262,49 +263,49 @@ def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batter_lineup_df)
   while lineup_count < 4:
     starting_lineup = {}
     pitcher_starting_lineup_df = pitcher_lineup_df.dropna()
-    batter_starting_lineup_df = batter_lineup_df.dropna()
+    batting_starting_lineup_df = batting_lineup_df.dropna()
     pitcher_indices = list(pitcher_starting_lineup_df.index)
     player_salary = 0
 
     pitcher_one_idx = np.random.choice(pitcher_indices)
     starting_lineup['pitcher_one'] = pitcher_starting_lineup_df.loc[pitcher_one_idx]['name_id']
-    drop_batters_against_pitchers(salary_data_df, pitcher_one_idx, pitcher_starting_lineup_df, batter_starting_lineup_df, player_salary, pitcher_indices)
+    drop_battings_against_pitchers(salary_data_df, pitcher_one_idx, pitcher_starting_lineup_df, batting_starting_lineup_df, player_salary, pitcher_indices)
 
     pitcher_two_idx = np.random.choice(pitcher_indices)
     starting_lineup['pitcher_two'] = pitcher_starting_lineup_df.loc[pitcher_two_idx]['name_id']
-    drop_batters_against_pitchers(salary_data_df, pitcher_two_idx, pitcher_starting_lineup_df, batter_starting_lineup_df, player_salary, pitcher_indices)
+    drop_battings_against_pitchers(salary_data_df, pitcher_two_idx, pitcher_starting_lineup_df, batting_starting_lineup_df, player_salary, pitcher_indices)
 
-    catcher_starters = batter_starting_lineup_df[batter_starting_lineup_df['position'].str.contains('C')]
+    catcher_starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains('C')]
     catcher_indices = list(catcher_starters.index)
     if len(catcher_indices) > 0:
       catcher_idx = np.random.choice(catcher_indices)
       starting_lineup['catcher'] = catcher_starters.loc[catcher_idx]['name_id']
 
-    first_base_starters = batter_starting_lineup_df[batter_starting_lineup_df['position'].str.contains('1B')]
+    first_base_starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains('1B')]
     first_base_indices = list(first_base_starters.index)
     if len(first_base_indices) > 0:
       first_base_idx = np.random.choice(first_base_indices)
       starting_lineup['first_base'] = first_base_starters.loc[first_base_idx]['name_id']
 
-    second_base_starters = batter_starting_lineup_df[batter_starting_lineup_df['position'].str.contains('2B')]
+    second_base_starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains('2B')]
     second_base_indices = list(second_base_starters.index)
     if len(second_base_indices) > 0:
       second_base_idx = np.random.choice(second_base_indices)
       starting_lineup['second_base'] = second_base_starters.loc[second_base_idx]['name_id']
 
-    third_base_starters = batter_starting_lineup_df[batter_starting_lineup_df['position'].str.contains('3B')]
+    third_base_starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains('3B')]
     third_base_indices = list(third_base_starters.index)
     if len(third_base_indices) > 0:
       third_base_idx = np.random.choice(third_base_indices)
       starting_lineup['third_base'] = third_base_starters.loc[third_base_idx]['name_id']
 
-    short_stop_starters = batter_starting_lineup_df[batter_starting_lineup_df['position'].str.contains('SS')]
+    short_stop_starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains('SS')]
     short_stop_indices = list(short_stop_starters.index)
     if len(short_stop_indices) > 0:
       short_stop_idx = np.random.choice(short_stop_indices)
       starting_lineup['short_stop'] = short_stop_starters.loc[short_stop_idx]['name_id']
 
-    outfielder_starters = batter_starting_lineup_df[batter_starting_lineup_df['position'].str.contains('OF')]
+    outfielder_starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains('OF')]
     outfielder_indices = list(outfielder_starters.index)
     if len(outfielder_indices) > 0:
       outfielder_one_idx = np.random.choice(outfielder_indices)
@@ -333,20 +334,20 @@ def generate_pitcher_starting_lineup(salary_data_df, pitcher_lineup_df, elite_pi
 
   return pitcher_lineup_df
 
-def generate_batter_starting_lineup(salary_data_df, batter_lineup_df, elite_hitters):
+def generate_batting_starting_lineup(salary_data_df, batting_lineup_df, elite_hitters):
   salary_lookup = salary_data_df.set_index('Name')['Salary'].to_dict()
   position_lookup = salary_data_df.set_index('Name')['Position'].to_dict()
   name_id_lookup = salary_data_df.set_index('Name')['Name + ID'].to_dict()
   team_lookup = salary_data_df.set_index('Name')['TeamAbbrev'].to_dict()
 
-  batter_lineup_df['salary'] = elite_hitters['batter_name'].map(salary_lookup)
-  batter_lineup_df['position'] = elite_hitters['batter_name'].map(position_lookup)
-  batter_lineup_df['name_id'] = elite_hitters['batter_name'].map(name_id_lookup)
-  batter_lineup_df['batter_teamabbrev'] = elite_hitters['batter_name'].map(team_lookup)
+  batting_lineup_df['salary'] = elite_hitters['batting_name'].map(salary_lookup)
+  batting_lineup_df['position'] = elite_hitters['batting_name'].map(position_lookup)
+  batting_lineup_df['name_id'] = elite_hitters['batting_name'].map(name_id_lookup)
+  batting_lineup_df['batting_teamabbrev'] = elite_hitters['batting_name'].map(team_lookup)
 
-  return batter_lineup_df
+  return batting_lineup_df
 
-def drop_batters_against_pitchers(salary_data_df, pitcher_idx, pitcher_lineup_df, batter_lineup_df, player_salary, pitcher_indices):
+def drop_battings_against_pitchers(salary_data_df, pitcher_idx, pitcher_lineup_df, batting_lineup_df, player_salary, pitcher_indices):
   game_matchups = []
   game_schedule = salary_data_df['Game Info'].unique()
   for game in game_schedule:
@@ -365,30 +366,30 @@ def drop_batters_against_pitchers(salary_data_df, pitcher_idx, pitcher_lineup_df
   pitcher_away_team = next((away for away in game_matchups if away.get('away_team') == pitcher_matchup), None)
 
   if pitcher_home_team:
-    batter_lineup_df.drop(batter_lineup_df[batter_lineup_df['batter_teamabbrev'] == pitcher_home_team.get('away_team')].index, inplace=True)
+    batting_lineup_df.drop(batting_lineup_df[batting_lineup_df['batting_teamabbrev'] == pitcher_home_team.get('away_team')].index, inplace=True)
 
   if pitcher_away_team:
-    batter_lineup_df.drop(batter_lineup_df[batter_lineup_df['batter_teamabbrev'] == pitcher_away_team.get('home_team')].index, inplace=True)
+    batting_lineup_df.drop(batting_lineup_df[batting_lineup_df['batting_teamabbrev'] == pitcher_away_team.get('home_team')].index, inplace=True)
 
     player_salary += pitcher_lineup_df.loc[pitcher_idx]['salary']
     pitcher_lineup_df.drop(pitcher_lineup_df[pitcher_lineup_df['pitcher_teamabbrev'] == pitcher_lineup_df.loc[pitcher_idx]['pitcher_teamabbrev']].index, inplace=True)
 
     pitcher_indices[:] = list(pitcher_lineup_df.index)
 
-def calculate_average_babip(batter_stats):
-  league_hits = batter_stats['H'].sum()
-  league_home_runs = batter_stats['HR'].sum()
-  league_at_bats = batter_stats['AB'].sum()
-  league_strikeouts = batter_stats['SO'].sum()
-  league_sacrafice_flies = batter_stats['SF'].sum()
+def calculate_average_babip(batting_stats):
+  league_hits = batting_stats['H'].sum()
+  league_home_runs = batting_stats['HR'].sum()
+  league_at_bats = batting_stats['AB'].sum()
+  league_strikeouts = batting_stats['SO'].sum()
+  league_sacrafice_flies = batting_stats['SF'].sum()
 
   return (league_hits - league_home_runs) / (league_at_bats - league_strikeouts - league_home_runs + league_sacrafice_flies)
 
-def calculate_average_iso(batter_stats):
-  league_average_2b = batter_stats['2B'].sum()
-  league_average_3b = batter_stats['3B'].sum()
-  league_average_home_run = batter_stats['HR'].sum()
-  league_average_at_bats = batter_stats['AB'].sum()
+def calculate_average_iso(batting_stats):
+  league_average_2b = batting_stats['2B'].sum()
+  league_average_3b = batting_stats['3B'].sum()
+  league_average_home_run = batting_stats['HR'].sum()
+  league_average_at_bats = batting_stats['AB'].sum()
 
   return ((1 * league_average_2b) + (2 * league_average_3b) + (3 * league_average_home_run)) / league_average_at_bats
 
@@ -404,3 +405,38 @@ def silent_lookup(lastname, firstname):
         return id
     except Exception:
       return pd.DataFrame()
+
+def load_mlb_batting_profiles():
+  today = date.today()
+  batting_profile_filename = f"mlb_data/batting_profile_{today}.csv"
+  pitcher_profile_filename = f"pitcher_profile_{today}.csv"
+
+  if os.path.exists(batting_profile_filename):
+    print(f"Loading batting profiles...")
+    batting_profile = pd.read_csv(batting_profile_filename)
+    batting_profile_df = pd.DataFrame(batting_profile)
+    return batting_profile_df
+  else:
+    print(f"Fetching and saving today's batting profiles...")
+    add_batting_profile = get_mlb_batting_profile()
+    add_batting_profile_df = pd.DataFrame(add_batting_profile)
+    add_batting_profile_df.to_csv(batting_profile_filename, index=False)
+    print(f"Successfully cached: {batting_profile_filename}")
+    return add_batting_profile_df
+
+def load_mlb_pitching_profiles():
+  today = date.today()
+  pitching_profile_filename = f"mlb_data/pitcher_profile_{today}.csv"
+
+  if os.path.exists(pitching_profile_filename):
+    print(f"Loading pitching profiles...")
+    pitching_profile = pd.read_csv(pitching_profile_filename)
+    pitching_profile_df = pd.DataFrame(pitching_profile)
+    return pitching_profile_df
+  else:
+    print(f"Fetching and saving today's batting profiles...")
+    add_pitching_profile = get_mlb_pitcher_profile()
+    add_pitching_profile_df = pd.DataFrame(add_pitching_profile)
+    add_pitching_profile_df.to_csv(pitching_profile_filename, index=False)
+    print(f"Successfully cached: {pitching_profile_filename}")
+    return add_pitching_profile_df

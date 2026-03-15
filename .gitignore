@@ -212,3 +212,4 @@ __marimo__/
 /pga_data/tournament_results.csv
 /pga_data/lineups.csv
 /pga_data/dk_salaries.csv
+/mlb_data/*.csv
