@@ -219,8 +219,6 @@ def get_ball_park_factors(team, year):
   return ball_park_factor
 
 def generate_mlb_lineup():
-  # pitcher_profiles = get_mlb_pitcher_profile()
-  # batting_profiles = get_mlb_batting_profile()
   # ball_park_factors = get_mlb_park_stats()
   salary_data = pd.read_csv('mlb_data/mlb_salaries.csv')
   salary_data_df = pd.DataFrame(salary_data)
@@ -231,6 +229,9 @@ def generate_mlb_lineup():
   batting_profile_df = load_mlb_batting_profiles()
   batting_lineup_df = batting_profile_df.dropna()
 
+  generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df)
+
+def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df):
   elite_pitchers = apply_elite_statistical_pitcher_filters(pitcher_lineup_df, batting_lineup_df)
   elite_hitters = apply_elite_statistical_batting_filters(pitcher_lineup_df, batting_lineup_df)
 
