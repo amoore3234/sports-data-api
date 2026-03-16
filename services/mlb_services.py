@@ -28,7 +28,7 @@ def get_mlb_pitcher_profile() -> list[dict]:
   # Modify once the season starts
   # end = date.today().isoformat()
   # start = (date.today() - timedelta(days=20)).isoformat()
-  statcast_data = statcast(start_dt='2025-03-30', end_dt='2025-05-02')
+  statcast_data = statcast(start_dt='2025-03-30', end_dt='2025-05-02', parallel=False)
 
   pitcher_profiles = []
 
@@ -172,52 +172,6 @@ def get_mlb_batting_national_averages() -> dict:
 
   return batting_averages
 
-def get_mlb_park_stats() -> list[dict]:
-  mlb_teams = [
-    'ARI', 'ATL', 'BAL', 'BOS', 'CHC', 'CHW',
-    'CIN', 'CLE', 'COL', 'DET', 'HOU', 'KCR',
-    'LAA', 'LAD', 'MIA', 'MIL', 'MIN', 'NYM',
-    'NYY', 'OAK', 'PHI', 'PIT', 'SDP', 'SEA',
-    'SFG', 'STL', 'TBR', 'TEX', 'TOR', 'WSN'
-  ]
-
-  park_stats = []
-
-  for team in mlb_teams:
-    ball_park_factors = get_ball_park_factors(team, 2025)
-
-    park_stat = {
-      'team': team,
-      'ball_park_factor': ball_park_factors
-    }
-    park_stats.append(park_stat)
-
-  return park_stats
-
-def get_ball_park_factors(team, year):
-  """Calculates the ball park factors for MLB stadiums.
-
-  Args:
-    team (str): The abbreviation of an MLB team
-    year (int): The year for which to calculate the ball park factors.
-
-  Returns:
-    dict: A dictionary containing the ball park factors for MLB stadiums.
-  """
-  schedule_data = schedule_and_record(year, team)
-
-  # Calculate the average runs scored at home games
-  home_games = schedule_data[schedule_data['Home_Away'] == 'Home']
-  home_runs_per_game = (home_games['R'].sum() + home_games['RA'].sum()) / len(home_games)
-
-  # Calculate the average runs scored at road games
-  road_games = schedule_data[schedule_data['Home_Away'] == '@']
-  road_runs_per_game = (road_games['R'].sum() + road_games['RA'].sum()) / len(road_games)
-
-  ball_park_factor = home_runs_per_game / road_runs_per_game
-
-  return ball_park_factor
-
 def generate_mlb_lineup():
   # ball_park_factors = get_mlb_park_stats()
   salary_data = pd.read_csv('mlb_data/mlb_salaries.csv')
@@ -230,6 +184,38 @@ def generate_mlb_lineup():
   batting_lineup_df = batting_profile_df.dropna()
 
   generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df)
+
+def generate_mlb_lineup_including_ballpark_factors():
+  salary_data = pd.read_csv('mlb_data/mlb_salaries.csv')
+  salary_data_df = pd.DataFrame(salary_data)
+
+  pitcher_profile_df = load_mlb_pitching_profiles()
+  pitcher_lineup_df = pitcher_profile_df.dropna()
+
+  batting_profile_df = load_mlb_batting_profiles()
+  batting_lineup_df = batting_profile_df.dropna()
+
+  get_pitcher_friendly_ballpark(pitcher_profile_df, batting_lineup_df)
+
+  generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df)
+
+def get_pitcher_friendly_ballpark(pitcher_df, batting_df):
+  ball_park_factors = pd.read_csv("mlb_data/mlb_park_factors.csv")
+  ball_park_factors_df = pd.DataFrame(ball_park_factors)
+  ball_park_pitcher = pd.merge(
+    pitcher_df,
+    ball_park_factors_df,
+    left_on='pitcher_team',
+    right_on='Team',
+    how='left')
+  ball_park_lookup = ball_park_factors.to_dict(orient='records')
+  ball_park_average = ball_park_pitcher['Park Factor'].mean()
+  pitcher_df = ball_park_pitcher.drop(ball_park_pitcher[ball_park_pitcher['Park Factor'] > ball_park_average].index)
+  batting_df = batting_df.drop(batting_df[batting_df['batting_team'] == pitcher_df['pitcher_team']].index)
+
+  print(pitcher_df)
+  print(batting_df)
+  print(f"Ball park average: {ball_park_average}")
 
 def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df):
   elite_pitchers = apply_elite_statistical_pitcher_filters(pitcher_lineup_df, batting_lineup_df)

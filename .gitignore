@@ -212,4 +212,5 @@ __marimo__/
 /pga_data/tournament_results.csv
 /pga_data/lineups.csv
 /pga_data/dk_salaries.csv
-/mlb_data/*.csv
+/mlb_data/batting_profile_*.csv
+/mlb_data/pitcher_profile_*.csv
