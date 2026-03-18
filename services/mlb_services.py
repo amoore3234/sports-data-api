@@ -195,11 +195,12 @@ def generate_mlb_lineup_including_ballpark_factors():
   batting_profile_df = load_mlb_batting_profiles()
   batting_lineup_df = batting_profile_df.dropna()
 
-  get_pitcher_friendly_ballpark(pitcher_profile_df, batting_lineup_df)
+  pitcher_lineup_df = get_pitcher_friendly_ballpark(pitcher_lineup_df)
+  batting_lineup_df = drop_hitters_at_pitcher_friendly_ballpark(pitcher_lineup_df, batting_lineup_df)
 
   generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df)
 
-def get_pitcher_friendly_ballpark(pitcher_df, batting_df):
+def get_pitcher_friendly_ballpark(pitcher_df):
   ball_park_factors = pd.read_csv("mlb_data/mlb_park_factors.csv")
   ball_park_factors_df = pd.DataFrame(ball_park_factors)
   ball_park_pitcher = pd.merge(
@@ -211,25 +212,40 @@ def get_pitcher_friendly_ballpark(pitcher_df, batting_df):
   ball_park_lookup = ball_park_factors.to_dict(orient='records')
   ball_park_average = ball_park_pitcher['Park Factor'].mean()
   pitcher_df = ball_park_pitcher.drop(ball_park_pitcher[ball_park_pitcher['Park Factor'] > ball_park_average].index)
-  teams_to_exclude = pitcher_df['pitcher_team'].unique()
-  drop_hitters = pd.merge(
-    batting_df,
+  pitcher_df.dropna()
+  print(f"Pitcher ballpark: {pitcher_df[['pitcher_name', 'pitcher_team']]}")
+  return pitcher_df
+
+  def get_hitter_friendly_ballpark(pitcher_df):
+  ball_park_factors = pd.read_csv("mlb_data/mlb_park_factors.csv")
+  ball_park_factors_df = pd.DataFrame(ball_park_factors)
+  ball_park_pitcher = pd.merge(
     pitcher_df,
-    left_on='batting_team',
-    right_on='pitcher_team',
-    how='left'
-  )
-  batting_df = drop_hitters[~drop_hitters['batting_team'].isin(teams_to_exclude)]
+    ball_park_factors_df,
+    left_on='pitcher_team',
+    right_on='Team',
+    how='left')
+  ball_park_lookup = ball_park_factors.to_dict(orient='records')
+  ball_park_average = ball_park_pitcher['Park Factor'].mean()
+  pitcher_df = ball_park_pitcher.drop(ball_park_pitcher[ball_park_pitcher['Park Factor'] < ball_park_average].index)
+  pitcher_df.dropna()
+  print(f"Pitcher ballpark: {pitcher_df[['pitcher_name', 'pitcher_team']]}")
+  return pitcher_df
+
+def drop_hitters_at_pitcher_friendly_ballpark(pitcher_df, batting_df):
+  teams_to_exclude = pitcher_df['pitcher_team'].unique()
+  batting_df = batting_df[~batting_df['batting_team'].isin(teams_to_exclude)]
   batting_df.dropna()
   print(f"Drop batting lineup: {batting_df}")
-
-  print(f"Ball park average: {ball_park_average}")
+  return batting_df
 
 def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df):
   elite_pitchers = apply_elite_statistical_pitcher_filters(pitcher_lineup_df, batting_lineup_df)
   elite_hitters = apply_elite_statistical_batting_filters(pitcher_lineup_df, batting_lineup_df)
 
   pitcher_lineup_df = generate_pitcher_starting_lineup(salary_data_df, pitcher_lineup_df, elite_pitchers)
+  # Apply filter for pitchers against hitter friendly ballpark factors here:
+  # Use example from drop_battings_against_pitchers method to apply filter
   print(f"Pitcher lineup: {pitcher_lineup_df}")
   batting_lineup_df = generate_batting_starting_lineup(salary_data_df, batting_lineup_df, elite_hitters)
   print(f"Batting_lineup_df: {batting_lineup_df}")
