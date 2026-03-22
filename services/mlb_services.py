@@ -6,6 +6,7 @@ import numpy as np
 import warnings
 import contextlib
 import os
+import model.position_type as roster
 
 # Disable the SettingWithCopy/ChainedAssignment warnings
 pd.options.mode.chained_assignment = None
@@ -195,37 +196,6 @@ def generate_mlb_lineup():
 
   generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df, pitcher_friendly_park, hitter_friendly_park)
 
-# def generate_mlb_lineup_including_ballpark_factors():
-#   salary_data = pd.read_csv('mlb_data/mlb_salaries.csv')
-#   salary_data_df = pd.DataFrame(salary_data)
-
-#   pitcher_profile_df = load_mlb_pitching_profiles()
-#   pitcher_lineup_df = pitcher_profile_df.dropna()
-
-#   batting_profile_df = load_mlb_batting_profiles()
-#   batting_lineup_df = batting_profile_df.dropna()
-
-#   pitcher_lineup_df = get_pitcher_friendly_ballpark(pitcher_lineup_df)
-#   pitcher_lineup_df = pitcher_lineup_df.dropna()
-#   print(f"Pitcher ballpark: {pitcher_lineup_df}")
-
-#   generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df, False, False)
-
-# def generate_mlb_lineup_including_hitter_ballpark_factors():
-#   salary_data = pd.read_csv('mlb_data/mlb_salaries.csv')
-#   salary_data_df = pd.DataFrame(salary_data)
-
-#   pitcher_profile_df = load_mlb_pitching_profiles()
-#   pitcher_lineup_df = pitcher_profile_df.dropna()
-
-#   batting_profile_df = load_mlb_batting_profiles()
-#   batting_lineup_df = batting_profile_df.dropna()
-
-#   batting_lineup_df = get_hitter_friendly_ballpark(batting_lineup_df)
-#   pitcher_lineup_df = drop_pitchers_at_hitter_friendly_ballpark(pitcher_lineup_df, batting_lineup_df)
-
-#   generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df, False, False)
-
 def get_pitcher_friendly_ballpark(pitcher_df):
   ball_park_factors = pd.read_csv("mlb_data/mlb_park_factors.csv")
   ball_park_factors_df = pd.DataFrame(ball_park_factors)
@@ -340,11 +310,7 @@ def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df
 
       drop_hitters_against_pitchers(salary_data_df, pitcher_two_idx, pitcher_starting_lineup_df, batting_starting_lineup_df, player_salary, pitcher_indices, pitcher_friendly_park, hitter_friendly_park)
 
-    catcher_starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains('C')]
-    catcher_indices = list(catcher_starters.index)
-    if len(catcher_indices) > 0:
-      catcher_idx = np.random.choice(catcher_indices)
-      starting_lineup['catcher'] = catcher_starters.loc[catcher_idx]['name_id']
+      starting_lineup['catcher'] = catcher_starters = get_starting_player(batting_starting_lineup_df, roster.PositionType.CATCHER.value)
 
     first_base_starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains('1B')]
     first_base_indices = list(first_base_starters.index)
@@ -384,6 +350,13 @@ def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df
     lineup_count += 1
   print(f"Print lineups: {lineup_list}")
   return lineup_list
+
+def get_starting_player(batting_starting_lineup_df, position_type):
+  starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains(position_type)]
+  indices = list(starters.index)
+  if len(indices) > 0:
+    idx = np.random.choice(indices)
+    return starters.loc[idx]['name_id']
 
 def generate_pitcher_starting_lineup(salary_data_df, pitcher_lineup_df, elite_pitchers):
   salary_lookup = salary_data_df.set_index('Name')['Salary'].to_dict()
