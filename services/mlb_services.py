@@ -243,7 +243,7 @@ def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_dat
   batting_lineup_df = generate_batting_starting_lineup(salary_data_df, batting_lineup_df, elite_hitters)
   print(f"Batting_lineup_df: {batting_lineup_df}")
 
-  if hitter_friendly_park == True:
+  if hitter_friendly_park:
     pitcher_lineup_df = drop_pitchers(pitcher_lineup_df, batting_lineup_df, salary_data_df)
     print(f"Dropped pitchers: {pitcher_lineup_df}")
 
@@ -267,7 +267,6 @@ def drop_pitchers(pitcher_lineup_df, batting_lineup_df, salary_data_df):
       seen.add(pitcher_away_team.get('away_team'))
 
   return pitcher_lineup_df
-
 
 def apply_elite_statistical_pitcher_filters(pitcher_lineup_df, batting_lineup_df):
   pitcher_national_average = get_mlb_pitcher_national_averages()
@@ -295,7 +294,9 @@ def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df
     pitcher_starting_lineup_df = pitcher_lineup_df.dropna()
     print(f"Pitcher lineup setup: {pitcher_starting_lineup_df}")
     batting_starting_lineup_df = batting_lineup_df.dropna()
+    print(f"Hitter lineup setup: {batting_starting_lineup_df}")
     pitcher_indices = list(pitcher_starting_lineup_df.index)
+    chosen_players = set()
     player_salary = 0
 
     if len(pitcher_indices) > 0:
@@ -310,53 +311,33 @@ def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df
 
       drop_hitters_against_pitchers(salary_data_df, pitcher_two_idx, pitcher_starting_lineup_df, batting_starting_lineup_df, player_salary, pitcher_indices, pitcher_friendly_park, hitter_friendly_park)
 
-      starting_lineup['catcher'] = catcher_starters = get_starting_player(batting_starting_lineup_df, roster.PositionType.CATCHER.value)
+    starters = list(batting_starting_lineup_df.index)
 
-    first_base_starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains('1B')]
-    first_base_indices = list(first_base_starters.index)
-    if len(first_base_indices) > 0:
-      first_base_idx = np.random.choice(first_base_indices)
-      starting_lineup['first_base'] = first_base_starters.loc[first_base_idx]['name_id']
-
-    second_base_starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains('2B')]
-    second_base_indices = list(second_base_starters.index)
-    if len(second_base_indices) > 0:
-      second_base_idx = np.random.choice(second_base_indices)
-      starting_lineup['second_base'] = second_base_starters.loc[second_base_idx]['name_id']
-
-    third_base_starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains('3B')]
-    third_base_indices = list(third_base_starters.index)
-    if len(third_base_indices) > 0:
-      third_base_idx = np.random.choice(third_base_indices)
-      starting_lineup['third_base'] = third_base_starters.loc[third_base_idx]['name_id']
-
-    short_stop_starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains('SS')]
-    short_stop_indices = list(short_stop_starters.index)
-    if len(short_stop_indices) > 0:
-      short_stop_idx = np.random.choice(short_stop_indices)
-      starting_lineup['short_stop'] = short_stop_starters.loc[short_stop_idx]['name_id']
-
-    outfielder_starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains('OF')]
-    outfielder_indices = list(outfielder_starters.index)
-    if len(outfielder_indices) > 0:
-      outfielder_one_idx = np.random.choice(outfielder_indices)
-      starting_lineup['outfielder_one'] = outfielder_starters.loc[outfielder_one_idx]['name_id']
-      outfielder_two_idx = np.random.choice(outfielder_indices)
-      starting_lineup['outfielder_two'] = outfielder_starters.loc[outfielder_two_idx]['name_id']
-      outfielder_three_idx = np.random.choice(outfielder_indices)
-      starting_lineup['outfielder_three'] = outfielder_starters.loc[outfielder_three_idx]['name_id']
+    starting_lineup['catcher'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.CATCHER.value)
+    starting_lineup['first_base'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.FIRSTBASE.value)
+    starting_lineup['second_base'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.SECONDBASE.value)
+    starting_lineup['third_base'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.THIRDBASE.value)
+    starting_lineup['short_stop'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.SHORTSTOP.value)
+    starting_lineup['outfielder_one'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.OUTFIELDER.value)
+    starting_lineup['outfielder_two'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.OUTFIELDER.value)
+    starting_lineup['outfielder_three'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.OUTFIELDER.value)
 
     lineup_list.append(starting_lineup)
     lineup_count += 1
   print(f"Print lineups: {lineup_list}")
   return lineup_list
 
-def get_starting_player(batting_starting_lineup_df, position_type):
+def get_starting_player(chosen_players, batting_starting_lineup_df, position_type):
   starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains(position_type)]
   indices = list(starters.index)
   if len(indices) > 0:
     idx = np.random.choice(indices)
-    return starters.loc[idx]['name_id']
+    player = starters.loc[idx]['name_id']
+    while player in chosen_players:
+      idx = np.random.choice(indices)
+      player = starters.loc[idx]['name_id']
+    chosen_players.add(player)
+    return player
 
 def generate_pitcher_starting_lineup(salary_data_df, pitcher_lineup_df, elite_pitchers):
   salary_lookup = salary_data_df.set_index('Name')['Salary'].to_dict()
@@ -392,7 +373,7 @@ def drop_hitters_against_pitchers(salary_data_df, pitcher_idx, pitcher_lineup_df
   pitcher_home_team = next((home for home in game_matchups if home.get('home_team') == pitcher_matchup), None)
   pitcher_away_team = next((away for away in game_matchups if away.get('away_team') == pitcher_matchup), None)
 
-  if pitcher_friendly_park == True:
+  if pitcher_friendly_park:
     if pitcher_home_team:
       home_team = pitcher_home_team.get('home_team')
       get_team_matchup(home_team, batting_lineup_df)
