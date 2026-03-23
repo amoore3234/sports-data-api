@@ -174,8 +174,8 @@ def get_mlb_batting_national_averages() -> dict:
   return batting_averages
 
 def generate_mlb_lineup():
-  pitcher_friendly_park = False
-  hitter_friendly_park = True
+  pitcher_friendly_park = True
+  hitter_friendly_park = False
   salary_data = pd.read_csv('mlb_data/mlb_salaries.csv')
   salary_data_df = pd.DataFrame(salary_data)
 
@@ -239,8 +239,7 @@ def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_dat
   elite_hitters = apply_elite_statistical_batting_filters(pitcher_lineup_df, batting_lineup_df)
 
   pitcher_lineup_df = generate_pitcher_starting_lineup(salary_data_df, pitcher_lineup_df, elite_pitchers)
-  pitcher_lineup_df = generate_confirmed_starting_lineups(pitcher_lineup_df)
-  print(f"Pitcher lineup: {pitcher_lineup_df}")
+  # pitcher_lineup_df = generate_confirmed_starting_lineups(pitcher_lineup_df)
   batting_lineup_df = generate_batting_starting_lineup(salary_data_df, batting_lineup_df, elite_hitters)
   print(f"Batting_lineup_df: {batting_lineup_df}")
 
@@ -253,18 +252,64 @@ def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_dat
 def generate_confirmed_starting_lineups(lineup_df):
   starting_lineup_data = pd.read_csv('mlb_data/confirmed_starting_lineups.csv')
   starting_lineup_df = pd.DataFrame(starting_lineup_data)
+  pitcher_testing = {
+    'pitcher_name':['Michael McGreevy', 'Cristian Javier', 'Reynaldo Lopez'],
+    'position': ['SP', 'SP', 'SP']
+  }
 
-  starting_list = list(starting_lineup_df['Starting Lineup'])
+  hitter_testing = {
+    'batter_name':['J. Wetherholt', 'Ivan Herrera', 'A. Burleson', 'Masyn Winn'],
+    'position':['2B', 'C', '1B', 'SS']
+  }
 
-  for the_list in starting_list:
+  lineup_df = pd.DataFrame(hitter_testing)
+  pitcher = (lineup_df['position'].str == 'SP')
+  if pitcher and not pitcher.empty:
+    starting_pitcher_list = []
 
-    if len(the_list) == 3:
-      # Make a list of last names
-      player_last_name = the_list[1]
-      # Include the list of last names in the data frame
-      lineup_df = lineup_df[lineup_df['pitcher_name'].str.contain(player_last_name)]
-      lineup_df = lineup_df.dropna()
-      return lineup_df
+    starting_lineups = list(starting_lineup_df['Starting Lineup'])
+    for name in starting_lineups:
+      name_array = name.split()
+      if len(name_array) == 3:
+        print(f"Split array: {name_array}")
+        player_lastname = name_array[1]
+        starting_pitcher_list.append(player_lastname)
+    
+    pitcher_lastname_lookup = '|'.join(starting_pitcher_list)
+
+    lineup_df = lineup_df[lineup_df['pitcher_name'].str.contains(pitcher_lastname_lookup)]
+    lineup_df.dropna()
+    print(f"Pitcher starters: {lineup_df}")
+    # return lineup_df
+  else:
+    positions = 'C|1B|2B|3B|SS|CF|LF|RF|DH'
+  
+    hitters_starting_lineup = starting_lineup_df[starting_lineup_df['Starting Lineup'].str.contains(positions)]
+    hitters_list = list(hitters_starting_lineup)
+    starting_hitter_list = []
+
+    for batter in hitters_list:
+      name_array = batter.split()
+      if len(name_array) == 4:
+        player_lastname = name_array[2]
+        starting_hitter_list.append(player_lastname)
+    
+    hitter_lastname_lookup = '|'.join(starting_hitter_list)
+
+    lineup_df = lineup_df[lineup_df['batter_name'].str.contains(hitter_lastname_lookup)]
+    lineup_df.dropna()
+    print(f"Batter starters: {lineup_df}")
+    # return lineup_df
+
+  # for player in starting_list:
+
+  #   if len(name) == 3:
+  #     # Make a list of last names
+  #     player_last_name = name[1]
+  #     # Include the list of last names in the data frame
+  #     lineup_df = lineup_df[lineup_df['pitcher_name'].str.contain(player_last_name)]
+  #     lineup_df = lineup_df.dropna()
+  #     return lineup_df
 
   # batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains(position_type)]
 
