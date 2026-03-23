@@ -313,21 +313,25 @@ def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df
 
     starters = list(batting_starting_lineup_df.index)
 
-    starting_lineup['catcher'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.CATCHER.value)
-    starting_lineup['first_base'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.FIRSTBASE.value)
-    starting_lineup['second_base'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.SECONDBASE.value)
-    starting_lineup['third_base'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.THIRDBASE.value)
-    starting_lineup['short_stop'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.SHORTSTOP.value)
-    starting_lineup['outfielder_one'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.OUTFIELDER.value)
-    starting_lineup['outfielder_two'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.OUTFIELDER.value)
-    starting_lineup['outfielder_three'] = get_starting_player(chosen_players, batting_starting_lineup_df, roster.PositionType.OUTFIELDER.value)
+    starting_lineup['catcher'] = get_starting_player(salary_data_df, chosen_players, batting_starting_lineup_df, roster.PositionType.CATCHER.value)
+    starting_lineup['first_base'] = get_starting_player(salary_data_df, chosen_players, batting_starting_lineup_df, roster.PositionType.FIRSTBASE.value)
+    starting_lineup['second_base'] = get_starting_player(salary_data_df, chosen_players, batting_starting_lineup_df, roster.PositionType.SECONDBASE.value)
+    starting_lineup['third_base'] = get_starting_player(salary_data_df, chosen_players, batting_starting_lineup_df, roster.PositionType.THIRDBASE.value)
+    starting_lineup['short_stop'] = get_starting_player(salary_data_df, chosen_players, batting_starting_lineup_df, roster.PositionType.SHORTSTOP.value)
+    starting_lineup['outfielder_one'] = get_starting_player(salary_data_df, chosen_players, batting_starting_lineup_df, roster.PositionType.OUTFIELDER.value)
+    starting_lineup['outfielder_two'] = get_starting_player(salary_data_df, chosen_players, batting_starting_lineup_df, roster.PositionType.OUTFIELDER.value)
+    starting_lineup['outfielder_three'] = get_starting_player(salary_data_df, chosen_players, batting_starting_lineup_df, roster.PositionType.OUTFIELDER.value)
 
-    lineup_list.append(starting_lineup)
-    lineup_count += 1
+    null_keys = [k for k, v in starting_lineup.items() if v is None]
+
+    if null_keys or player_salary <= 50000 and player_salary >= 45000:
+      lineup_list.append(starting_lineup)
+      lineup_count += 1
+
   print(f"Print lineups: {lineup_list}")
   return lineup_list
 
-def get_starting_player(chosen_players, batting_starting_lineup_df, position_type):
+def get_starting_player(salary_data_df, chosen_players, batting_starting_lineup_df, position_type):
   starters = batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains(position_type)]
   indices = list(starters.index)
   if len(indices) > 0:
@@ -337,7 +341,9 @@ def get_starting_player(chosen_players, batting_starting_lineup_df, position_typ
       idx = np.random.choice(indices)
       player = starters.loc[idx]['name_id']
     chosen_players.add(player)
+    player_salary += lineup_creation_df.loc[idx, 'Salary']
     return player
+
 
 def generate_pitcher_starting_lineup(salary_data_df, pitcher_lineup_df, elite_pitchers):
   salary_lookup = salary_data_df.set_index('Name')['Salary'].to_dict()
