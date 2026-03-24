@@ -4,8 +4,6 @@ cache.enable()
 import pandas as pd
 import numpy as np
 import warnings
-import contextlib
-import os
 import model.position_type as roster
 import util.mlb_service_util as util
 
@@ -21,10 +19,10 @@ def generate_mlb_lineup():
   salary_data = pd.read_csv('mlb_data/mlb_salaries.csv')
   salary_data_df = pd.DataFrame(salary_data)
 
-  pitcher_profile_df = load_mlb_pitching_profiles()
+  pitcher_profile_df = util.load_mlb_pitching_profiles()
   pitcher_lineup_df = pitcher_profile_df.dropna()
 
-  batting_profile_df = load_mlb_batting_profiles()
+  batting_profile_df = util.load_mlb_batting_profiles()
   batting_lineup_df = batting_profile_df.dropna()
 
   if pitcher_friendly_park:
@@ -39,11 +37,11 @@ def generate_mlb_lineup():
   generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df, pitcher_friendly_park, hitter_friendly_park)
 
 def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df, pitcher_friendly_park, hitter_friendly_park):
-  elite_pitchers = apply_elite_statistical_pitcher_filters(pitcher_lineup_df, batting_lineup_df)
-  elite_hitters = apply_elite_statistical_batting_filters(pitcher_lineup_df, batting_lineup_df)
+  elite_pitchers = apply_elite_statistical_pitcher_filters(pitcher_lineup_df)
+  elite_hitters = apply_elite_statistical_batting_filters(batting_lineup_df)
 
   pitcher_lineup_df = generate_pitcher_starting_lineup(salary_data_df, pitcher_lineup_df, elite_pitchers)
-  # pitcher_lineup_df = generate_confirmed_starting_lineups(pitcher_lineup_df)
+  pitcher_lineup_df = generate_confirmed_starting_lineups(pitcher_lineup_df)
   batting_lineup_df = generate_batting_starting_lineup(salary_data_df, batting_lineup_df, elite_hitters)
   print(f"Batting_lineup_df: {batting_lineup_df}")
 
@@ -66,56 +64,51 @@ def generate_confirmed_starting_lineups(lineup_df):
     'position':['2B', 'C', '1B', 'SS']
   }
 
-  lineup_df = pd.DataFrame(hitter_testing)
+  lineup_df = pd.DataFrame(pitcher_testing)
   pitcher = (lineup_df['position'].str == 'SP')
+  print(f"Starting pitcher filters: {pitcher}")
   if pitcher and not pitcher.empty:
-    starting_pitcher_list = []
-
-    starting_lineups = list(starting_lineup_df['Starting Lineup'])
-    for name in starting_lineups:
-      name_array = name.split()
-      if len(name_array) == 3:
-        print(f"Split array: {name_array}")
-        player_lastname = name_array[1]
-        starting_pitcher_list.append(player_lastname)
-
-    pitcher_lastname_lookup = '|'.join(starting_pitcher_list)
-
-    lineup_df = lineup_df[lineup_df['pitcher_name'].str.contains(pitcher_lastname_lookup)]
-    lineup_df.dropna()
-    print(f"Pitcher starters: {lineup_df}")
-    # return lineup_df
+    get_pitcher_starters(lineup_df, starting_lineup_df)
   else:
-    positions = 'C|1B|2B|3B|SS|CF|LF|RF|DH'
+    get_batter_starters(lineup_df, starting_lineup_df)
 
-    hitters_starting_lineup = starting_lineup_df[starting_lineup_df['Starting Lineup'].str.contains(positions)]
-    hitters_list = list(hitters_starting_lineup)
-    starting_hitter_list = []
+def get_pitcher_starters(lineup_df, starting_lineup_df):
+  starting_pitcher_list = []
 
-    for batter in hitters_list:
-      name_array = batter.split()
-      if len(name_array) == 4:
-        player_lastname = name_array[2]
-        starting_hitter_list.append(player_lastname)
+  starting_lineups = list(starting_lineup_df['Starting Lineup'])
+  for name in starting_lineups:
+    name_array = name.split()
+    if len(name_array) == 3:
+      print(f"Split array: {name_array}")
+      player_lastname = name_array[1]
+      starting_pitcher_list.append(player_lastname)
 
-    hitter_lastname_lookup = '|'.join(starting_hitter_list)
+  pitcher_lastname_lookup = '|'.join(starting_pitcher_list)
 
-    lineup_df = lineup_df[lineup_df['batter_name'].str.contains(hitter_lastname_lookup)]
-    lineup_df.dropna()
-    print(f"Batter starters: {lineup_df}")
-    # return lineup_df
+  lineup_df = lineup_df[lineup_df['pitcher_name'].str.contains(pitcher_lastname_lookup)]
+  lineup_df.dropna()
+  print(f"Pitcher starters: {lineup_df}")
+  # return lineup_df
 
-  # for player in starting_list:
+def get_batter_starters(lineup_df, starting_lineup_df):
+  positions = 'C|1B|2B|3B|SS|CF|LF|RF|DH'
 
-  #   if len(name) == 3:
-  #     # Make a list of last names
-  #     player_last_name = name[1]
-  #     # Include the list of last names in the data frame
-  #     lineup_df = lineup_df[lineup_df['pitcher_name'].str.contain(player_last_name)]
-  #     lineup_df = lineup_df.dropna()
-  #     return lineup_df
+  hitters_starting_lineup = starting_lineup_df[starting_lineup_df['Starting Lineup'].str.contains(positions)]
+  hitters_list = list(hitters_starting_lineup)
+  starting_hitter_list = []
 
-  # batting_starting_lineup_df[batting_starting_lineup_df['position'].str.contains(position_type)]
+  for batter in hitters_list:
+    name_array = batter.split()
+    if len(name_array) == 4:
+      player_lastname = name_array[2]
+      starting_hitter_list.append(player_lastname)
+
+  hitter_lastname_lookup = '|'.join(starting_hitter_list)
+
+  lineup_df = lineup_df[lineup_df['batter_name'].str.contains(hitter_lastname_lookup)]
+  lineup_df.dropna()
+  print(f"Batter starters: {lineup_df}")
+  # return lineup_df
 
 def drop_pitchers(pitcher_lineup_df, batting_lineup_df, salary_data_df):
   game_matchups = get_list_of_team_game_matchups(salary_data_df)
@@ -136,7 +129,7 @@ def drop_pitchers(pitcher_lineup_df, batting_lineup_df, salary_data_df):
 
   return pitcher_lineup_df
 
-def apply_elite_statistical_pitcher_filters(pitcher_lineup_df, batting_lineup_df):
+def apply_elite_statistical_pitcher_filters(pitcher_lineup_df):
   pitcher_national_average = util.get_mlb_pitcher_national_averages()
 
   pitcher_lineup_df['elite_strikeout_K'] = pitcher_lineup_df['pitcher_strike_K_percent'] > pitcher_national_average['league_pitcher_k_bb_average']
@@ -144,7 +137,7 @@ def apply_elite_statistical_pitcher_filters(pitcher_lineup_df, batting_lineup_df
 
   return elite_pitchers
 
-def apply_elite_statistical_batting_filters(pitcher_lineup_df, batting_lineup_df):
+def apply_elite_statistical_batting_filters(batting_lineup_df):
   batting_national_average = util.get_mlb_batting_national_averages()
 
   batting_lineup_df['elite_wOBA'] = batting_lineup_df['batting_expected_xwOBA'] > batting_national_average['league_batting_wOBA_average']
@@ -285,38 +278,3 @@ def get_list_of_team_game_matchups(salary_data_df) -> list[dict]:
 
 def get_team_matchup(team_matchup, batting_lineup_df):
     batting_lineup_df.drop(batting_lineup_df[batting_lineup_df['batting_teamabbrev'] == team_matchup].index, inplace=True)
-
-def load_mlb_batting_profiles():
-  today = date.today()
-  batting_profile_filename = f"mlb_data/batting_profile_{today}.csv"
-  pitcher_profile_filename = f"pitcher_profile_{today}.csv"
-
-  if os.path.exists(batting_profile_filename):
-    print(f"Loading batting profiles...")
-    batting_profile = pd.read_csv(batting_profile_filename)
-    batting_profile_df = pd.DataFrame(batting_profile)
-    return batting_profile_df
-  else:
-    print(f"Fetching and saving today's batting profiles...")
-    add_batting_profile = util.get_mlb_batting_profile()
-    add_batting_profile_df = pd.DataFrame(add_batting_profile)
-    add_batting_profile_df.to_csv(batting_profile_filename, index=False)
-    print(f"Successfully cached: {batting_profile_filename}")
-    return add_batting_profile_df
-
-def load_mlb_pitching_profiles():
-  today = date.today()
-  pitching_profile_filename = f"mlb_data/pitcher_profile_{today}.csv"
-
-  if os.path.exists(pitching_profile_filename):
-    print(f"Loading pitching profiles...")
-    pitching_profile = pd.read_csv(pitching_profile_filename)
-    pitching_profile_df = pd.DataFrame(pitching_profile)
-    return pitching_profile_df
-  else:
-    print(f"Fetching and saving today's batting profiles...")
-    add_pitching_profile = util.get_mlb_pitcher_profile()
-    add_pitching_profile_df = pd.DataFrame(add_pitching_profile)
-    add_pitching_profile_df.to_csv(pitching_profile_filename, index=False)
-    print(f"Successfully cached: {pitching_profile_filename}")
-    return add_pitching_profile_df

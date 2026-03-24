@@ -232,3 +232,37 @@ def silent_lookup(lastname, firstname):
         return id
     except Exception:
       return pd.DataFrame()
+  
+def load_mlb_batting_profiles():
+  today = date.today()
+  batting_profile_filename = f"mlb_data/batting_profile_{today}.csv"
+
+  if os.path.exists(batting_profile_filename):
+    print(f"Loading batting profiles...")
+    batting_profile = pd.read_csv(batting_profile_filename)
+    batting_profile_df = pd.DataFrame(batting_profile)
+    return batting_profile_df
+  else:
+    print(f"Fetching and saving today's batting profiles...")
+    add_batting_profile = get_mlb_batting_profile()
+    add_batting_profile_df = pd.DataFrame(add_batting_profile)
+    add_batting_profile_df.to_csv(batting_profile_filename, index=False)
+    print(f"Successfully cached: {batting_profile_filename}")
+    return add_batting_profile_df
+
+def load_mlb_pitching_profiles():
+  today = date.today()
+  pitching_profile_filename = f"mlb_data/pitcher_profile_{today}.csv"
+
+  if os.path.exists(pitching_profile_filename):
+    print(f"Loading pitching profiles...")
+    pitching_profile = pd.read_csv(pitching_profile_filename)
+    pitching_profile_df = pd.DataFrame(pitching_profile)
+    return pitching_profile_df
+  else:
+    print(f"Fetching and saving today's batting profiles...")
+    add_pitching_profile = get_mlb_pitcher_profile()
+    add_pitching_profile_df = pd.DataFrame(add_pitching_profile)
+    add_pitching_profile_df.to_csv(pitching_profile_filename, index=False)
+    print(f"Successfully cached: {pitching_profile_filename}")
+    return add_pitching_profile_df
