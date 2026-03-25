@@ -132,7 +132,7 @@ def get_mlb_batting_profile() -> dict:
   # Prepare the datasets.
   batting_rank = batting_stats(2025)
   batting_stats_profile = batting_rank.to_dict(orient='records')
-  statcast_data = statcast(start_dt='2025-03-30', end_dt='2025-10-25')
+  statcast_data = statcast(start_dt='2025-06-30', end_dt='2025-10-30')
 
   batting_profiles = []
 
@@ -232,7 +232,7 @@ def silent_lookup(lastname, firstname):
         return id
     except Exception:
       return pd.DataFrame()
-  
+
 def load_mlb_batting_profiles():
   today = date.today()
   batting_profile_filename = f"mlb_data/batting_profile_{today}.csv"
