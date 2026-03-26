@@ -214,3 +214,5 @@ __marimo__/
 /pga_data/dk_salaries.csv
 /mlb_data/batting_profile_*.csv
 /mlb_data/pitcher_profile_*.csv
+/mlb_data/fd_mlb_lineups.csv
+/mlb_data/dk_mlb_lineups.csv

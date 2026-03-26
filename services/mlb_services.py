@@ -12,10 +12,10 @@ pd.options.mode.chained_assignment = None
 warnings.filterwarnings('ignore')
 
 def generate_mlb_lineup():
-  is_pitcher_friendly_park = True
-  is_hitter_friendly_park = False
+  is_pitcher_friendly_park = False
+  is_hitter_friendly_park = True
   is_confirmed_starters = False
-  is_fanduel_lineup = False
+  is_fanduel_lineup = True
 
   salary_data = pd.read_csv('mlb_data/dk_mlb_salaries.csv')
   salary_data_df = pd.DataFrame(salary_data)
@@ -60,7 +60,7 @@ def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_dat
     pitcher_lineup_df = drop_pitchers(pitcher_lineup_df, batting_lineup_df, salary_data_df)
     print(f"Dropped pitchers: {pitcher_lineup_df}")
 
-  generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df, is_pitcher_friendly_park, is_hitter_friendly_park)
+  generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df, is_hitter_friendly_park, is_fanduel_lineup)
 
 def generate_confirmed_starting_lineups(lineup_df):
   starting_lineup_data = pd.read_csv('mlb_data/confirmed_starting_lineups.csv')
@@ -202,11 +202,25 @@ def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df
 
     null_keys = [k for k, v in starting_lineup.items() if v is None]
     salary_cap = sum(player_salary).astype(int)
-    if null_keys or salary_cap <= 50000 and salary_cap >= 49500:
-      lineup_list.append(starting_lineup)
-      lineup_count += 1
-      starting_lineup['salary_cap'] = salary_cap
+
+    if is_fanduel_lineup:
+      if null_keys or salary_cap <= 50000 and salary_cap >= 49500:
+        lineup_list.append(starting_lineup)
+        lineup_count += 1
+        starting_lineup['salary_cap'] = salary_cap
+      else:
+        if null_keys or salary_cap <= 50000 and salary_cap >= 49500:
+          lineup_list.append(starting_lineup)
+          lineup_count += 1
+          starting_lineup['salary_cap'] = salary_cap
   print(f"Print lineups: {lineup_list}")
+  final_lineup_df = pd.DataFrame(lineup_list)
+
+  if is_fanduel_lineup:
+    final_lineup_df.to_csv('mlb_data/fd_mlb_lineups.csv', index=False)
+  else:
+    final_lineup_df.to_csv('mlb_data/dk_mlb_lineups.csv', index=False)
+
   return lineup_list
 
 def get_starting_player(player_salary, chosen_players, batting_starting_lineup_df, position_type):
