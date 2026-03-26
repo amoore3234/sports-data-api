@@ -8,3 +8,5 @@ services:
       - ./pga_data:/app/pga_data
     environment:
       PYTHONUNBUFFERED: 1
+volumes:
+  pga_data:

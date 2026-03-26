@@ -14,7 +14,7 @@ warnings.filterwarnings('ignore')
 def generate_mlb_lineup():
   is_pitcher_friendly_park = False
   is_hitter_friendly_park = True
-  is_confirmed_starters = False
+  is_confirmed_starters = True
   is_fanduel_lineup = True
 
   salary_data = pd.read_csv('mlb_data/dk_mlb_salaries.csv')
@@ -39,21 +39,22 @@ def generate_mlb_lineup():
     batting_lineup_df = stats_util.get_hitter_friendly_ballpark(batting_lineup_df)
     pitcher_lineup_df = stats_util.drop_pitchers_at_hitter_friendly_ballpark(pitcher_lineup_df, batting_lineup_df)
 
-  generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df, is_pitcher_friendly_park, is_hitter_friendly_park, is_confirmed_starters, is_fanduel_lineup)
+  generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df, is_hitter_friendly_park, is_confirmed_starters, is_fanduel_lineup)
 
-def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df, is_pitcher_friendly_park, is_hitter_friendly_park, is_confirmed_starters, is_fanduel_lineup):
+def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df, is_hitter_friendly_park, is_confirmed_starters, is_fanduel_lineup):
   elite_pitchers = apply_elite_statistical_pitcher_filters(pitcher_lineup_df)
   elite_hitters = apply_elite_statistical_batting_filters(batting_lineup_df)
-
-  pitcher_lineup_df = generate_pitcher_starting_lineup(salary_data_df, pitcher_lineup_df, elite_pitchers)
-  batting_lineup_df = generate_batting_starting_lineup(salary_data_df, batting_lineup_df, elite_hitters)
 
   if is_fanduel_lineup:
     pitcher_lineup_df = generate_pitcher_starting_lineup_fd(salary_data_df, pitcher_lineup_df, elite_pitchers)
     batting_lineup_df = generate_batting_starting_lineup_fd(salary_data_df, batting_lineup_df, elite_hitters)
+  else:
+    pitcher_lineup_df = generate_pitcher_starting_lineup(salary_data_df, pitcher_lineup_df, elite_pitchers)
+    batting_lineup_df = generate_batting_starting_lineup(salary_data_df, batting_lineup_df, elite_hitters)
 
   if is_confirmed_starters:
     pitcher_lineup_df = generate_confirmed_starting_lineups(pitcher_lineup_df)
+    batting_lineup_df = generate_confirmed_starting_lineups(batting_lineup_df)
   print(f"Batting_lineup_df: {batting_lineup_df}")
 
   if is_hitter_friendly_park:
@@ -65,19 +66,19 @@ def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_dat
 def generate_confirmed_starting_lineups(lineup_df):
   starting_lineup_data = pd.read_csv('mlb_data/confirmed_starting_lineups.csv')
   starting_lineup_df = pd.DataFrame(starting_lineup_data)
-  pitcher_testing = {
-    'pitcher_name':['Michael McGreevy', 'Cristian Javier', 'Reynaldo Lopez'],
-    'position': ['SP', 'SP', 'SP']
-  }
+  # pitcher_testing = {
+  #   'pitcher_name':['Michael McGreevy', 'Cristian Javier', 'Reynaldo Lopez'],
+  #   'position': ['SP', 'SP', 'SP']
+  # }
 
-  hitter_testing = {
-    'batter_name':['J. Wetherholt', 'Ivan Herrera', 'A. Burleson', 'Masyn Winn'],
-    'position':['2B', 'C', '1B', 'SS']
-  }
+  # hitter_testing = {
+  #   'batter_name':['J. Wetherholt', 'Ivan Herrera', 'A. Burleson', 'Masyn Winn'],
+  #   'position':['2B', 'C', '1B', 'SS']
+  # }
 
-  lineup_df = pd.DataFrame(pitcher_testing)
+  # lineup_df = pd.DataFrame(pitcher_testing)
   print(f"Pitchers: {lineup_df}")
-  pitcher = (lineup_df['position'].str.contains('SP')).any()
+  pitcher = (lineup_df['position'].str.contains('SP') or lineup_df['position'].str.contains('P')).any()
   print(f"Starting pitcher filters: {pitcher}")
   if pitcher:
     get_pitcher_starters(lineup_df, starting_lineup_df)
@@ -200,16 +201,16 @@ def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df
         pitcher_two_idx = np.random.choice(pitcher_indices)
         starting_lineup['util'] = pitcher_starting_lineup_df.loc[pitcher_two_idx]['name_id']
 
-    null_keys = [k for k, v in starting_lineup.items() if v is None]
+    keys_exist = [k for k, v in starting_lineup.items() if v is None]
     salary_cap = sum(player_salary).astype(int)
 
     if is_fanduel_lineup:
-      if null_keys or salary_cap <= 50000 and salary_cap >= 49500:
+      if keys_exist or salary_cap <= 35000 and salary_cap >= 34500:
         lineup_list.append(starting_lineup)
         lineup_count += 1
         starting_lineup['salary_cap'] = salary_cap
       else:
-        if null_keys or salary_cap <= 50000 and salary_cap >= 49500:
+        if keys_exist or salary_cap <= 50000 and salary_cap >= 49500:
           lineup_list.append(starting_lineup)
           lineup_count += 1
           starting_lineup['salary_cap'] = salary_cap
@@ -238,10 +239,10 @@ def get_starting_player(player_salary, chosen_players, batting_starting_lineup_d
     return player
 
 def generate_pitcher_starting_lineup_fd(salary_data_df, pitcher_lineup_df, elite_pitchers):
-  salary_lookup = salary_data_df.set_index('Name')['Salary'].to_dict()
-  position_lookup = salary_data_df.set_index('Name')['Position'].to_dict()
-  name_id_lookup = salary_data_df.set_index('Name')['Player ID + Player Name'].to_dict()
-  team_lookup = salary_data_df.set_index('Name')['Team'].to_dict()
+  salary_lookup = salary_data_df.set_index('Nickname')['Salary'].to_dict()
+  position_lookup = salary_data_df.set_index('Nickname')['Position'].to_dict()
+  name_id_lookup = salary_data_df.set_index('Nickname')['Player ID + Player Name'].to_dict()
+  team_lookup = salary_data_df.set_index('Nickname')['Team'].to_dict()
 
   pitcher_lineup_df['salary'] = elite_pitchers['pitcher_name'].map(salary_lookup)
   pitcher_lineup_df['position'] = elite_pitchers['pitcher_name'].map(position_lookup)
@@ -266,10 +267,10 @@ def generate_pitcher_starting_lineup(salary_data_df, pitcher_lineup_df, elite_pi
   return pitcher_lineup_df
 
 def generate_batting_starting_lineup_fd(salary_data_df, batting_lineup_df, elite_hitters):
-  salary_lookup = salary_data_df.set_index('Name')['Salary'].to_dict()
-  position_lookup = salary_data_df.set_index('Name')['Position'].to_dict()
-  name_id_lookup = salary_data_df.set_index('Name')['Player ID + Player Name'].to_dict()
-  team_lookup = salary_data_df.set_index('Name')['Team'].to_dict()
+  salary_lookup = salary_data_df.set_index('Nickname')['Salary'].to_dict()
+  position_lookup = salary_data_df.set_index('Nickname')['Position'].to_dict()
+  name_id_lookup = salary_data_df.set_index('Nickname')['Player ID + Player Name'].to_dict()
+  team_lookup = salary_data_df.set_index('Nickname')['Team'].to_dict()
 
   batting_lineup_df['salary'] = elite_hitters['batting_name'].map(salary_lookup)
   batting_lineup_df['position'] = elite_hitters['batting_name'].map(position_lookup)
