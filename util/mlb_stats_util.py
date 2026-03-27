@@ -74,7 +74,7 @@ def get_mlb_pitcher_profile() -> list[dict]:
   # Modify once the season starts
   # end = date.today().isoformat()
   # start = (date.today() - timedelta(days=20)).isoformat()
-  statcast_data = statcast(start_dt='2025-03-30', end_dt='2025-05-02', parallel=False)
+  statcast_data = statcast(start_dt='2025-06-30', end_dt='2025-10-30', parallel=False)
 
   pitcher_profiles = []
 
