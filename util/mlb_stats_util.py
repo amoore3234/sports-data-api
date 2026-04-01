@@ -21,7 +21,8 @@ def get_mlb_pitcher_national_averages() -> dict:
     'league_pitcher_BB9_average': (pitcher_stats['BB'].sum() / pitcher_stats['IP'].sum()) * 9,
     'league_pitcher_WHIP_average': (pitcher_stats['H'].sum() + pitcher_stats['BB'].sum()) / pitcher_stats['IP'].sum(),
     'league_pitcher_ERA_average': (pitcher_stats['ER'].sum() / pitcher_stats['IP'].sum()) * 9,
-    'league_pitcher_k_bb_average': (pitcher_stats['K-BB%'].sum()) / len(pitcher_stats)
+    'league_pitcher_k_bb_average': (pitcher_stats['K-BB%'].sum()) / len(pitcher_stats),
+    'league_pitcher_barrel_average': pitcher_stats['Barrel%'].mean()
   }
 
   return pitching_averages
@@ -105,7 +106,7 @@ def get_mlb_pitcher_profile() -> list[dict]:
     pitcher_profiles.append(profile)
 
   pitcher_data = statcast_data[['pitcher', 'p_throws', 'stand']].drop_duplicates()
-  pitcher_advanced_data = pitcher_statistics[['Name', 'WHIP', 'ERA', 'Team', 'BB', 'IP']].drop_duplicates()
+  pitcher_advanced_data = pitcher_statistics[['Name', 'WHIP', 'ERA', 'Team', 'BB', 'IP', 'Barrel%']].drop_duplicates()
 
   # Include additional metrics to a pitcher's profile from different datasets.
   for pitcher in pitcher_profiles:
@@ -114,6 +115,7 @@ def get_mlb_pitcher_profile() -> list[dict]:
       pitcher['pitcher_team'] = found_pitcher_name.iloc[0]['Team']
       pitcher['pitcher_ERA'] = found_pitcher_name.iloc[0]['ERA']
       pitcher['pitcher_WHIP'] = found_pitcher_name.iloc[0]['WHIP']
+      pitcher['pitcher_barrel_percent'] = found_pitcher_name.iloc[0]['Barrel%']
       pitcher['pitcher_BB_per_9'] = (found_pitcher_name.iloc[0]['BB'] / found_pitcher_name.iloc[0]['IP']) * 9
 
     found_pitcher_id = pitcher_data.loc[pitcher_data['pitcher'] == pitcher['pitcher_id'], 'p_throws']

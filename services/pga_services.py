@@ -252,13 +252,13 @@ def predict_top_10_performance():
                          on='Player',
                          how='left')
   new_tournament_df[['Season_Average_SG_Total']] = new_tournament_df[['Season_Average_SG_Total']].fillna(0.0)
-  new_tournament_df.drop(columns=['Rounds', 'SG Total', 'Scrambling','Round_One_SG_Total', 'Round_Two_SG_Total', 'Round_Three_SG_Total',
+  new_tournament_df.drop(columns=['Rounds', 'SG Total', 'Scrambling', 'Round_Three_SG_Total',
     'Round_Four_SG_Total'], inplace=True)
 
   new_tournament_df.to_csv('pga_data/sg_totals_with_top_performers.csv', index=False)
 
   # Prepare and train the model by including season Strokes Gained total stats, SG totals for the first two rounds, and top ten finishs.
-  X = new_tournament_df[['Season_Average_SG_Total', 'Recent_Form_SG']]
+  X = new_tournament_df[['Round_One_SG_Total', 'Round_Two_SG_Total', 'Recent_Form_SG']]
   y = new_tournament_df['Top_Ten_Finish']
 
   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -267,7 +267,7 @@ def predict_top_10_performance():
   # Include parameters to avoid overfitting to develop a more accurate prediction.
   rf_model = RandomForestClassifier(
     n_estimators=500,
-    max_depth=5,
+    max_depth=3,
     class_weight='balanced',
     random_state=42)
 
