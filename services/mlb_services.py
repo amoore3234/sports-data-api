@@ -80,17 +80,17 @@ def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_dat
   batting_lineup_df = generate_starting_lineup(salary_data_df, batting_lineup_df, elite_hitters, 'batting_name', 'batting_teamabbrev')
 
   if is_confirmed_starters:
-    pitcher_lineup_df = generate_confirmed_starting_lineups(pitcher_lineup_df)
-    batting_lineup_df = generate_confirmed_starting_lineups(batting_lineup_df)
+    pitcher_lineup_df = generate_confirmed_starting_lineups(pitcher_lineup_df, salary_data_df)
+    batting_lineup_df = generate_confirmed_starting_lineups(batting_lineup_df, salary_data_df)
 
   if is_hitter_friendly_park:
     # Don't return pitchers at parks that favor hitters.
     pitcher_lineup_df = drop_pitchers(pitcher_lineup_df, batting_lineup_df, salary_data_df)
 
-  batting_lineup_df = get_missing_hitters(batting_lineup_df, salary_data_df, is_fanduel_lineup)
+  # batting_lineup_df = get_missing_hitters(batting_lineup_df, salary_data_df, is_fanduel_lineup)
   generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df, is_hitter_friendly_park, is_fanduel_lineup)
 
-def generate_confirmed_starting_lineups(lineup_df) -> pd.DataFrame:
+def generate_confirmed_starting_lineups(lineup_df, salary_data_df) -> pd.DataFrame:
   """Confirms that players are starting in the game.
 
   Parameters:
@@ -105,12 +105,14 @@ def generate_confirmed_starting_lineups(lineup_df) -> pd.DataFrame:
   dk_pitcher = (lineup_df['position'].str.contains('SP')).any()
   fd_pitcher = (lineup_df['position'].str.contains('P')).any()
 
-  if is_stacking:
-    generate_top_order_starters(lineup_df, starting_lineup_df)
-
   if dk_pitcher or fd_pitcher:
     return get_pitcher_starters(lineup_df, starting_lineup_df)
   else:
+    if is_stacking:
+      hitter_profile_df = stats_util.load_mlb_batting_profiles()
+      batting_lineup_df = generate_starting_lineup(salary_data_df, hitter_profile_df, hitter_profile_df, 'batting_name', 'batting_teamabbrev')
+      batting_starting_lineup = generate_top_order_starters(batting_lineup_df, starting_lineup_df)
+      generate_line_odds(batting_starting_lineup, starting_lineup_df, salary_data_df)
     return get_batter_starters(lineup_df, starting_lineup_df)
 
 def get_missing_hitters(batting_lineup_df, salary_df, is_fanduel_lineup) -> pd.DataFrame:
@@ -251,31 +253,100 @@ def generate_top_order_starters(hitter_lineup_df, starting_lineup_df):
   hitters_list = list(hitters_starting_lineup['Starting Lineup'])
   top_order_list = []
   start = 0
-  end = 4
+  end = 3
   print(f"Size of hitters list: {len(hitters_list)}")
   while end <= len(hitters_list):
     starting_lineup = hitters_list[start:end]
-    print(f"Lineups: {starting_lineup}")
     for batter in starting_lineup:
       name_array = batter.split()
       if len(name_array) == 4:
         player_lastname = name_array[2]
         top_order_list.append(player_lastname)
     start = end + 1
-    end += 4
+    end += 3
+  print(f"Top order starting lineup: {top_order_list}")
 
   hitter_lastname_lookup = '|'.join(top_order_list)
-  # print(f"Starting hitters lookup: {hitter_lastname_lookup}")
-  hitter_lineup_df = hitter_lineup_df[hitter_lineup_df['batting_name'].str.contains(hitter_lastname_lookup)]
-  hitter_lineup_df.dropna()
 
-  # return hitter_lineup_df
+  hitter_lineup_df = hitter_lineup_df[hitter_lineup_df['batting_name'].str.contains(hitter_lastname_lookup)]
+  hitter_lineup_df = hitter_lineup_df.dropna()
+
+  return hitter_lineup_df
+
+def generate_line_odds(hitter_lineup_df, starting_lineup_df, salary_data_df):
+  odds_title = 'LINE|O/U'
+  odds_df = starting_lineup_df[starting_lineup_df['Starting Lineup'].str.contains(odds_title)]
+  odds_list = list(odds_df['Starting Lineup'])
+
+  winner_odds = []
+  over_and_under_odds = []
+
+  for lines in odds_list:
+    details_array = lines.split()
+    headline = details_array[0]
+
+    if headline == 'LINE':
+      winner_odds.append(details_array[1])
+    if headline == 'O/U':
+      over_and_under_odds.append(float(details_array[1]))
+
+  odds_details = {
+    'favorite_to_win': winner_odds,
+    'over_and_under': over_and_under_odds
+  }
+
+  odds_details_df = pd.DataFrame(odds_details)
+  average_over_under = odds_details_df['over_and_under'].mean()
+  odds_details_df = odds_details_df[odds_details_df['over_and_under'] > average_over_under]
+
+  game_matchups = get_list_of_team_game_matchups(salary_data_df)
+  print(f"Game matches: {game_matchups}")
+  teams = list(odds_details_df['favorite_to_win'])
+  print(f"Teams favored to win: {teams}")
+  team_list = []
+  home_team = []
+  away_team = []
+
+  for home in game_matchups:
+    home_team.append(home.get('home_team'))
+
+  for away in game_matchups:
+    away_team.append(away.get('away_team'))
+
+  game_matchups_data = {
+    'home_team': home_team,
+    'away_team': away_team
+  }
+
+  game_matchups_df = pd.DataFrame(game_matchups_data)
+
+  print(f"Today's game: {game_matchups_df}")
+
+  matchup_lookup = '|'.join(teams)
+  # for team in teams:
+  #   if team in game_matchups_df:
+  #     team_list.append(game.get('away_team'))
+  #   else:
+  #     team_list.append(game.get('home_team'))
+
+  game_matchups_df = game_matchups_df[(game_matchups_df['home_team'].str.contains(matchup_lookup)) | (game_matchups_df['away_team'].str.contains(matchup_lookup))]
+
+  home_away_games = list(game_matchups_df['home_team']) + list(game_matchups_df['away_team'])
+  hitter_team_lookup = '|'.join(home_away_games)
+
+  print(f"List of home and away teams: {home_away_games}")
+
+  print(f"Update matchups: {game_matchups_df}")
+
+  hitter_lineup_df = hitter_lineup_df[hitter_lineup_df['batting_team'].str.contains(hitter_team_lookup)]
+  print(f"New starting lineup: {hitter_lineup_df}")
+
 
 def drop_pitchers(pitcher_lineup_df, batting_lineup_df, salary_data_df) -> pd.DataFrame:
-  """Generate starting pitchers.
+  """Drop opposing pitchers.
 
   This function filters out pitchers that are facing opposing hitters.
-  This ensures that oppsoing are in the starting lineup in the same game.
+  This ensures that opposing pitchers and hitters are not in the starting lineup in the same game.
 
   Parameters:
     pitcher_lineup_df: Data Frame containing a list of pitchers.
@@ -392,14 +463,13 @@ def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df
 
     # Fanduel includes an util field in their lineup structure
     if is_fanduel_lineup:
-      if len(pitcher_indices) > 0:
-        pitcher_two_idx = np.random.choice(pitcher_indices)
-        starting_lineup['util'] = pitcher_starting_lineup_df.loc[pitcher_two_idx]['name_id']
+      # if len(pitcher_indices) > 0:
+      #   pitcher_two_idx = np.random.choice(pitcher_indices)
+      #   starting_lineup['util'] = pitcher_starting_lineup_df.loc[pitcher_two_idx]['name_id']
+      #   player_salary.append(pitcher_starting_lineup_df.loc[pitcher_two_idx]['salary'])
 
-        # drop_hitters_against_pitchers(salary_data_df, pitcher_two_idx, pitcher_starting_lineup_df, batting_starting_lineup_df,
-        #                             player_salary, pitcher_indices, is_pitcher_friendly_park)
-      else:
-        starting_lineup['util'] = get_starting_players(player_salary, starting_players, batting_starting_lineup_df, 'C|1B|2B|3B|SS|OF|OF|OF')
+
+      starting_lineup['util'] = get_starting_players(player_salary, starting_players, batting_starting_lineup_df, 'C|1B|2B|3B|SS|OF|OF|OF')
 
 
     # keys_exist = [k for k, v in starting_lineup.items() if v is None]
@@ -549,7 +619,7 @@ def get_list_of_team_game_matchups(salary_data_df) -> list[dict]:
       'away_team': teams[0]
     }
     game_matchups.append(final_matchup)
-    return game_matchups
+  return game_matchups
 
 def filter_hitters_against_pitchers(team_matchup, batting_lineup_df):
   """Get team matchup.
