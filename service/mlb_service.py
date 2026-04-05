@@ -4,6 +4,7 @@ import numpy as np
 import warnings
 import model.position_type as roster
 import util.mlb_stats_util as stats_util
+import util.data_util as data
 from collections import Counter
 
 # Disable the SettingWithCopy/ChainedAssignment warnings
@@ -219,9 +220,6 @@ def get_pitcher_starters(lineup_df, starting_lineup_df):
   lineup_df.dropna()
   return lineup_df
 
-def get_missing_starting_hitters(lineup_df, position):
-  return return_missing_starters(lineup_df, position)
-
 def get_batter_starters(lineup_df) -> pd.DataFrame:
   """Generate starting hitters.
 
@@ -237,8 +235,6 @@ def get_batter_starters(lineup_df) -> pd.DataFrame:
   return return_missing_starters(lineup_df, positions)
 
 def return_missing_starters(lineup_df, positions):
-  # hitters_starting_lineup = starting_lineup_df[starting_lineup_df['Starting Lineup'].str.contains(positions)]
-  # hitters_list = list(hitters_starting_lineup)
   hitters_list = get_list_of_hitters(positions)
   starting_hitter_list = []
 
@@ -285,8 +281,9 @@ def generate_top_order_starters(hitter_lineup_df):
   return hitter_lineup_df
 
 def get_list_of_hitters(position):
-  starting_lineup_data = pd.read_csv('mlb_data/confirmed_starting_lineups.csv')
-  starting_lineup_df = pd.DataFrame(starting_lineup_data)
+  if position == 'C':
+    position = 'C '
+  starting_lineup_df = data.get_starting_lineup()
   hitters_starting_lineup = starting_lineup_df[starting_lineup_df['Starting Lineup'].str.contains(position)]
 
   return list(hitters_starting_lineup['Starting Lineup'])
