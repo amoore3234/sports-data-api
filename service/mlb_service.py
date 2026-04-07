@@ -264,13 +264,15 @@ def generate_top_order_starters(hitter_lineup_df):
   print(f"Size of hitters list: {len(hitters_list)}")
   while end <= len(hitters_list):
     starting_lineup = hitters_list[start:end]
+    print(f"Starting lineups: {starting_lineup}")
     for batter in starting_lineup:
       name_array = batter.split()
+      print(f"Name array: {name_array}")
       if len(name_array) == 4:
         player_lastname = name_array[2]
         top_order_list.append(player_lastname)
-    start = end + 1
-    end += 3
+    start += 9
+    end += 9
   print(f"Top order starting lineup: {top_order_list}")
 
   hitter_lastname_lookup = '|'.join(top_order_list)

@@ -1,10 +1,28 @@
 import unittest
 from unittest.mock import patch
+import pandas as pd
 
 import service.mlb_service as service
 import test_data as data
 
 class TestMlbService(unittest.TestCase):
+
+  @patch('service.mlb_service.get_list_of_hitters')
+  def test_generate_top_order_starters(self, mock_get_list_of_hitters):
+    #Arrange
+    hitter_lineup_df = data.get_batter_profile_test()
+    hitters_list = list(data.get_starting_hitters_test()['Starting Lineup'])
+    mock_get_list_of_hitters.return_value = hitters_list
+    expected = pd.DataFrame({
+      'batter_name': ['J. Wetherholt', 'Ivan Herrera', 'A. Burleson', 'Colt Keith', 'K. McGonigle', 'G. Torres'],
+      'batter_name': ['STL', 'STL', 'STL', 'DET', 'DET', 'DET']
+    })
+    
+    #Act
+    actual = service.generate_top_order_starters(hitter_lineup_df)
+
+    #Assert
+    assert len(actual) == 6
 
   @patch('util.data_util.get_starting_lineup')
   def test_get_list_of_hitters_one_position(self, mock_get_starting_lineup):
@@ -20,12 +38,12 @@ class TestMlbService(unittest.TestCase):
     assert len(actual) == 2
     assert expected == actual
 
-@patch('service.mlb_service.get_list_of_hitters')
+@patch('util.data_util.get_starting_lineup')
 def test_get_list_of_hitters_multiple_position(mock_get_starting_lineup):
   #Arrange
-  position = '1B'
+  position = '1B|2B'
   mock_get_starting_lineup.return_value = data.get_starting_hitters_test()
-  expected = ['1B A. Burleson L', '2B J. Wetherholt L', '1B S. Torkelson R', '2B G. Torres R']
+  expected = ['2B J. Wetherholt L', '1B A. Burleson L', '2B G. Torres R', '1B S. Torkelson R']
 
   #Act
   actual = service.get_list_of_hitters(position)
