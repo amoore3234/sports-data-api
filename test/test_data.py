@@ -10,16 +10,16 @@ def get_pitcher_profile_test():
 def get_batter_profile_test():
   return pd.DataFrame({
     'batter_id': [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    'batting_name': [
+    'batter_name': [
       'J. Wetherholt',
       'Ivan Herrera',
       'A. Burleson',
       'Nolan Gorman',
       'J. Walker',
       'Colt Keith',
-      'K. McGonigle L',
-      '2B G. Torres R',
-      'LF Riley Greene L'
+      'K. McGonigle',
+      'G. Torres',
+      'Riley Greene'
     ],
     'batter_team': ['STL', 'STL', 'STL', 'STL', 'STL', 'DET', 'DET', 'DET', 'DET']
   })

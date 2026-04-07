@@ -37,8 +37,8 @@ def get_mlb_batting_national_averages() -> dict:
 
   batting_averages = {
     'league_batting_wOBA_average': (batting_stat['wOBA'] * batting_stat['PA']).sum() / batting_stat['PA'].sum(),
-    'league_batting_BABIP_average': calculate_average_babip(batting_stat),
-    'league_batting_ISO_average': calculate_average_iso(batting_stat)
+    'league_batter_BABIP_average': calculate_average_babip(batting_stat),
+    'league_batter_ISO_average': calculate_average_iso(batting_stat)
   }
 
   return batting_averages
@@ -141,15 +141,15 @@ def get_mlb_batting_profile() -> dict:
   # Generate advance metrics for a batting's profile.
   for batting_profile in batting_stats_profile:
     profile = {
-      'batting_id': batting_profile.get('IDfg'),
-      'batting_name': batting_profile.get('Name'),
-      'batting_team': batting_profile.get('Team'),
-      'batting_actual_wOBA': batting_profile.get('wOBA'),
-      'batting_expected_xwOBA': batting_profile.get('xwOBA'),
-      'batting_BABIP': batting_profile.get('BABIP'),
-      'batting_bat_speed': batting_profile.get('Spd'),
-      'batting_barrel_percent': batting_profile.get('Barrel%'),
-      'batting_ISO': batting_profile.get('ISO')
+      'batter_id': batting_profile.get('IDfg'),
+      'batter_name': batting_profile.get('Name'),
+      'batter_team': batting_profile.get('Team'),
+      'batter_actual_wOBA': batting_profile.get('wOBA'),
+      'batter_expected_xwOBA': batting_profile.get('xwOBA'),
+      'batter_BABIP': batting_profile.get('BABIP'),
+      'batter_bat_speed': batting_profile.get('Spd'),
+      'batter_barrel_percent': batting_profile.get('Barrel%'),
+      'batter_ISO': batting_profile.get('ISO')
     }
 
     batting_profiles.append(profile)
@@ -158,7 +158,7 @@ def get_mlb_batting_profile() -> dict:
 
   # Include additional metrics to a batting's profile from different datasets.
   for batting in batting_profiles:
-    name_array = batting['batting_name'].split()
+    name_array = batting['batter_name'].split()
 
     id = silent_lookup(name_array[1], name_array[0])
     batting_details = batting_data.loc[batting_data['batter'] == id]
@@ -206,17 +206,17 @@ def get_hitter_friendly_ballpark(batting_df):
   ball_park_hitter = pd.merge(
     batting_df,
     ball_park_factors_df,
-    left_on='batting_team',
+    left_on='batter_team',
     right_on='Team',
     how='left')
   ball_park_average = ball_park_hitter['Park Factor'].mean()
   batting_df = ball_park_hitter.drop(ball_park_hitter[ball_park_hitter['Park Factor'] < ball_park_average].index)
   batting_df.dropna()
-  print(f"Batting ballpark: {batting_df[['batting_name', 'batting_team']]}")
+  print(f"Batting ballpark: {batting_df[['batter_name', 'batter_team']]}")
   return batting_df
 
 def drop_pitchers_at_hitter_friendly_ballpark(pitcher_df, batting_df):
-  teams_to_exclude = batting_df['batting_team'].unique()
+  teams_to_exclude = batting_df['batter_team'].unique()
   pitcher_df = pitcher_df[~pitcher_df['pitcher_team'].isin(teams_to_exclude)]
   pitcher_df.dropna()
   print(f"Drop pitcher lineup for ballpark: {pitcher_df}")

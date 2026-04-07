@@ -8,21 +8,38 @@ import test_data as data
 class TestMlbService(unittest.TestCase):
 
   @patch('service.mlb_service.get_list_of_hitters')
+  def test_get_starting_batters(self, mock_get_list_of_hitters):
+
+    #Arrange
+    expected = data.get_batter_profile_test()
+    hitters_list = list(data.get_starting_hitters_test()['Starting Lineup'])
+    mock_get_list_of_hitters.return_value = hitters_list
+
+    #Act
+    actual = service.get_starting_batters(expected)
+
+    #Assert
+    assert len(actual) == 9
+    assert expected['batter_name'].all() == actual['batter_name'].all()
+
+  @patch('service.mlb_service.get_list_of_hitters')
   def test_generate_top_order_starters(self, mock_get_list_of_hitters):
     #Arrange
     hitter_lineup_df = data.get_batter_profile_test()
     hitters_list = list(data.get_starting_hitters_test()['Starting Lineup'])
     mock_get_list_of_hitters.return_value = hitters_list
     expected = pd.DataFrame({
+      'batter_id': [1, 2, 3, 6, 7, 8],
       'batter_name': ['J. Wetherholt', 'Ivan Herrera', 'A. Burleson', 'Colt Keith', 'K. McGonigle', 'G. Torres'],
-      'batter_name': ['STL', 'STL', 'STL', 'DET', 'DET', 'DET']
+      'batter_team': ['STL', 'STL', 'STL', 'DET', 'DET', 'DET']
     })
-    
+
     #Act
     actual = service.generate_top_order_starters(hitter_lineup_df)
 
     #Assert
     assert len(actual) == 6
+    assert expected['batter_name'].all() == actual['batter_name'].all()
 
   @patch('util.data_util.get_starting_lineup')
   def test_get_list_of_hitters_one_position(self, mock_get_starting_lineup):

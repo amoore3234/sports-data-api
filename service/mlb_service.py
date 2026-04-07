@@ -78,10 +78,10 @@ def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_dat
   elite_hitters = apply_elite_statistical_batting_filters(batting_lineup_df)
 
   pitcher_lineup_df = generate_starting_lineup(salary_data_df, pitcher_lineup_df, elite_pitchers, 'pitcher_name', 'pitcher_teamabbrev')
-  batting_lineup_df = generate_starting_lineup(salary_data_df, batting_lineup_df, elite_hitters, 'batting_name', 'batting_teamabbrev')
+  batting_lineup_df = generate_starting_lineup(salary_data_df, batting_lineup_df, elite_hitters, 'batter_name', 'batting_teamabbrev')
 
   if is_confirmed_starters:
-    batting_lineup_df = generate_starting_lineup(salary_data_df, batting_lineup_df, batting_lineup_df, 'batting_name', 'batting_teamabbrev')
+    batting_lineup_df = generate_starting_lineup(salary_data_df, batting_lineup_df, batting_lineup_df, 'batter_name', 'batting_teamabbrev')
     print(f"Generate lineup: {batting_lineup_df}")
     pitcher_lineup_df = generate_confirmed_starting_lineups(pitcher_lineup_df, salary_data_df)
     batting_lineup_df = generate_confirmed_starting_lineups(batting_lineup_df, salary_data_df)
@@ -112,7 +112,7 @@ def generate_confirmed_starting_lineups(lineup_df, salary_data_df) -> pd.DataFra
     return get_pitcher_starters(lineup_df, starting_lineup_df)
   elif is_stacking:
     # hitter_profile_df = stats_util.load_mlb_batting_profiles()
-    # batting_lineup_df = generate_starting_lineup(salary_data_df, hitter_profile_df, hitter_profile_df, 'batting_name', 'batting_teamabbrev')
+    # batting_lineup_df = generate_starting_lineup(salary_data_df, hitter_profile_df, hitter_profile_df, 'batter_name', 'batting_teamabbrev')
     batting_starting_lineup = generate_top_order_starters(lineup_df)
     return generate_stack_lineup(batting_starting_lineup, starting_lineup_df, salary_data_df)
   else:
@@ -186,8 +186,8 @@ def map_missing_players(salary_df, position, name, team_abbrev, batting_position
       DataFrame: Returns a new data frame containing a new batting lineup.
   """
   new_batting_lineup_df = salary_df[salary_df['Position'].str.contains(position)]
-  new_batting_lineup_df['batting_name'] = new_batting_lineup_df[name]
-  new_batting_lineup_df['batting_team'] = new_batting_lineup_df[team_abbrev]
+  new_batting_lineup_df['batter_name'] = new_batting_lineup_df[name]
+  new_batting_lineup_df['batter_team'] = new_batting_lineup_df[team_abbrev]
   new_batting_lineup_df['position'] = new_batting_lineup_df[batting_position]
   new_batting_lineup_df['salary'] = new_batting_lineup_df[salary]
   new_batting_lineup_df['name_id'] = new_batting_lineup_df[name_id]
@@ -220,7 +220,7 @@ def get_pitcher_starters(lineup_df, starting_lineup_df):
   lineup_df.dropna()
   return lineup_df
 
-def get_batter_starters(lineup_df) -> pd.DataFrame:
+def get_starting_batters(lineup_df):
   """Generate starting hitters.
 
   Parameters:
@@ -232,9 +232,6 @@ def get_batter_starters(lineup_df) -> pd.DataFrame:
   """
   positions = 'C|1B|2B|3B|SS|CF|LF|RF|DH'
 
-  return return_missing_starters(lineup_df, positions)
-
-def return_missing_starters(lineup_df, positions):
   hitters_list = get_list_of_hitters(positions)
   starting_hitter_list = []
 
@@ -246,7 +243,7 @@ def return_missing_starters(lineup_df, positions):
 
   hitter_lastname_lookup = '|'.join(starting_hitter_list)
 
-  lineup_df = lineup_df[lineup_df['batting_name'].str.contains(hitter_lastname_lookup)]
+  lineup_df = lineup_df[lineup_df['batter_name'].str.contains(hitter_lastname_lookup)]
   lineup_df.dropna()
 
   return lineup_df
@@ -254,30 +251,27 @@ def return_missing_starters(lineup_df, positions):
 def generate_top_order_starters(hitter_lineup_df):
   positions = 'C|1B|2B|3B|SS|CF|LF|RF|DH'
 
-  # hitters_starting_lineup = starting_lineup_df[starting_lineup_df['Starting Lineup'].str.contains(positions)]
-
-  # hitters_list = list(hitters_starting_lineup['Starting Lineup'])
   hitters_list = get_list_of_hitters(positions)
   top_order_list = []
   start = 0
   end = 3
-  print(f"Size of hitters list: {len(hitters_list)}")
+
   while end <= len(hitters_list):
     starting_lineup = hitters_list[start:end]
-    print(f"Starting lineups: {starting_lineup}")
+
     for batter in starting_lineup:
       name_array = batter.split()
-      print(f"Name array: {name_array}")
+
       if len(name_array) == 4:
         player_lastname = name_array[2]
         top_order_list.append(player_lastname)
     start += 9
     end += 9
-  print(f"Top order starting lineup: {top_order_list}")
 
   hitter_lastname_lookup = '|'.join(top_order_list)
 
-  hitter_lineup_df = hitter_lineup_df[hitter_lineup_df['batting_name'].str.contains(hitter_lastname_lookup)]
+  hitter_lineup_df = hitter_lineup_df[hitter_lineup_df['batter_name'].str.contains(hitter_lastname_lookup)]
+
   hitter_lineup_df = hitter_lineup_df.dropna()
 
   return hitter_lineup_df
@@ -355,7 +349,7 @@ def generate_stack_lineup(hitter_lineup_df, starting_lineup_df, salary_data_df):
 
   print(f"Update matchups: {game_matchups_df}")
 
-  hitter_lineup_df = hitter_lineup_df[hitter_lineup_df['batting_team'].str.contains(hitter_team_lookup)]
+  hitter_lineup_df = hitter_lineup_df[hitter_lineup_df['batter_team'].str.contains(hitter_team_lookup)]
   print(f"New starting lineup: {hitter_lineup_df}")
   return hitter_lineup_df
 
@@ -421,7 +415,7 @@ def apply_elite_statistical_batting_filters(batting_lineup_df) -> pd.DataFrame:
   """
   batting_national_average = stats_util.get_mlb_batting_national_averages()
 
-  batting_lineup_df['elite_wOBA'] = batting_lineup_df['batting_expected_xwOBA'] > batting_national_average['league_batting_wOBA_average']
+  batting_lineup_df['elite_wOBA'] = batting_lineup_df['batter_expected_xwOBA'] > batting_national_average['league_batting_wOBA_average']
   elite_hitters_df = batting_lineup_df[batting_lineup_df['elite_wOBA'] == True]
 
   return elite_hitters_df
