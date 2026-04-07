@@ -195,58 +195,42 @@ def map_missing_players(salary_df, position, name, team_abbrev, batting_position
   new_batting_lineup_df = new_batting_lineup_df[new_batting_lineup_df[average_pts_per_game] > average_fts_pts]
   return new_batting_lineup_df
 
-def get_pitcher_starters(lineup_df, starting_lineup_df):
-  """Generate starting pitchers.
-
-  Parameters:
-    lineup_df: Pitcher Data Frame.
-    starting_lineup_df: Starting hitters.
-
-  Returns:
-      DataFrame: Returns updated Data Frame.
-  """
-  starting_pitcher_list = []
-
-  starting_lineups = list(starting_lineup_df['Starting Lineup'])
-  for name in starting_lineups:
-    name_array = name.split()
-    if len(name_array) == 3:
-      player_lastname = name_array[1]
-      starting_pitcher_list.append(player_lastname)
-
-  pitcher_lastname_lookup = '|'.join(starting_pitcher_list)
-
-  lineup_df = lineup_df[lineup_df['pitcher_name'].str.contains(pitcher_lastname_lookup)]
-  lineup_df.dropna()
-  return lineup_df
-
-def get_starting_batters(lineup_df):
-  """Generate starting hitters.
+def get_starting_batters_and_pitchers(lineup_df):
+  """Generate starting hitters and pitchers.
 
   Parameters:
     lineup_df: Pitcher or hitter Data Frame.
-    starting_lineup_df: Starting hitters.
 
   Returns:
       DataFrame: Returns updated Data Frame.
   """
-  positions = 'C|1B|2B|3B|SS|CF|LF|RF|DH'
 
-  hitters_list = get_list_of_hitters(positions)
-  starting_hitter_list = []
+  if 'batter_name' in lineup_df.columns:
+    positions = 'C|1B|2B|3B|SS|CF|LF|RF|DH'
+    hitters_list = get_list_of_hitters(positions)
 
-  for batter in hitters_list:
-    name_array = batter.split()
-    if len(name_array) == 4:
-      player_lastname = name_array[2]
-      starting_hitter_list.append(player_lastname)
+    return get_starters(lineup_df, hitters_list, column_name='batter_name', length_value=4, index=2)
+  else:
+    pitchers_list = list(data.get_starting_lineup()['Starting Lineup'])
 
-  hitter_lastname_lookup = '|'.join(starting_hitter_list)
+    return get_starters(lineup_df, pitchers_list, column_name='pitcher_name', length_value=3, index=1)
 
-  lineup_df = lineup_df[lineup_df['batter_name'].str.contains(hitter_lastname_lookup)]
-  lineup_df.dropna()
+def get_starters(lineup_df, starting_list, column_name, length_value, index):
+  starting_lineup_list = []
+
+  for starter in starting_list:
+    name_array = starter.split()
+    if len(name_array) == length_value:
+      player_lastname = name_array[index]
+      starting_lineup_list.append(player_lastname)
+
+  lookup_table = '|'.join(starting_lineup_list)
+
+  lineup_df = lineup_df[lineup_df[column_name].str.contains(lookup_table)]
+  lineup_df = lineup_df.dropna()
 
   return lineup_df
+
 
 def generate_top_order_starters(hitter_lineup_df):
   positions = 'C|1B|2B|3B|SS|CF|LF|RF|DH'
@@ -258,10 +242,8 @@ def generate_top_order_starters(hitter_lineup_df):
 
   while end <= len(hitters_list):
     starting_lineup = hitters_list[start:end]
-
     for batter in starting_lineup:
       name_array = batter.split()
-
       if len(name_array) == 4:
         player_lastname = name_array[2]
         top_order_list.append(player_lastname)
@@ -269,9 +251,7 @@ def generate_top_order_starters(hitter_lineup_df):
     end += 9
 
   hitter_lastname_lookup = '|'.join(top_order_list)
-
   hitter_lineup_df = hitter_lineup_df[hitter_lineup_df['batter_name'].str.contains(hitter_lastname_lookup)]
-
   hitter_lineup_df = hitter_lineup_df.dropna()
 
   return hitter_lineup_df

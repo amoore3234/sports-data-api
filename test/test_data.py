@@ -4,7 +4,8 @@ def get_pitcher_profile_test():
   return pd.DataFrame({
     'pitcher_id': [1, 2, 3, 4, 5],
     'pitcher_name': ['Dustin May', 'Jack Flaherty', 'Lazaro Estrada', 'Anthony Kay', 'Chad Patrick'],
-    'pitcher_team': ['STL', 'DET', 'TOR', 'CWS', 'MIL']
+    'pitcher_team': ['STL', 'DET', 'TOR', 'CWS', 'MIL'],
+    'position': ['SP', 'SP', 'SP', 'SP', 'SP']
   })
 
 def get_batter_profile_test():
@@ -21,7 +22,8 @@ def get_batter_profile_test():
       'G. Torres',
       'Riley Greene'
     ],
-    'batter_team': ['STL', 'STL', 'STL', 'STL', 'STL', 'DET', 'DET', 'DET', 'DET']
+    'batter_team': ['STL', 'STL', 'STL', 'STL', 'STL', 'DET', 'DET', 'DET', 'DET'],
+    'position': ['2B', 'OF', '1B', '3B', '3B', 'SS', '2B', 'OF', 'OF']
   })
 
 def get_starting_pitchers_test():
@@ -32,7 +34,11 @@ def get_starting_pitchers_test():
       'Lazaro Estrada R',
       'Anthony Kay L',
       'Chad Patrick R',
-      'Tony Bennet L'
+      'Tony Bennet L',
+      '2B J. Wetherholt L',
+      'DH Ivan Herrera R',
+      '1B A. Burleson L',
+      '3B Nolan Gorman L',
     ]
   })
 

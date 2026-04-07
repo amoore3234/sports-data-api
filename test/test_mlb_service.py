@@ -7,16 +7,29 @@ import test_data as data
 
 class TestMlbService(unittest.TestCase):
 
+  @patch('util.data_util.get_starting_lineup')
+  def test_get_starting_pitchers(self, mock_get_starting_lineup):
+
+    #Arrange
+    expected = data.get_pitcher_profile_test()
+    mock_get_starting_lineup.return_value = data.get_starting_pitchers_test()
+
+    #Act
+    actual = service.get_starting_batters_and_pitchers(expected)
+
+    #Assert
+    assert len(actual) == 5
+    assert expected['pitcher_name'].all() == actual['pitcher_name'].all()
+
   @patch('service.mlb_service.get_list_of_hitters')
   def test_get_starting_batters(self, mock_get_list_of_hitters):
 
     #Arrange
     expected = data.get_batter_profile_test()
-    hitters_list = list(data.get_starting_hitters_test()['Starting Lineup'])
-    mock_get_list_of_hitters.return_value = hitters_list
+    mock_get_list_of_hitters.return_value = list(data.get_starting_hitters_test()['Starting Lineup'])
 
     #Act
-    actual = service.get_starting_batters(expected)
+    actual = service.get_starting_batters_and_pitchers(expected)
 
     #Assert
     assert len(actual) == 9
