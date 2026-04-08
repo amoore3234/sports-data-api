@@ -36,8 +36,11 @@ def player_expected_score_at_course():
   players_championships_data = pd.read_csv('pga_data/players_championships_stats.csv')
   valspar_championship_data = pd.read_csv('pga_data/valspar_championship_stats.csv')
   texas_childrens_houston_open_data = pd.read_csv('pga_data/texas_childrens_houston_open_stats.csv')
+  valero_texas_open_data = pd.read_csv('pga_data/valero_texas_open_stats.csv')
   dk_data = pd.read_csv('pga_data/dk_salaries.csv')
+  fd_data = pd.read_csv('pga_data/fd_salaries.csv')
   df_salary = pd.DataFrame(dk_data)
+  fd_salary_df = pd.DataFrame(fd_data)
   phoenix_df = pd.DataFrame(phoenix_open_data)
   genesis_invitational_df = pd.DataFrame(genesis_invitational_data)
   pebble_beach_df = pd.DataFrame(pebble_data)
@@ -46,10 +49,13 @@ def player_expected_score_at_course():
   players_championships_df = pd.DataFrame(players_championships_data)
   valspar_championship_df = pd.DataFrame(valspar_championship_data)
   texas_childrens_houston_open_df = pd.DataFrame(texas_childrens_houston_open_data)
+  valero_texas_open_df = pd.DataFrame(valero_texas_open_data)
   tournaments = [phoenix_df, genesis_invitational_df, cognizant_classic_df, pebble_beach_df,
-                 arnold_palmer_df, players_championships_df, valspar_championship_df, texas_childrens_houston_open_df]
+                 arnold_palmer_df, players_championships_df, valspar_championship_df,
+                 texas_childrens_houston_open_df, valero_texas_open_df]
   tournament_df = pd.concat(tournaments, ignore_index=True)
 
+  fanduel_lineup = False
   # A course's scoring average and difficulty.
   target_rating = 74.2
   target_slope = 128
@@ -130,6 +136,10 @@ def player_expected_score_at_course():
   salary_lookup = df_salary.set_index('Name')['Salary'].to_dict()
   name_id = df_salary.set_index('Name')['Name + ID'].to_dict()
 
+  if fanduel_lineup:
+    salary_lookup = fd_salary_df.set_index('Name')['Salary'].to_dict()
+    name_id = fd_salary_df.set_index('Name')['Player ID + Player Name'].to_dict()
+
   lineup_creation_df['Salary'] = lineup_creation_df['Player'].map(salary_lookup)
   lineup_creation_df['Name_ID'] = lineup_creation_df['Player'].map(name_id)
 
@@ -147,9 +157,14 @@ def player_expected_score_at_course():
       player_salary += lineup_creation_df.loc[idx, 'Salary']
       available_indices.remove(idx)
       player_key += 1
-    if player_salary <= 50000 and player_salary >= 49000:
-      lineup_list.append(lineup)
-      lineup_count += 1
+    if fanduel_lineup:
+      if player_salary <= 60000 and player_salary >= 59000:
+        lineup_list.append(lineup)
+        lineup_count += 1
+    else:
+      if player_salary <= 50000 and player_salary >= 49000:
+        lineup_list.append(lineup)
+        lineup_count += 1
   temp_df = pd.DataFrame({1: [], 2: [], 3: [], 4:[], 5:[], 6:[]})
   lineups_df = pd.DataFrame(lineup_list)
   lineup_df = pd.concat([temp_df, lineups_df], ignore_index=True)
@@ -192,6 +207,7 @@ def predict_top_10_performance():
   players_championships_data = pd.read_csv('pga_data/players_championships_stats.csv')
   valspar_championship_data = pd.read_csv('pga_data/valspar_championship_stats.csv')
   texas_childrens_houston_open_data = pd.read_csv('pga_data/texas_childrens_houston_open_stats.csv')
+  valero_texas_open_data = pd.read_csv('pga_data/valero_texas_open_stats.csv')
   phoenix_df = pd.DataFrame(phoenix_open_data)
   genesis_invitational_df = pd.DataFrame(genesis_invitational_data)
   pebble_beach_df = pd.DataFrame(pebble_data)
@@ -201,8 +217,10 @@ def predict_top_10_performance():
   players_championships_df = pd.DataFrame(players_championships_data)
   valspar_championship_df = pd.DataFrame(valspar_championship_data)
   texas_childrens_houston_open_df = pd.DataFrame(texas_childrens_houston_open_data)
+  valero_texas_open_df = pd.DataFrame(valero_texas_open_data)
   tournaments = [phoenix_df, genesis_invitational_df, cognizant_classic_df, pebble_beach_df,
-                 arnold_palmer_df, players_championships_df, valspar_championship_df, texas_childrens_houston_open_df]
+                 arnold_palmer_df, players_championships_df, valspar_championship_df,
+                 texas_childrens_houston_open_df, valero_texas_open_df]
   tournament_df = pd.concat(tournaments, ignore_index=True)
 
   # Calculate a player's current average Strokes Gained statistics per round.
