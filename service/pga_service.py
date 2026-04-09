@@ -55,7 +55,7 @@ def player_expected_score_at_course():
                  texas_childrens_houston_open_df, valero_texas_open_df]
   tournament_df = pd.concat(tournaments, ignore_index=True)
 
-  fanduel_lineup = False
+  fanduel_lineup = True
   # A course's scoring average and difficulty.
   target_rating = 74.2
   target_slope = 128
@@ -137,8 +137,8 @@ def player_expected_score_at_course():
   name_id = df_salary.set_index('Name')['Name + ID'].to_dict()
 
   if fanduel_lineup:
-    salary_lookup = fd_salary_df.set_index('Name')['Salary'].to_dict()
-    name_id = fd_salary_df.set_index('Name')['Player ID + Player Name'].to_dict()
+    salary_lookup = fd_salary_df.set_index('Nickname')['Salary'].to_dict()
+    name_id = fd_salary_df.set_index('Nickname')['Player ID + Player Name'].to_dict()
 
   lineup_creation_df['Salary'] = lineup_creation_df['Player'].map(salary_lookup)
   lineup_creation_df['Name_ID'] = lineup_creation_df['Player'].map(name_id)
