@@ -2,7 +2,7 @@ import pandas as pd
 
 def get_pitcher_profile_test():
   return pd.DataFrame({
-    'pitcher_id': [1, 2, 3, 4, 5],
+    'pitcher_id': [1, 2, 3, 4, 5, 6],
     'pitcher_name': ['Dustin May', 'Jack Flaherty', 'Lazaro Estrada', 'Anthony Kay', 'Chad Patrick', 'Seth Lugo'],
     'pitcher_team': ['STL', 'DET', 'TOR', 'CWS', 'MIL', 'KC'],
     'position': ['SP', 'SP', 'SP', 'SP', 'SP', 'SP']
@@ -67,23 +67,23 @@ def get_batter_profile_test():
       'Z. McKinstry',
       'S. Torkelson',
       'P. Meadows',
-      'C. Meidroth R',
+      'C. Meidroth',
       'C. Montgomery',
       'M. Vargas',
       'A. Benintendi',
       'Austin Hays',
-      'M. Murakami L',
+      'M. Murakami',
       'E. Pereira',
       'Edgar Quero',
       'L. Acuna',
       'M. Garcia',
-      'Bobby Witt'
-      'V. Pasquantino'
-      'S. Perez'
-      'Lane Thomas'
-      'J. Caglianone'
+      'Bobby Witt',
+      'V. Pasquantino',
+      'S. Perez',
+      'Lane Thomas',
+      'J. Caglianone',
       'J. India',
-      'I. Collins'
+      'I. Collins',
       'Kyle Isbel'
     ],
     'batter_team': [
@@ -95,7 +95,7 @@ def get_batter_profile_test():
       'STL',
       'STL',
       'STL',
-      'STL'
+      'STL',
       'DET',
       'DET',
       'DET',
@@ -133,7 +133,7 @@ def get_batter_profile_test():
       'SS',
       'OF',
       'C',
-      'OF'
+      'OF',
       '3B',
       'SS',
       '2B',
@@ -577,7 +577,7 @@ def get_player_salary_data_fd():
       '128430-117831:S. Perez'
       '128430-110051:Lane Thomas'
       '128430-124452:J. Caglianone'
-      '128430-123821:J. India (4892944)'
+      '128430-123821:J. India'
       '128430-137453:I. Collins'
       '128430-134421:Kyle Isbel'
     ],

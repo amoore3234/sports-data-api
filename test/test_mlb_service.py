@@ -15,7 +15,7 @@ class TestMlbService(unittest.TestCase):
     mock_get_starting_lineup.return_value = data.get_starting_pitchers_test()
 
     #Act
-    actual = service.get_starting_batters_and_pitchers(expected)
+    actual = service.get_starting_batters_or_pitchers(expected, position=None)
 
     #Assert
     assert len(actual) == 5
@@ -29,7 +29,7 @@ class TestMlbService(unittest.TestCase):
     mock_get_list_of_hitters.return_value = list(data.get_starting_hitters_test()['Starting Lineup'])
 
     #Act
-    actual = service.get_starting_batters_and_pitchers(expected)
+    actual = service.get_starting_batters_or_pitchers(expected, position=None)
 
     #Assert
     assert len(actual) == 9
@@ -79,7 +79,7 @@ def test_get_list_of_hitters_multiple_position(mock_get_starting_lineup):
   actual = service.get_list_of_hitters(position)
 
   #Assert
-  assert len(actual) == 4
+  assert len(actual) == 8
   assert expected == actual
 
 # @patch('service.mlb_service.get_pitcher_starters')

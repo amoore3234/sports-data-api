@@ -156,48 +156,41 @@ def get_missing_hitters(batting_lineup_df, is_fanduel_lineup) -> pd.DataFrame:
 
   for position in positions:
     if position not in frequency_map:
-      if is_fanduel_lineup:
-        # new_hitter_roster_df = map_missing_players(
-        #   salary_df, position, 'Nickname', 'Team', 'Position', 'Salary', 'Player ID + Player Name', 'AvgPointsPerGame')
-        new_hitter_roster_df = return_missing_starters(batting_lineup_df, position)
-      else:
-        # new_hitter_roster_df = map_missing_players(
-        #   salary_df, position, 'Name', 'TeamAbbrev', 'Position', 'Salary', 'Name + ID', 'AvgPointsPerGame')
-        new_hitter_roster_df = return_missing_starters(batting_lineup_df, position)
+      new_hitter_roster_df = get_starting_batters_or_pitchers(batting_lineup_df, position)
       batting_lineup_df = pd.concat([batting_lineup_df, new_hitter_roster_df], ignore_index=True)
 
   batting_lineup_df = batting_lineup_df.fillna('')
 
   return batting_lineup_df
 
-def map_missing_players(salary_df, position, name, team_abbrev, batting_position,
-                        salary, name_id, average_pts_per_game) -> pd.DataFrame:
-  """Map players to an existing Data Frame to return a new Data Frame of players.
+# def map_missing_players(salary_df, position, name, team_abbrev, batting_position,
+#                         salary, name_id, average_pts_per_game) -> pd.DataFrame:
+#   """Map players to an existing Data Frame to return a new Data Frame of players.
 
-  Parameters:
-    salary_df: Data Frame containing a list of players with their relative prices.
-    position: The vacant position.
-    name: The column name for a player's name.
-    team_abbrev: The column name for the team code.
-    batting_position: The column name for player's listed position.
-    salary: The column name for a player's salary.
-    name_id: The column name for a player's id.
-    average_pts_per_game: The column name for a player's average points per game.
+#   Parameters:
+#     salary_df: Data Frame containing a list of players with their relative prices.
+#     position: The vacant position.
+#     name: The column name for a player's name.
+#     team_abbrev: The column name for the team code.
+#     batting_position: The column name for player's listed position.
+#     salary: The column name for a player's salary.
+#     name_id: The column name for a player's id.
+#     average_pts_per_game: The column name for a player's average points per game.
 
-  Returns:
-      DataFrame: Returns a new data frame containing a new batting lineup.
-  """
-  new_batting_lineup_df = salary_df[salary_df['Position'].str.contains(position)]
-  new_batting_lineup_df['batter_name'] = new_batting_lineup_df[name]
-  new_batting_lineup_df['batter_team'] = new_batting_lineup_df[team_abbrev]
-  new_batting_lineup_df['position'] = new_batting_lineup_df[batting_position]
-  new_batting_lineup_df['salary'] = new_batting_lineup_df[salary]
-  new_batting_lineup_df['name_id'] = new_batting_lineup_df[name_id]
-  average_fts_pts = new_batting_lineup_df[average_pts_per_game].mean()
-  new_batting_lineup_df = new_batting_lineup_df[new_batting_lineup_df[average_pts_per_game] > average_fts_pts]
-  return new_batting_lineup_df
+#   Returns:
+#       DataFrame: Returns a new data frame containing a new batting lineup.
+#   """
+#   new_batting_lineup_df = salary_df[salary_df['Position'].str.contains(position)]
+#   new_batting_lineup_df['batter_name'] = new_batting_lineup_df[name]
+#   new_batting_lineup_df['batter_team'] = new_batting_lineup_df[team_abbrev]
+#   new_batting_lineup_df['position'] = new_batting_lineup_df[batting_position]
+#   new_battig_lineup_df['salary'] = new_batting_lineup_df[salary]
+#   new_batting_lineup_df['name_id'] = new_batting_lineup_df[name_id]
+#   average_fts_pts = new_batting_lineup_df[average_pts_per_game].mean()
+#   new_batting_lineup_df = new_batting_lineup_df[new_batting_lineup_df[average_pts_per_game] > average_fts_pts]
+#   return new_batting_lineup_df
 
-def get_starting_batters_and_pitchers(lineup_df):
+def get_starting_batters_or_pitchers(lineup_df, position):
   """Generate starting hitters and pitchers.
 
   Parameters:
@@ -210,6 +203,8 @@ def get_starting_batters_and_pitchers(lineup_df):
   if 'batter_name' in lineup_df.columns:
     positions = 'C|1B|2B|3B|SS|CF|LF|RF|DH'
     hitters_list = get_list_of_hitters(positions)
+    if position:
+      hitters_list = get_list_of_hitters(position)
 
     return get_starters(lineup_df, hitters_list, column_name='batter_name', length_value=4, index=2)
   else:
@@ -251,7 +246,7 @@ def generate_top_order_starters(hitter_lineup_df) -> pd.DataFrame:
         top_order_list.append(player_lastname)
     start += 9
     end += 9
-
+  print(f"Top order list: {top_order_list}")
   hitter_lastname_lookup = '|'.join(top_order_list)
   hitter_lineup_df = hitter_lineup_df[hitter_lineup_df['batter_name'].str.contains(hitter_lastname_lookup)]
   hitter_lineup_df = hitter_lineup_df.dropna()
