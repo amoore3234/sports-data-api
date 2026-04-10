@@ -77,9 +77,11 @@ def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_dat
   elite_pitchers = apply_elite_statistical_pitcher_filters(pitcher_lineup_df)
   elite_hitters = apply_elite_statistical_batting_filters(batting_lineup_df)
 
+  #TODO: Change naming of the method from 'generate_starting_lineup' to 'map_player_salary' or something similar. Move this at the end of method before generate_optimal_lineup.
   pitcher_lineup_df = generate_starting_lineup(salary_data_df, pitcher_lineup_df, elite_pitchers, 'pitcher_name', 'pitcher_teamabbrev')
   batting_lineup_df = generate_starting_lineup(salary_data_df, batting_lineup_df, elite_hitters, 'batter_name', 'batting_teamabbrev')
 
+  #TODO: Remove toggle. Change the method from 'generate_confirmed_starting_lineups' to 'confirm_starting_lineup'. Move to the beginning of method after generating elite stats.
   if is_confirmed_starters:
     batting_lineup_df = generate_starting_lineup(salary_data_df, batting_lineup_df, batting_lineup_df, 'batter_name', 'batting_teamabbrev')
     print(f"Generate lineup: {batting_lineup_df}")
@@ -215,7 +217,7 @@ def get_starting_batters_and_pitchers(lineup_df):
 
     return get_starters(lineup_df, pitchers_list, column_name='pitcher_name', length_value=3, index=1)
 
-def get_starters(lineup_df, starting_list, column_name, length_value, index):
+def get_starters(lineup_df, starting_list, column_name, length_value, index) -> pd.DataFrame:
   starting_lineup_list = []
 
   for starter in starting_list:
@@ -232,7 +234,7 @@ def get_starters(lineup_df, starting_list, column_name, length_value, index):
   return lineup_df
 
 
-def generate_top_order_starters(hitter_lineup_df):
+def generate_top_order_starters(hitter_lineup_df) -> pd.DataFrame:
   positions = 'C|1B|2B|3B|SS|CF|LF|RF|DH'
 
   hitters_list = get_list_of_hitters(positions)
@@ -256,7 +258,7 @@ def generate_top_order_starters(hitter_lineup_df):
 
   return hitter_lineup_df
 
-def get_list_of_hitters(position):
+def get_list_of_hitters(position) -> list[str]:
   if position == 'C':
     position = 'C '
   starting_lineup_df = data.get_starting_lineup()
