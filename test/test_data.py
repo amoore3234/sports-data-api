@@ -37,7 +37,16 @@ def get_batter_profile_test():
       24,
       25,
       26,
-      27
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36
     ],
     'batter_name': [
       'J. Wetherholt',
@@ -66,7 +75,16 @@ def get_batter_profile_test():
       'M. Murakami L',
       'E. Pereira',
       'Edgar Quero',
-      'L. Acuna'
+      'L. Acuna',
+      'M. Garcia',
+      'Bobby Witt'
+      'V. Pasquantino'
+      'S. Perez'
+      'Lane Thomas'
+      'J. Caglianone'
+      'J. India',
+      'I. Collins'
+      'Kyle Isbel'
     ],
     'batter_team': [
       'STL',
@@ -95,7 +113,16 @@ def get_batter_profile_test():
       'CWS',
       'CWS',
       'CWS',
-      'CWS'
+      'CWS',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC'
     ],
     'position': [
       '2B',
@@ -124,6 +151,15 @@ def get_batter_profile_test():
       '1B',
       'OF',
       'C',
+      'OF',
+      '3B',
+      'SS',
+      '1B',
+      'C',
+      'OF',
+      'OF',
+      '2B',
+      'OF',
       'OF'
     ]
   })
@@ -173,6 +209,164 @@ def get_starting_hitters_test():
       '1B M. Murakami L',
       'RF E. Pereira R',
       'C Edgar Quero S',
-      'CF L. Acuna'
+      'CF L. Acuna',
+      '3B M. Garcia R',
+      'SS Bobby Witt R',
+      '1B V. Pasquantino L',
+      'C S. Perez R',
+      'RF Lane Thomas R',
+      'DH J. Caglianone L',
+      '2B J. India R',
+      'LF I. Collins S',
+      'CF Kyle Isbel L'
     ]
+  })
+
+def get_player_salary_data():
+  return pd.DataFrame({
+    'Position': [
+      '2B',
+      'OF',
+      '1B',
+      '3B',
+      'OF',
+      'SS',
+      'OF',
+      'C',
+      'OF'
+      '3B',
+      'SS',
+      '2B',
+      'OF',
+      'OF',
+      'C',
+      'OF',
+      '1B',
+      'OF',
+      '2B',
+      'SS',
+      '3B',
+      'OF',
+      'OF',
+      '1B',
+      'OF',
+      'C',
+      'OF',
+      '3B',
+      'SS',
+      '1B',
+      'C',
+      'OF',
+      'OF',
+      '2B',
+      'OF',
+      'OF'
+    ],
+    'Name + ID': [
+      'J. Wetherholt (4892893)',
+      'Ivan Herrera (4892895)',
+      'A. Burleson (4892898)',
+      'Nolan Gorman (4892891)',
+      'J. Walker (4892892)',
+      'T. Saggese (4892913)',
+      'N. Church (4892912)',
+      'Pedro Pages (4892911)',
+      'Victor Scott (4892910)',
+      'Colt Keith (4892920)',
+      'K. McGonigle (4892921)',
+      'G. Torres (4892922)',
+      'K. Carpenter (4892923)',
+      'Riley Greene (4892924)',
+      'D. Dingler (4892925)',
+      'Z. McKinstry (4892926)',
+      'S. Torkelson (4892927)',
+      'P. Meadows (4892928)',
+      'C. Meidroth R (4892929)',
+      'C. Montgomery (4892930)',
+      'M. Vargas (4892931)',
+      'A. Benintendi (4892932)',
+      'Austin Hays (4892933)',
+      'M. Murakami L (4892934)',
+      'E. Pereira (4892935)',
+      'Edgar Quero (4892936)',
+      'L. Acuna (4892937)'
+    ],
+    'Name': [
+      'J. Wetherholt',
+      'Ivan Herrera',
+      'A. Burleson',
+      'Nolan Gorman',
+      'J. Walker',
+      'T. Saggese',
+      'N. Church',
+      'Pedro Pages',
+      'Victor Scott',
+      'Colt Keith',
+      'K. McGonigle',
+      'G. Torres',
+      'K. Carpenter',
+      'Riley Greene',
+      'D. Dingler',
+      'Z. McKinstry',
+      'S. Torkelson',
+      'P. Meadows',
+      'C. Meidroth',
+      'C. Montgomery',
+      'M. Vargas',
+      'A. Benintendi',
+      'Austin Hays',
+      'M. Murakami',
+      'E. Pereira',
+      'Edgar Quero',
+      'L. Acuna',
+      'M. Garcia'
+      'Bobby Witt'
+      'V. Pasquantino'
+      'S. Perez'
+      'Lane Thomas'
+      'J. Caglianone'
+      'J. India'
+      'I. Collins'
+      'Kyle Isbel'
+    ],
+    'Game Info': [],
+    'Team': [
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'STL'
+      'DET',
+      'DET',
+      'DET',
+      'DET',
+      'DET',
+      'DET',
+      'DET',
+      'DET',
+      'DET',
+      'CWS',
+      'CWS',
+      'CWS',
+      'CWS',
+      'CWS',
+      'CWS',
+      'CWS',
+      'CWS',
+      'CWS',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC'
+    ],
+    'Salary': []
   })
