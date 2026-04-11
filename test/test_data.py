@@ -5,7 +5,8 @@ def get_pitcher_profile_test():
     'pitcher_id': [1, 2, 3, 4, 5, 6],
     'pitcher_name': ['Dustin May', 'Jack Flaherty', 'Lazaro Estrada', 'Anthony Kay', 'Chad Patrick', 'Seth Lugo'],
     'pitcher_team': ['STL', 'DET', 'TOR', 'CWS', 'MIL', 'KC'],
-    'position': ['SP', 'SP', 'SP', 'SP', 'SP', 'SP']
+    'position': ['SP', 'SP', 'SP', 'SP', 'SP', 'SP'],
+    'Name + ID': ['D. May (4892886)', 'Jack Flaherty (4892887)', 'Lazaro Estrada (4892888)', 'Anthony Kay (4892889)', 'Chad Patrick (4892890)', 'Seth Lugo (4892892)']
   })
 
 def get_batter_profile_test():
@@ -161,6 +162,196 @@ def get_batter_profile_test():
       '2B',
       'OF',
       'OF'
+    ],
+    'Name': [
+      'J. Wetherholt',
+      'Ivan Herrera',
+      'A. Burleson',
+      'Nolan Gorman',
+      'J. Walker',
+      'T. Saggese',
+      'N. Church',
+      'Pedro Pages',
+      'Victor Scott',
+      'Colt Keith',
+      'K. McGonigle',
+      'G. Torres',
+      'K. Carpenter',
+      'Riley Greene',
+      'D. Dingler',
+      'Z. McKinstry',
+      'S. Torkelson',
+      'P. Meadows',
+      'C. Meidroth',
+      'C. Montgomery',
+      'M. Vargas',
+      'A. Benintendi',
+      'Austin Hays',
+      'M. Murakami',
+      'E. Pereira',
+      'Edgar Quero',
+      'L. Acuna',
+      'M. Garcia',
+      'Bobby Witt',
+      'V. Pasquantino',
+      'S. Perez',
+      'Lane Thomas',
+      'J. Caglianone',
+      'J. India',
+      'I. Collins',
+      'Kyle Isbel'
+    ],
+    'Name + ID': [
+      'J. Wetherholt (4892893)',
+      'Ivan Herrera (4892895)',
+      'A. Burleson (4892898)',
+      'Nolan Gorman (4892891)',
+      'J. Walker (4892892)',
+      'T. Saggese (4892913)',
+      'N. Church (4892912)',
+      'Pedro Pages (4892911)',
+      'Victor Scott (4892910)',
+      'Colt Keith (4892920)',
+      'K. McGonigle (4892921)',
+      'G. Torres (4892922)',
+      'K. Carpenter (4892923)',
+      'Riley Greene (4892924)',
+      'D. Dingler (4892925)',
+      'Z. McKinstry (4892926)',
+      'S. Torkelson (4892927)',
+      'P. Meadows (4892928)',
+      'C. Meidroth (4892929)',
+      'C. Montgomery (4892930)',
+      'M. Vargas (4892931)',
+      'A. Benintendi (4892932)',
+      'Austin Hays (4892933)',
+      'M. Murakami (4892934)',
+      'E. Pereira (4892935)',
+      'Edgar Quero (4892936)',
+      'L. Acuna (4892937)',
+      'M. Garcia (4892938)',
+      'Bobby Witt (4892939)',
+      'V. Pasquantino (4892940)',
+      'S. Perez (4892941)',
+      'Lane Thomas (4892942)',
+      'J. Caglianone (4892943)',
+      'J. India (4892944)',
+      'I. Collins (4892945)',
+      'Kyle Isbel (4892946)',
+    ],
+    'Game Info': [
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC'
+    ],
+    'Team': [
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'DET',
+      'DET',
+      'DET',
+      'DET',
+      'DET',
+      'DET',
+      'DET',
+      'DET',
+      'DET',
+      'CWS',
+      'CWS',
+      'CWS',
+      'CWS',
+      'CWS',
+      'CWS',
+      'CWS',
+      'CWS',
+      'CWS',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC',
+      'KC'
+    ],
+    'Salary': [
+      4500,
+      3800,
+      4500,
+      3100,
+      3200,
+      2500,
+      2800,
+      2500,
+      3300,
+      3900,
+      3900,
+      4900,
+      3100,
+      2700,
+      3900,
+      2900,
+      3300,
+      2900,
+      3500,
+      4100,
+      3500,
+      2200,
+      2400,
+      4400,
+      2400,
+      2100,
+      2700,
+      4800,
+      5900,
+      4200,
+      3600,
+      2200,
+      3500,
+      2600,
+      2900,
+      3200
     ]
   })
 
@@ -303,15 +494,15 @@ def get_player_salary_data_dk():
       'E. Pereira (4892935)',
       'Edgar Quero (4892936)',
       'L. Acuna (4892937)',
-      'M. Garcia (4892938)'
-      'Bobby Witt (4892939)'
-      'V. Pasquantino (4892940)'
-      'S. Perez (4892941)'
-      'Lane Thomas (4892942)'
-      'J. Caglianone (4892943)'
-      'J. India (4892944)'
-      'I. Collins (4892945)'
-      'Kyle Isbel (4892946)'
+      'M. Garcia (4892938)',
+      'Bobby Witt (4892939)',
+      'V. Pasquantino (4892940)',
+      'S. Perez (4892941)',
+      'Lane Thomas (4892942)',
+      'J. Caglianone (4892943)',
+      'J. India (4892944)',
+      'I. Collins (4892945)',
+      'Kyle Isbel (4892946)',
     ],
     'Name': [
       'D. May',
@@ -347,20 +538,20 @@ def get_player_salary_data_dk():
       'E. Pereira',
       'Edgar Quero',
       'L. Acuna',
-      'M. Garcia'
-      'Bobby Witt'
-      'V. Pasquantino'
-      'S. Perez'
-      'Lane Thomas'
-      'J. Caglianone'
-      'J. India'
-      'I. Collins'
+      'M. Garcia',
+      'Bobby Witt',
+      'V. Pasquantino',
+      'S. Perez',
+      'Lane Thomas',
+      'J. Caglianone',
+      'J. India',
+      'I. Collins',
       'Kyle Isbel'
     ],
     'Game Info': [
       'STL@DET',
       'STL@DET',
-      'TOR@LAA'
+      'TOR@LAA',
       'CWS@KC',
       'MIL@CHC',
       'CWS@KC',
@@ -508,7 +699,7 @@ def get_player_salary_data_fd():
       'SS',
       'OF',
       'C',
-      'OF'
+      'OF',
       '3B',
       'SS',
       '2B',
@@ -571,14 +762,14 @@ def get_player_salary_data_fd():
       '128430-136703:E. Pereira',
       '128430-134401:Edgar Quero',
       '128430-106844:L. Acuna',
-      '128430-101115:M. Garcia'
-      '128430-102209:Bobby Witt'
-      '128430-116003:V. Pasquantino'
-      '128430-117831:S. Perez'
-      '128430-110051:Lane Thomas'
-      '128430-124452:J. Caglianone'
-      '128430-123821:J. India'
-      '128430-137453:I. Collins'
+      '128430-101115:M. Garcia',
+      '128430-102209:Bobby Witt',
+      '128430-116003:V. Pasquantino',
+      '128430-117831:S. Perez',
+      '128430-110051:Lane Thomas',
+      '128430-124452:J. Caglianone',
+      '128430-123821:J. India',
+      '128430-137453:I. Collins',
       '128430-134421:Kyle Isbel'
     ],
     'Name': [
@@ -615,20 +806,20 @@ def get_player_salary_data_fd():
       'E. Pereira',
       'Edgar Quero',
       'L. Acuna',
-      'M. Garcia'
-      'Bobby Witt'
-      'V. Pasquantino'
-      'S. Perez'
-      'Lane Thomas'
-      'J. Caglianone'
-      'J. India'
-      'I. Collins'
+      'M. Garcia',
+      'Bobby Witt',
+      'V. Pasquantino',
+      'S. Perez',
+      'Lane Thomas',
+      'J. Caglianone',
+      'J. India',
+      'I. Collins',
       'Kyle Isbel'
     ],
     'Game Info': [
       'STL@DET',
       'STL@DET',
-      'TOR@LAA'
+      'TOR@LAA',
       'CWS@KC',
       'MIL@CHC',
       'CWS@KC',
@@ -684,7 +875,7 @@ def get_player_salary_data_fd():
       'STL',
       'STL',
       'STL',
-      'STL'
+      'STL',
       'DET',
       'DET',
       'DET',

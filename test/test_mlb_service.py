@@ -32,7 +32,8 @@ class TestMlbService(unittest.TestCase):
     actual = service.get_starting_batters_or_pitchers(expected, position=None)
 
     #Assert
-    assert len(actual) == 9
+    # Size of data frame. Index starts at 0.
+    assert len(actual) == 35
     assert expected['batter_name'].all() == actual['batter_name'].all()
 
   @patch('service.mlb_service.get_list_of_hitters')
@@ -42,16 +43,67 @@ class TestMlbService(unittest.TestCase):
     hitters_list = list(data.get_starting_hitters_test()['Starting Lineup'])
     mock_get_list_of_hitters.return_value = hitters_list
     expected = pd.DataFrame({
-      'batter_id': [1, 2, 3, 6, 7, 8],
-      'batter_name': ['J. Wetherholt', 'Ivan Herrera', 'A. Burleson', 'Colt Keith', 'K. McGonigle', 'G. Torres'],
-      'batter_team': ['STL', 'STL', 'STL', 'DET', 'DET', 'DET']
+      'batter_id': [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      'batter_name': [
+        'J. Wetherholt',
+        'Ivan Herrera',
+        'A. Burleson',
+        'Nolan Gorman',
+        'Colt Keith',
+        'K. McGonigle',
+        'G. Torres',
+        'K. Carpenter',
+        'C. Meidroth',
+        'C. Montgomery',
+        'M. Vargas',
+        'A. Benintendi',
+        'M. Garcia',
+        'Bobby Witt',
+        'V. Pasquantino',
+        'S. Perez'
+      ],
+      'batter_team': [
+        'STL',
+        'STL',
+        'STL',
+        'STL',
+        'DET',
+        'DET',
+        'DET',
+        'DET',
+        'CWS',
+        'CWS',
+        'CWS',
+        'CWS',
+        'KC',
+        'KC',
+        'KC',
+        'KC'
+      ]
     })
 
     #Act
     actual = service.generate_top_order_starters(hitter_lineup_df)
 
     #Assert
-    assert len(actual) == 6
+    assert len(actual) == 16
     assert expected['batter_name'].all() == actual['batter_name'].all()
 
   @patch('util.data_util.get_starting_lineup')
@@ -59,13 +111,13 @@ class TestMlbService(unittest.TestCase):
     #Arrange
     position = 'C'
     mock_get_starting_lineup.return_value = data.get_starting_hitters_test()
-    expected = ['C Pedro Pages R', 'C D. Dingler R']
+    expected = ['C Pedro Pages R', 'C D. Dingler R', 'C Edgar Quero S', 'C S. Perez R']
 
     #Act
     actual = service.get_list_of_hitters(position)
 
     #Assert
-    assert len(actual) == 2
+    assert len(actual) == 4
     assert expected == actual
 
 @patch('util.data_util.get_starting_lineup')
@@ -73,7 +125,16 @@ def test_get_list_of_hitters_multiple_position(mock_get_starting_lineup):
   #Arrange
   position = '1B|2B'
   mock_get_starting_lineup.return_value = data.get_starting_hitters_test()
-  expected = ['2B J. Wetherholt L', '1B A. Burleson L', '2B G. Torres R', '1B S. Torkelson R']
+  expected = [
+    '2B J. Wetherholt L',
+    '1B A. Burleson L',
+    '2B G. Torres R',
+    '1B S. Torkelson R',
+    '2B C. Meidroth R',
+    '1B M. Murakami L',
+    '1B V. Pasquantino L',
+    '2B J. India R'
+  ]
 
   #Act
   actual = service.get_list_of_hitters(position)

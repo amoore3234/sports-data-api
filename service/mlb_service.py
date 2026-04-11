@@ -92,7 +92,7 @@ def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_dat
     # Don't return pitchers at parks that favor hitters.
     pitcher_lineup_df = drop_pitchers(pitcher_lineup_df, batting_lineup_df, salary_data_df)
 
-  batting_lineup_df = get_missing_hitters(batting_lineup_df, is_fanduel_lineup)
+  batting_lineup_df = get_missing_hitters(batting_lineup_df)
   generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df, is_hitter_friendly_park, is_fanduel_lineup)
 
 def generate_confirmed_starting_lineups(lineup_df, salary_data_df) -> pd.DataFrame:
@@ -120,7 +120,7 @@ def generate_confirmed_starting_lineups(lineup_df, salary_data_df) -> pd.DataFra
   else:
     return get_batter_starters(lineup_df)
 
-def get_missing_hitters(batting_lineup_df, is_fanduel_lineup) -> pd.DataFrame:
+def get_missing_hitters(batting_lineup_df) -> pd.DataFrame:
   """Generates a list of hitters to fill in open positions.
 
   Parameters:
@@ -235,7 +235,7 @@ def generate_top_order_starters(hitter_lineup_df) -> pd.DataFrame:
   hitters_list = get_list_of_hitters(positions)
   top_order_list = []
   start = 0
-  end = 3
+  end = 4
 
   while end <= len(hitters_list):
     starting_lineup = hitters_list[start:end]
@@ -246,7 +246,7 @@ def generate_top_order_starters(hitter_lineup_df) -> pd.DataFrame:
         top_order_list.append(player_lastname)
     start += 9
     end += 9
-  print(f"Top order list: {top_order_list}")
+
   hitter_lastname_lookup = '|'.join(top_order_list)
   hitter_lineup_df = hitter_lineup_df[hitter_lineup_df['batter_name'].str.contains(hitter_lastname_lookup)]
   hitter_lineup_df = hitter_lineup_df.dropna()
