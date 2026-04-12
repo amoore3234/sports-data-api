@@ -6,7 +6,45 @@ def get_pitcher_profile_test():
     'pitcher_name': ['Dustin May', 'Jack Flaherty', 'Lazaro Estrada', 'Anthony Kay', 'Chad Patrick', 'Seth Lugo'],
     'pitcher_team': ['STL', 'DET', 'TOR', 'CWS', 'MIL', 'KC'],
     'position': ['SP', 'SP', 'SP', 'SP', 'SP', 'SP'],
-    'Name + ID': ['D. May (4892886)', 'Jack Flaherty (4892887)', 'Lazaro Estrada (4892888)', 'Anthony Kay (4892889)', 'Chad Patrick (4892890)', 'Seth Lugo (4892892)']
+    'Name + ID': [
+      'D. May (4892886)',
+      'Jack Flaherty (4892887)',
+      'Lazaro Estrada (4892888)',
+      'Anthony Kay (4892889)',
+      'Chad Patrick (4892890)',
+      'Seth Lugo (4892892)'
+    ],
+    'Name': [
+      'D. May',
+      'Jack Flaherty',
+      'Lazaro Estrada',
+      'Anthony Kay',
+      'Chad Patrick',
+      'Seth Lugo'
+    ],
+    'Game Info': [
+      'STL@DET',
+      'STL@DET',
+      'TOR@LAA',
+      'CWS@KC',
+      'MIL@CHC'
+    ],
+    'Team': [
+      'STL',
+      'DET',
+      'TOR',
+      'CWS',
+      'MIL',
+      'KC'
+    ],
+    'Salary': [
+      9900,
+      9700,
+      9600,
+      9000,
+      8700,
+      8500
+    ]
   })
 
 def get_batter_profile_test():
