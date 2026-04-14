@@ -15,12 +15,13 @@ golf_data_df = golf_data_df.replace('ï¿½', ' ')
 golf_data_df = golf_data_df.map(lambda x: x.lower() if isinstance(x, str) else x)
 name_map = {
   'cam davis':'cameron davis',
-  'min lin': 'min woo lee',
+  'min lee': 'min woo lee',
   'si kim': 'si woo kim',
   'nico echavarria': 'nicolas echavarria',
   'matt mccarty': 'matthew mccarty',
   'rooyen van': 'erik van rooyen',
-  'johnny keefer': 'john keefer'
+  'johnny keefer': 'john keefer',
+  'zach bauchou': 'zachary bauchou'
 }
 
 player_names = []
@@ -49,6 +50,9 @@ while index < len(round_one_results):
   player_name_array = updated_name.split()
   if updated_name != 'cut':
     player_first_last = f"{player_name_array[1]} {player_name_array[0]}"
+    for key, value in name_map.items():
+      if key == player_first_last:
+        player_first_last = value
  
     sg_putting.append(round_one_results[index + 4])
     sg_putting.append(round_two_results[index + 4])
@@ -131,6 +135,6 @@ while end < len(scrambling_list):
 # clean_scrambling_data = [0 if math.isnan(x) else x for x in new_scrambling]
 # print(f"Scrambling List: {clean_scrambling_data}")
 # print(f"Size: {len(clean_scrambling_data)}")
-# sg_statistics_df['Scrambling'] = clean_scrambling_data
+sg_statistics_df['Scrambling'] = new_scrambling
 
-statistics_df.to_csv('pga_data/latest_tournament_results.csv', index=False)
+sg_statistics_df.to_csv('pga_data/latest_tournament_results.csv', index=False)
