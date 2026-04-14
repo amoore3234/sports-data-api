@@ -1,16 +1,27 @@
+import math
 import pandas as pd
 
 # def generate_advanced_pga_stats():
 dk_salary_data = pd.read_csv('pga_data/dk_salaries.csv')
 data = pd.read_csv('pga_data/players_championships_stats.csv')
 df = pd.DataFrame(data)
+df['Player'] = df['Player'].str.lower()
 dk_salary_df = pd.DataFrame(dk_salary_data)
 golf_data = pd.read_csv('pga_data/golf_data.csv', encoding='cp1252')
 golf_data_df = pd.DataFrame(golf_data)
 golf_data_df = golf_data_df.iloc[:, ~golf_data_df.columns.str.contains('Unnamed')]
 golf_data_df = golf_data_df.replace(r'[\u2013\u2014]', 0, regex=True)
 golf_data_df = golf_data_df.replace('ï¿½', ' ')
-golf_data_df = golf_data_df.map(lambda x: x.title() if isinstance(x, str) else x)
+golf_data_df = golf_data_df.map(lambda x: x.lower() if isinstance(x, str) else x)
+name_map = {
+  'cam davis':'cameron davis',
+  'min lin': 'min woo lee',
+  'si kim': 'si woo kim',
+  'nico echavarria': 'nicolas echavarria',
+  'matt mccarty': 'matthew mccarty',
+  'rooyen van': 'erik van rooyen',
+  'johnny keefer': 'john keefer'
+}
 
 player_names = []
 sg_putting = []
@@ -36,9 +47,9 @@ while index < len(round_one_results):
   player_name = round_one_results[index + 1]
   updated_name = player_name.replace('ï¿½', ' ')
   player_name_array = updated_name.split()
-  if updated_name != 'Cut':
+  if updated_name != 'cut':
     player_first_last = f"{player_name_array[1]} {player_name_array[0]}"
-
+ 
     sg_putting.append(round_one_results[index + 4])
     sg_putting.append(round_two_results[index + 4])
     sg_putting.append(round_three_results[index + 4])
@@ -78,7 +89,7 @@ while index < len(round_one_results):
       rounds_count += 1
       count += 1
   index+=10
-  if player_name == 'Cut':
+  if player_name == 'cut':
     index += 1
   rounds_count = 0
   count = 0
@@ -94,14 +105,32 @@ sg_statistics = {
 }
 
 sg_statistics_df = pd.DataFrame(sg_statistics)
+# print(f"Size of data frame: {(sg_statistics_df)}")
+# print(f"Data frame players: {df}")
 statistics_df = sg_statistics_df.merge(
   df,
   left_on='Player',
   right_on='Player',
   how='left'
 )
+scrambling_list = list(statistics_df['Scrambling'])
+start = 0
+end = 4
+counter = 0
+new_scrambling = []
+while end < len(scrambling_list):
+  stats = scrambling_list[start:end]
+  while counter < len(stats):
+    new_scrambling.append(scrambling_list[start])
+    start += 1
+    counter += 1
+  counter = 0
+  start += 12
+  end += 16
+
+# clean_scrambling_data = [0 if math.isnan(x) else x for x in new_scrambling]
+# print(f"Scrambling List: {clean_scrambling_data}")
+# print(f"Size: {len(clean_scrambling_data)}")
+# sg_statistics_df['Scrambling'] = clean_scrambling_data
 
 statistics_df.to_csv('pga_data/latest_tournament_results.csv', index=False)
-
-
-

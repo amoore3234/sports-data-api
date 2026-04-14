@@ -40,6 +40,7 @@ def player_expected_score_at_course():
   dk_data = pd.read_csv('pga_data/dk_salaries.csv')
   fd_data = pd.read_csv('pga_data/fd_salaries.csv')
   df_salary = pd.DataFrame(dk_data)
+  df_salary['Name'] = df_salary['Name'].str.lower()
   fd_salary_df = pd.DataFrame(fd_data)
   phoenix_df = pd.DataFrame(phoenix_open_data)
   genesis_invitational_df = pd.DataFrame(genesis_invitational_data)
