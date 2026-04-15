@@ -1,9 +1,10 @@
 import math
 import pandas as pd
+import numpy as np
 
 # def generate_advanced_pga_stats():
 dk_salary_data = pd.read_csv('pga_data/dk_salaries.csv')
-data = pd.read_csv('pga_data/players_championships_stats.csv')
+data = pd.read_csv('pga_data/valspar_championship_stats.csv')
 df = pd.DataFrame(data)
 df['Player'] = df['Player'].str.lower()
 dk_salary_df = pd.DataFrame(dk_salary_data)
@@ -13,15 +14,16 @@ golf_data_df = golf_data_df.iloc[:, ~golf_data_df.columns.str.contains('Unnamed'
 golf_data_df = golf_data_df.replace(r'[\u2013\u2014]', 0, regex=True)
 golf_data_df = golf_data_df.replace('ï¿½', ' ')
 golf_data_df = golf_data_df.map(lambda x: x.lower() if isinstance(x, str) else x)
+golf_data_df = golf_data_df.replace(' ', 0)
 name_map = {
-  'cam davis':'cameron davis',
   'min lee': 'min woo lee',
   'si kim': 'si woo kim',
-  'nico echavarria': 'nicolas echavarria',
-  'matt mccarty': 'matthew mccarty',
+  'matt mccarty':'matthew mccarty',
   'rooyen van': 'erik van rooyen',
   'johnny keefer': 'john keefer',
-  'zach bauchou': 'zachary bauchou'
+  'zach bauchou': 'zachary bauchou',
+  'de dumont': 'adrien dumont de chassart',
+  'harris english': 'harry english'
 }
 
 player_names = []
@@ -53,7 +55,7 @@ while index < len(round_one_results):
     for key, value in name_map.items():
       if key == player_first_last:
         player_first_last = value
- 
+
     sg_putting.append(round_one_results[index + 4])
     sg_putting.append(round_two_results[index + 4])
     sg_putting.append(round_three_results[index + 4])
@@ -109,6 +111,7 @@ sg_statistics = {
 }
 
 sg_statistics_df = pd.DataFrame(sg_statistics)
+
 # print(f"Size of data frame: {(sg_statistics_df)}")
 # print(f"Data frame players: {df}")
 statistics_df = sg_statistics_df.merge(
@@ -117,24 +120,22 @@ statistics_df = sg_statistics_df.merge(
   right_on='Player',
   how='left'
 )
-scrambling_list = list(statistics_df['Scrambling'])
-start = 0
-end = 4
-counter = 0
-new_scrambling = []
-while end < len(scrambling_list):
-  stats = scrambling_list[start:end]
-  while counter < len(stats):
-    new_scrambling.append(scrambling_list[start])
-    start += 1
-    counter += 1
+if 'Scrambling' in statistics_df.columns:
+  scrambling_list = list(statistics_df['Scrambling'])
+  start = 0
+  end = 4
   counter = 0
-  start += 12
-  end += 16
+  new_scrambling = []
+  while end < len(scrambling_list):
+    stats = scrambling_list[start:end]
+    while counter < len(stats):
+      new_scrambling.append(scrambling_list[start])
+      start += 1
+      counter += 1
+    counter = 0
+    start += 12
+    end += 16
 
-# clean_scrambling_data = [0 if math.isnan(x) else x for x in new_scrambling]
-# print(f"Scrambling List: {clean_scrambling_data}")
-# print(f"Size: {len(clean_scrambling_data)}")
-sg_statistics_df['Scrambling'] = new_scrambling
-
+  sg_statistics_df['Scrambling'] = new_scrambling
+sg_statistics_df = sg_statistics_df.replace(r'^\s*$', np.nan, regex=True).fillna(0)
 sg_statistics_df.to_csv('pga_data/latest_tournament_results.csv', index=False)
