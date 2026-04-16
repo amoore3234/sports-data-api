@@ -267,7 +267,7 @@ def predict_top_10_performance():
   new_tournament_df['Recent_Form_SG'] = round(new_tournament_df['Projected_First_Two_Rounds_SG_Totals'], 1)
   top_10_threshold = new_tournament_df['Recent_Form_SG'].nlargest(10).min()
 
-  new_tournament_df['Top_Ten_Finish'] = (new_tournament_df['Recent_Form_SG'] >= 5).astype(int)
+  new_tournament_df['Top_Ten_Finish'] = (new_tournament_df['Recent_Form_SG'] >= top_10_threshold).astype(int)
   new_tournament_df = new_tournament_df.drop_duplicates(subset='Player')
 
   # Include players' current season averages into the Data Frame as a baseline for make future predictions.
@@ -328,4 +328,80 @@ def predict_top_10_performance():
 
   print("\nFeature Importances:")
   print(importances)
+
+  def predict_top_10_performance_player_skill():
+    pebble_data = pd.read_csv('pga_data/pebble_beach_stats.csv')
+    phoenix_open_data = pd.read_csv('pga_data/wm_phoenix_open_stats.csv')
+    genesis_invitational_data = pd.read_csv('pga_data/genesis_invitational_stats.csv')
+    cognizant_class_data = pd.read_csv('pga_data/cognizant_classic_stats.csv')
+    arnold_palmer_data = pd.read_csv('pga_data/arnold_palmer_stats.csv')
+    players_championships_data = pd.read_csv('pga_data/players_championships_stats.csv')
+    valspar_championship_data = pd.read_csv('pga_data/valspar_championship_stats.csv')
+    texas_childrens_houston_open_data = pd.read_csv('pga_data/texas_childrens_houston_open_stats.csv')
+    valero_texas_open_data = pd.read_csv('pga_data/valero_texas_open_stats.csv')
+    masters_data = pd.read_csv('pga_data/masters_stats.csv')
+    phoenix_df = pd.DataFrame(phoenix_open_data)
+    genesis_invitational_df = pd.DataFrame(genesis_invitational_data)
+    pebble_beach_df = pd.DataFrame(pebble_data)
+    cognizant_classic_df = pd.DataFrame(cognizant_class_data)
+    arnold_palmer_df = pd.DataFrame(arnold_palmer_data)
+    players_championships_df = pd.DataFrame(players_championships_data)
+    valspar_championship_df = pd.DataFrame(valspar_championship_data)
+    texas_childrens_houston_open_df = pd.DataFrame(texas_childrens_houston_open_data)
+    valero_texas_open_df = pd.DataFrame(valero_texas_open_data)
+    masters_df = pd.DataFrame(masters_data)
+    tournaments = [phoenix_df, genesis_invitational_df, cognizant_classic_df, pebble_beach_df,
+                  arnold_palmer_df, players_championships_df, valspar_championship_df,
+                  texas_childrens_houston_open_df, valero_texas_open_df]
+    tournament_df = pd.concat(tournaments, ignore_index=True)
+
+    # Calculate a player's current average Strokes Gained statistics per round.
+  round_one_total_sg_putting_one = tournament_df[tournament_df['Rounds'] == 1].groupby('Player')['SG Putting'].transform('mean')
+  round_one_total_sg_around_green_one = tournament_df[tournament_df['Rounds'] == 1].groupby('Player')['SG Around Green'].transform('mean')
+  round_one_total_sg_approach_one = tournament_df[tournament_df['Rounds'] == 1].groupby('Player')['SG Approach'].transform('mean')
+  round_one_total_sg_off_the_tee_one = tournament_df[tournament_df['Rounds'] == 1].groupby('Player')['SG Off The Tee'].transform('mean')
+  round_one_total_sg_tee_to_green_one = tournament_df[tournament_df['Rounds'] == 1].groupby('Player')['SG Tee To Green'].transform('mean')
+  round_one_total_sg_total_one = tournament_df[tournament_df['Rounds'] == 1].groupby('Player')['SG Total'].transform('mean')
+
+  round_one_total_sg_putting_two = tournament_df[tournament_df['Rounds'] == 2].groupby('Player')['SG Putting'].transform('mean')
+  round_one_total_sg_around_green_two = tournament_df[tournament_df['Rounds'] == 2].groupby('Player')['SG Around Green'].transform('mean')
+  round_one_total_sg_approach_two = tournament_df[tournament_df['Rounds'] == 2].groupby('Player')['SG Approach'].transform('mean')
+  round_one_total_sg_off_the_tee_two = tournament_df[tournament_df['Rounds'] == 2].groupby('Player')['SG Off The Tee'].transform('mean')
+  round_one_total_sg_tee_to_green_two = tournament_df[tournament_df['Rounds'] == 2].groupby('Player')['SG Tee To Green'].transform('mean')
+  round_one_total_sg_total_two = tournament_df[tournament_df['Rounds'] == 2].groupby('Player')['SG Total'].transform('mean')
+
+  round_one_total_sg_putting_three = tournament_df[tournament_df['Rounds'] == 3].groupby('Player')['SG Putting'].transform('mean')
+  round_one_total_sg_around_green_three = tournament_df[tournament_df['Rounds'] == 3].groupby('Player')['SG Around Green'].transform('mean')
+  round_one_total_sg_approach_three = tournament_df[tournament_df['Rounds'] == 3].groupby('Player')['SG Approach'].transform('mean')
+  round_one_total_sg_off_the_tee_three = tournament_df[tournament_df['Rounds'] == 3].groupby('Player')['SG Off The Tee'].transform('mean')
+  round_one_total_sg_tee_to_green_three = tournament_df[tournament_df['Rounds'] == 3].groupby('Player')['SG Tee To Green'].transform('mean')
+  round_one_total_sg_total_three = tournament_df[tournament_df['Rounds'] == 3].groupby('Player')['SG Total'].transform('mean')
+
+  round_one_total_sg_putting_four = tournament_df[tournament_df['Rounds'] == 4].groupby('Player')['SG Putting'].transform('mean')
+  round_one_total_sg_around_green_four = tournament_df[tournament_df['Rounds'] == 4].groupby('Player')['SG Around Green'].transform('mean')
+  round_one_total_sg_approach_four = tournament_df[tournament_df['Rounds'] == 4].groupby('Player')['SG Approach'].transform('mean')
+  round_one_total_sg_off_the_tee_four = tournament_df[tournament_df['Rounds'] == 4].groupby('Player')['SG Off The Tee'].transform('mean')
+  round_one_total_sg_tee_to_green_four = tournament_df[tournament_df['Rounds'] == 4].groupby('Player')['SG Tee To Green'].transform('mean')
+  round_one_total_sg_total_four = tournament_df[tournament_df['Rounds'] == 4].groupby('Player')['SG Total'].transform('mean')
+
+  # Create columns that contains the total Strokes Gained per round for each player.
+  tournament_df['Round_One_SG_Total'] = round(round_one_total_sg, 1)
+  round_one_drop = tournament_df.dropna(subset=['Round_One_SG_Total'])
+  round_one_drop.drop_duplicates(subset=['Player'], inplace=True)
+  round_one_results = list(round_one_drop['Round_One_SG_Total'])
+
+  tournament_df['Round_Two_SG_Total'] = round(round_two_total_sg, 1)
+  round_two_drop = tournament_df.dropna(subset=['Round_Two_SG_Total'])
+  round_two_drop.drop_duplicates(subset=['Player'], inplace=True)
+  round_two_results = list(round_two_drop['Round_Two_SG_Total'])
+
+  tournament_df['Round_Three_SG_Total'] = round(round_three_total_sg, 1)
+  round_three_drop = tournament_df.dropna(subset=['Round_Three_SG_Total'])
+  round_three_drop.drop_duplicates(subset=['Player'], inplace=True)
+  round_three_results = list(round_three_drop['Round_Three_SG_Total'])
+
+  tournament_df['Round_Four_SG_Total'] = round(round_four_total_sg, 1)
+  round_four_drop = tournament_df.dropna(subset=['Round_Four_SG_Total'])
+  round_four_drop.drop_duplicates(subset=['Player'], inplace=True)
+  round_four_results = list(round_four_drop['Round_Four_SG_Total'])
 

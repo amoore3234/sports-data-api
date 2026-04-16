@@ -141,5 +141,5 @@ if merge_data_set:
   sg_statistics_df['Scrambling'] = new_scrambling
   
 sg_statistics_df = sg_statistics_df.replace(r'^\s*$', np.nan, regex=True).fillna(0)
-sg_statistics_df.to_csv('pga_data/latest_tournament_results.csv', index=False)
+sg_statistics_df.to_csv('pga_data/masters_stats.csv', index=False)
 
