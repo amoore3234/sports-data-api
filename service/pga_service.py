@@ -538,7 +538,7 @@ sg_statistics = {
 }
 
 players_sg_stats_df = pd.DataFrame(sg_statistics)
-players_sg_stats_df.to_csv('pga_data/sg_performance_totals.csv', index=False)
+
 seasonal_golf_df['Player'] = seasonal_golf_df['Player'].str.lower()
 seasonal_golf_df['Drive Accuracy'] = seasonal_golf_data['DACC'] / 100
 players_sg_stats_df = players_sg_stats_df.merge(
@@ -551,29 +551,27 @@ players_sg_stats_df = players_sg_stats_df.merge(
 players_sg_stats_df['Drive Accuracy'] = players_sg_stats_df['Drive Accuracy'].fillna(
     players_sg_stats_df['Drive Accuracy'].mean()
 )
-players_sg_stats_df.to_csv('pga_data/seasonal_stats.csv', index=False)
+
 threshold = players_sg_stats_df['SG Total'].nlargest(20).min()
-players_sg_stats_df['Is_Top_10'] = (players_sg_stats_df['SG Total'] >= threshold).astype(int)
+players_sg_stats_df['Is_Top_20'] = (players_sg_stats_df['SG Total'] >= threshold).astype(int)
 print(f"Data Frame: {players_sg_stats_df}")
 print(f"Average sg total: {threshold}")
-players_sg_stats_df.to_csv('pga_data/seasonal_overall_data.csv', index=False)
+
 feature = [
   'SG Putting',
   'SG Around Green',
   'SG Approach',
-  'SG Off The Tee',
-  'SG Tee To Green'
+  'SG Off The Tee'
 ]
 # Prepare and train the model by including potential top 10 finishers.
 X = players_sg_stats_df[feature]
-y = players_sg_stats_df['Is_Top_10']
+y = players_sg_stats_df['Is_Top_20']
 
 X = players_sg_stats_df[feature].copy()
-X['SG Approach'] *= 1.2
-X['SG Around Green'] *= 1.1
-# X['Drive Accuracy'] *= 1.5
-X['SG Putting'] *= 0.7
-X['SG Off The Tee'] *= 0.7
+X['SG Approach'] *= 1.8
+X['SG Around Green'] *= 1.5
+X['SG Putting'] *= 0.01
+X['SG Off The Tee'] *= 2
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
@@ -598,19 +596,24 @@ rf_model.fit(X_train_res, y_train_res)
 probabilities = rf_model.predict_proba(X_test)[:, 1]
 
 test_indices = X_test.index
+# 1. Prepare features for the ENTIRE dataset (not just the test split)
+X_all = X.copy() 
+
+# 2. Get probabilities for every single player in the file
+all_probabilities = rf_model.predict_proba(X_all)[:, 1]
 
 # Create the Leaderboard
 leaderboard = pd.DataFrame({
-    'Player': players_sg_stats_df.loc[test_indices, 'Player'],
-    'Actual_Top_10': y_test,
-    'Probability': probabilities
+    'Player': players_sg_stats_df['Player'],
+    'Actual_Top_20': y,
+    'Probability': all_probabilities
 }).sort_values(by='Probability', ascending=False)
 
 print(leaderboard)
 leaderboard.to_csv('pga_data/top_ten_probabilities.csv', index=False)
 
 # Predict and Evaluate
-y_pred = (probabilities >= 0.15).astype(int)
+y_pred = (probabilities >= 0.25).astype(int)
 print(f"Y train counts {y_train.value_counts()}")
 
 print("Confusion Matrix:")
