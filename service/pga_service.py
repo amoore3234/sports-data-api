@@ -364,26 +364,35 @@ round_one_total_sg_tee_to_green = tournament_df[tournament_df['Rounds'] == 1].gr
 round_one_total_sg_total = tournament_df[tournament_df['Rounds'] == 1].groupby('Player')['SG Total'].transform('mean')
 
 tournament_df['SG_Putting_Total_One'] = round(round_one_total_sg_putting, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Putting_Total_One'])
+sg_one_putting_df = tournament_df.dropna(subset=['SG_Putting_Total_One'])
+sg_one_putting_df = sg_one_putting_df.drop_duplicates(subset=['Player'])
+round_one_total_sg_putting_list = np.array(list(sg_one_putting_df['SG_Putting_Total_One']))
+
 tournament_df['SG_Around_Green_Total_One'] = round(round_one_total_sg_around_green, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Around_Green_Total_One'])
+sg_one_around_green_df = tournament_df.dropna(subset=['SG_Around_Green_Total_One'])
+sg_one_around_green_df = sg_one_around_green_df.drop_duplicates(subset=['Player'])
+round_one_total_sg_around_green_list = np.array(list(sg_one_around_green_df['SG_Around_Green_Total_One']))
+
 tournament_df['SG_Approach_Total_One'] = round(round_one_total_sg_approach, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Approach_Total_One'])
+sg_one_approach_df = tournament_df.dropna(subset=['SG_Approach_Total_One'])
+sg_one_approach_df = sg_one_approach_df.drop_duplicates(subset=['Player'])
+round_one_total_sg_approach_list = np.array(list(sg_one_approach_df['SG_Approach_Total_One']))
+
 tournament_df['SG_Off_The_Tee_Total_One'] = round(round_one_total_sg_off_the_tee, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Off_The_Tee_Total_One'])
+sg_one_off_the_tee_df = tournament_df.dropna(subset=['SG_Off_The_Tee_Total_One'])
+sg_one_off_the_tee_df = sg_one_off_the_tee_df.drop_duplicates(subset=['Player'])
+round_one_total_sg_off_the_tee_list = np.array(list(sg_one_off_the_tee_df['SG_Off_The_Tee_Total_One']))
+
 tournament_df['SG_Tee_To_Green_Total_One'] = round(round_one_total_sg_tee_to_green, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Tee_To_Green_Total_One'])
+sg_one_tee_to_green_df = tournament_df.dropna(subset=['SG_Tee_To_Green_Total_One'])
+sg_one_tee_to_green_df = sg_one_tee_to_green_df.drop_duplicates(subset=['Player'])
+round_one_total_sg_tee_to_green_list = np.array(list(sg_one_tee_to_green_df['SG_Tee_To_Green_Total_One']))
+
 tournament_df['SG_Total_One'] = round(round_one_total_sg_total, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Total_One'])
+sg_one_total_df = tournament_df.dropna(subset=['SG_Total_One'])
+sg_one_total_df = sg_one_total_df.drop_duplicates(subset=['Player'])
+round_one_total_sg_total_list = np.array(list(sg_one_total_df['SG_Total_One']))
 
-round_one_total_sg_putting_list = np.array(pd.Series(list(tournament_df['SG_Putting_Total_One'])).dropna().tolist())
-round_one_total_sg_around_green_list = np.array(list(tournament_df['SG_Around_Green_Total_One']))
-round_one_total_sg_approach_list = np.array(list(tournament_df['SG_Approach_Total_One']))
-round_one_total_sg_off_the_tee_list = np.array(list(tournament_df['SG_Off_The_Tee_Total_One']))
-round_one_total_sg_tee_to_green_list = np.array(list(tournament_df['SG_Tee_To_Green_Total_One']))
-round_one_total_sg_total_list = np.array(list(tournament_df['SG_Total_One']))
-
-print(f"Round 1 putting: {round_one_total_sg_putting_list}")
 
 round_two_total_sg_putting = tournament_df[tournament_df['Rounds'] == 2].groupby('Player')['SG Putting'].transform('mean')
 round_two_total_sg_around_green = tournament_df[tournament_df['Rounds'] == 2].groupby('Player')['SG Around Green'].transform('mean')
@@ -393,28 +402,34 @@ round_two_total_sg_tee_to_green = tournament_df[tournament_df['Rounds'] == 2].gr
 round_two_total_sg_total = tournament_df[tournament_df['Rounds'] == 2].groupby('Player')['SG Total'].transform('mean')
 
 tournament_df['SG_Putting_Total_Two'] = round(round_two_total_sg_putting, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Putting_Total_Two'])
+sg_two_putting_df = tournament_df.dropna(subset=['SG_Putting_Total_Two'])
+sg_two_putting_df = sg_two_putting_df.drop_duplicates(subset=['Player'])
+round_two_total_sg_putting_list = np.array(list(sg_two_putting_df['SG_Putting_Total_Two']))
+
 tournament_df['SG_Around_Green_Total_Two'] = round(round_two_total_sg_around_green, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Around_Green_Total_Two'])
+sg_two_around_green_df = tournament_df.dropna(subset=['SG_Around_Green_Total_Two'])
+sg_two_around_green_df = sg_two_around_green_df.drop_duplicates(subset=['Player'])
+round_two_total_sg_around_green_list = np.array(list(sg_two_around_green_df['SG_Around_Green_Total_Two']))
+
 tournament_df['SG_Approach_Total_Two'] = round(round_two_total_sg_approach, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Approach_Total_Two'])
+sg_two_approach_df = tournament_df.dropna(subset=['SG_Approach_Total_Two'])
+sg_two_approach_df = sg_two_approach_df.drop_duplicates(subset=['Player'])
+round_two_total_sg_approach_list = np.array(list(sg_two_approach_df['SG_Approach_Total_Two']))
+
 tournament_df['SG_Off_The_Tee_Total_Two'] = round(round_two_total_sg_off_the_tee, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Off_The_Tee_Total_Two'])
-tournament_df['SG_Tee_To_Green_Total_Two'] = round(round_two_total_sg_tee_to_green, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Tee_To_Green_Total_Two'])
-tournament_df['SG_Total_Two'] = round(round_two_total_sg_total, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Total_Two'])
+sg_two_off_the_tee_df = tournament_df.dropna(subset=['SG_Off_The_Tee_Total_Two'])
+sg_two_off_the_tee_df = sg_two_off_the_tee_df.drop_duplicates(subset=['Player'])
+round_two_total_sg_off_the_tee_list = np.array(list(sg_two_off_the_tee_df['SG_Off_The_Tee_Total_Two']))
 
-print(tournament_df['SG_Putting_Total_Two'])
+tournament_df['SG_Tee_To_Green_Total_Two'] = round(round_one_total_sg_tee_to_green, 3)
+sg_two_tee_to_green_df = tournament_df.dropna(subset=['SG_Tee_To_Green_Total_Two'])
+sg_two_tee_to_green_df = sg_two_tee_to_green_df.drop_duplicates(subset=['Player'])
+round_two_total_sg_tee_to_green_list = np.array(list(sg_two_tee_to_green_df['SG_Tee_To_Green_Total_Two']))
 
-round_two_total_sg_putting_list = np.array(pd.Series(list(tournament_df['SG_Putting_Total_Two'])).dropna().tolist())
-round_two_total_sg_around_green_list = np.array(list(tournament_df['SG_Around_Green_Total_Two']))
-round_two_total_sg_approach_list = np.array(list(tournament_df['SG_Approach_Total_Two']))
-round_two_total_sg_off_the_tee_list = np.array(list(tournament_df['SG_Off_The_Tee_Total_Two']))
-round_two_total_sg_tee_to_green_list = np.array(list(tournament_df['SG_Tee_To_Green_Total_Two']))
-round_two_total_sg_total_list = np.array(list(tournament_df['SG_Total_Two']))
-
-print(f"Round 2 putting: {round_two_total_sg_putting_list}")
+tournament_df['SG_Total_Two'] = round(round_one_total_sg_total, 3)
+sg_two_total_df = tournament_df.dropna(subset=['SG_Total_Two'])
+sg_two_total_df = sg_two_total_df.drop_duplicates(subset=['Player'])
+round_two_total_sg_total_list = np.array(list(sg_two_total_df['SG_Total_Two']))
 
 round_three_total_sg_putting = tournament_df[tournament_df['Rounds'] == 3].groupby('Player')['SG Putting'].transform('mean')
 round_three_total_sg_around_green = tournament_df[tournament_df['Rounds'] == 3].groupby('Player')['SG Around Green'].transform('mean')
@@ -424,24 +439,34 @@ round_three_total_sg_tee_to_green = tournament_df[tournament_df['Rounds'] == 3].
 round_three_total_sg_total = tournament_df[tournament_df['Rounds'] == 3].groupby('Player')['SG Total'].transform('mean')
 
 tournament_df['SG_Putting_Total_Three'] = round(round_three_total_sg_putting, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Putting_Total_Three'])
-tournament_df['SG_Around_Green_Total_Three'] = round(round_three_total_sg_around_green, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Around_Green_Total_Three'])
-tournament_df['SG_Approach_Total_Three'] = round(round_three_total_sg_approach, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Approach_Total_Three'])
-tournament_df['SG_Off_The_Tee_Total_Three'] = round(round_three_total_sg_off_the_tee, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Off_The_Tee_Total_Three'])
-tournament_df['SG_Tee_To_Green_Total_Three'] = round(round_three_total_sg_tee_to_green, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Tee_To_Green_Total_Three'])
-tournament_df['SG_Total_Three'] = round(round_three_total_sg_total, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Total_Three'])
+sg_three_putting_df = tournament_df.dropna(subset=['SG_Putting_Total_Three'])
+sg_three_putting_df = sg_three_putting_df.drop_duplicates(subset=['Player'])
+round_three_total_sg_putting_list = np.array(list(sg_three_putting_df['SG_Putting_Total_Three']))
 
-round_three_total_sg_putting_list = np.array(pd.Series(list(tournament_df['SG_Putting_Total_Three'])).dropna().tolist())
-round_three_total_sg_around_green_list = np.array(list(tournament_df['SG_Around_Green_Total_Three']))
-round_three_total_sg_approach_list = np.array(list(tournament_df['SG_Approach_Total_Three']))
-round_three_total_sg_off_the_tee_list = np.array(list(tournament_df['SG_Off_The_Tee_Total_Three']))
-round_three_total_sg_tee_to_green_list = np.array(list(tournament_df['SG_Tee_To_Green_Total_Three']))
-round_three_total_sg_total_list = np.array(list(tournament_df['SG_Total_Three']))
+tournament_df['SG_Around_Green_Total_Three'] = round(round_three_total_sg_around_green, 3)
+sg_three_around_green_df = tournament_df.dropna(subset=['SG_Around_Green_Total_Three'])
+sg_three_around_green_df = sg_three_around_green_df.drop_duplicates(subset=['Player'])
+round_three_total_sg_around_green_list = np.array(list(sg_three_around_green_df['SG_Around_Green_Total_Three']))
+
+tournament_df['SG_Approach_Total_Three'] = round(round_three_total_sg_approach, 3)
+sg_three_approach_df = tournament_df.dropna(subset=['SG_Approach_Total_Three'])
+sg_three_approach_df = sg_three_approach_df.drop_duplicates(subset=['Player'])
+round_three_total_sg_approach_list = np.array(list(sg_three_approach_df['SG_Approach_Total_Three']))
+
+tournament_df['SG_Off_The_Tee_Total_Three'] = round(round_three_total_sg_off_the_tee, 3)
+sg_three_off_the_tee_df = tournament_df.dropna(subset=['SG_Off_The_Tee_Total_Three'])
+sg_three_off_the_tee_df = sg_three_off_the_tee_df.drop_duplicates(subset=['Player'])
+round_three_total_sg_off_the_tee_list = np.array(list(sg_three_off_the_tee_df['SG_Off_The_Tee_Total_Three']))
+
+tournament_df['SG_Tee_To_Green_Total_Three'] = round(round_one_total_sg_tee_to_green, 3)
+sg_three_tee_to_green_df = tournament_df.dropna(subset=['SG_Tee_To_Green_Total_Three'])
+sg_three_tee_to_green_df = sg_three_tee_to_green_df.drop_duplicates(subset=['Player'])
+round_three_total_sg_tee_to_green_list = np.array(list(sg_three_tee_to_green_df['SG_Tee_To_Green_Total_Three']))
+
+tournament_df['SG_Total_Three'] = round(round_three_total_sg_total, 3)
+sg_three_total_df = tournament_df.dropna(subset=['SG_Total_Three'])
+sg_three_total_df = sg_three_total_df.drop_duplicates(subset=['Player'])
+round_three_total_sg_total_list = np.array(list(sg_three_total_df['SG_Total_Three']))
 
 round_four_total_sg_putting = tournament_df[tournament_df['Rounds'] == 4].groupby('Player')['SG Putting'].transform('mean')
 round_four_total_sg_around_green = tournament_df[tournament_df['Rounds'] == 4].groupby('Player')['SG Around Green'].transform('mean')
@@ -451,53 +476,63 @@ round_four_total_sg_tee_to_green = tournament_df[tournament_df['Rounds'] == 4].g
 round_four_total_sg_total = tournament_df[tournament_df['Rounds'] == 4].groupby('Player')['SG Total'].transform('mean')
 
 tournament_df['SG_Putting_Total_Four'] = round(round_four_total_sg_putting, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Putting_Total_Four'])
-tournament_df['SG_Around_Green_Total_Four'] = round(round_four_total_sg_around_green, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Around_Green_Total_Four'])
-tournament_df['SG_Approach_Total_Four'] = round(round_four_total_sg_approach, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Approach_Total_Three'])
-tournament_df['SG_Off_The_Tee_Total_Four'] = round(round_four_total_sg_off_the_tee, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Off_The_Tee_Total_Three'])
-tournament_df['SG_Tee_To_Green_Total_Four'] = round(round_four_total_sg_tee_to_green, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Tee_To_Green_Total_Three'])
-tournament_df['SG_Total_Four'] = round(round_four_total_sg_total, 3)
-# tournament_df = tournament_df.dropna(subset=['SG_Total_Four'])
+sg_four_putting_df = tournament_df.dropna(subset=['SG_Putting_Total_Four'])
+sg_four_putting_df = sg_four_putting_df.drop_duplicates(subset=['Player'])
+round_four_total_sg_putting_list = np.array(list(sg_four_putting_df['SG_Putting_Total_Four']))
 
-round_four_total_sg_putting_list = np.array(list(tournament_df['SG_Putting_Total_Four']))
-round_four_total_sg_around_green_list = np.array(list(tournament_df['SG_Around_Green_Total_Four']))
-round_four_total_sg_approach_list = np.array(list(tournament_df['SG_Approach_Total_Four']))
-round_four_total_sg_off_the_tee_list = np.array(list(tournament_df['SG_Off_The_Tee_Total_Four']))
-round_four_total_sg_tee_to_green_list = np.array(list(tournament_df['SG_Tee_To_Green_Total_Four']))
-round_four_total_sg_total_list = np.array(list(tournament_df['SG_Total_Four']))
+tournament_df['SG_Around_Green_Total_Four'] = round(round_four_total_sg_around_green, 3)
+sg_four_around_green_df = tournament_df.dropna(subset=['SG_Around_Green_Total_Four'])
+sg_four_around_green_df = sg_four_around_green_df.drop_duplicates(subset=['Player'])
+round_four_total_sg_around_green_list = np.array(list(sg_four_around_green_df['SG_Around_Green_Total_Four']))
+
+tournament_df['SG_Approach_Total_Four'] = round(round_three_total_sg_approach, 3)
+sg_four_approach_df = tournament_df.dropna(subset=['SG_Approach_Total_Four'])
+sg_four_approach_df = sg_four_approach_df.drop_duplicates(subset=['Player'])
+round_four_total_sg_approach_list = np.array(list(sg_four_approach_df['SG_Approach_Total_Four']))
+
+tournament_df['SG_Off_The_Tee_Total_Four'] = round(round_four_total_sg_off_the_tee, 3)
+sg_four_off_the_tee_df = tournament_df.dropna(subset=['SG_Off_The_Tee_Total_Four'])
+sg_four_off_the_tee_df = sg_four_off_the_tee_df.drop_duplicates(subset=['Player'])
+round_four_total_sg_off_the_tee_list = np.array(list(sg_four_off_the_tee_df['SG_Off_The_Tee_Total_Four']))
+
+tournament_df['SG_Tee_To_Green_Total_Four'] = round(round_one_total_sg_tee_to_green, 3)
+sg_four_tee_to_green_df = tournament_df.dropna(subset=['SG_Tee_To_Green_Total_Four'])
+sg_four_tee_to_green_df = sg_four_tee_to_green_df.drop_duplicates(subset=['Player'])
+round_four_total_sg_tee_to_green_list = np.array(list(sg_four_tee_to_green_df['SG_Tee_To_Green_Total_Four']))
+
+tournament_df['SG_Total_Four'] = round(round_three_total_sg_total, 3)
+sg_four_total_df = tournament_df.dropna(subset=['SG_Total_Four'])
+sg_four_total_df = sg_four_total_df.drop_duplicates(subset=['Player'])
+round_four_total_sg_total_list = np.array(list(sg_four_total_df['SG_Total_Four']))
 
 # Calculate the total SG stats
 total_sg_putting = round_one_total_sg_putting_list + round_two_total_sg_putting_list + round_three_total_sg_putting_list + round_four_total_sg_putting_list
-total_sg_around_green = round_one_total_sg_around_green + round_two_total_sg_around_green + round_three_total_sg_around_green + round_four_total_sg_around_green
-total_sg_approach = round_one_total_sg_approach + round_two_total_sg_approach + round_three_total_sg_approach + round_four_total_sg_approach
-total_sg_off_the_tee = round_one_total_sg_off_the_tee + round_two_total_sg_off_the_tee + round_three_total_sg_off_the_tee + round_four_total_sg_off_the_tee
-total_sg_tee_to_green = round_four_total_sg_tee_to_green + round_two_total_sg_tee_to_green + round_three_total_sg_tee_to_green + round_four_total_sg_tee_to_green
-total_sg_total = round_four_total_sg_total + round_two_total_sg_total + round_three_total_sg_total + round_four_total_sg_total
+total_sg_around_green = round_one_total_sg_around_green_list + round_two_total_sg_around_green_list + round_three_total_sg_around_green_list + round_four_total_sg_around_green_list
+total_sg_approach = round_one_total_sg_approach_list + round_two_total_sg_approach_list + round_three_total_sg_approach_list + round_four_total_sg_approach_list
+total_sg_off_the_tee = round_one_total_sg_off_the_tee_list + round_two_total_sg_off_the_tee_list + round_three_total_sg_off_the_tee_list + round_four_total_sg_off_the_tee_list
+total_sg_tee_to_green = round_four_total_sg_tee_to_green_list + round_two_total_sg_tee_to_green_list + round_three_total_sg_tee_to_green_list + round_four_total_sg_tee_to_green_list
+total_sg_total = round_four_total_sg_total_list + round_two_total_sg_total_list + round_three_total_sg_total_list + round_four_total_sg_total_list
 
-print(f"Total sg putting: {total_sg_putting}")
+np.set_printoptions(precision=3, suppress=True)
+players = list(tournament_df['Player'].unique())
+total_sg_putting = [round(x, 3) + 0.0 for x in total_sg_putting]
+total_sg_around_green = [round(x, 3) + 0.0 for x in total_sg_around_green]
+total_sg_approach = [round(x, 3) + 0.0 for x in total_sg_approach]
+total_sg_off_the_tee = [round(x, 3) + 0.0 for x in total_sg_off_the_tee]
+total_sg_tee_to_green = [round(x, 3) + 0.0 for x in total_sg_tee_to_green]
+total_sg_total = [round(x, 3) + 0.0 for x in total_sg_total]
+print(f"Unique players size: {len(players)}")
+print(f"Putting size: {len(total_sg_putting)}")
+print(f"Around green size: {len(total_sg_around_green)}")
+sg_statistics = {
+  'Player': players,
+  'SG Putting': total_sg_putting,
+  'SG Around Green': total_sg_around_green,
+  'SG Approach': total_sg_approach,
+  'SG Off The Tee': total_sg_off_the_tee,
+  'SG Tee To Green': total_sg_tee_to_green,
+  'SG Total': total_sg_total
+}
 
-  # # Create columns that contains the total Strokes Gained per round for each player.
-  # tournament_df['Round_One_SG_Total'] = round(round_one_total_sg, 1)
-  # round_one_drop = tournament_df.dropna(subset=['Round_One_SG_Total'])
-  # round_one_drop.drop_duplicates(subset=['Player'], inplace=True)
-  # round_one_results = list(round_one_drop['Round_One_SG_Total'])
-
-  # tournament_df['Round_Two_SG_Total'] = round(round_two_total_sg, 1)
-  # round_two_drop = tournament_df.dropna(subset=['Round_Two_SG_Total'])
-  # round_two_drop.drop_duplicates(subset=['Player'], inplace=True)
-  # round_two_results = list(round_two_drop['Round_Two_SG_Total'])
-
-  # tournament_df['Round_Three_SG_Total'] = round(round_three_total_sg, 1)
-  # round_three_drop = tournament_df.dropna(subset=['Round_Three_SG_Total'])
-  # round_three_drop.drop_duplicates(subset=['Player'], inplace=True)
-  # round_three_results = list(round_three_drop['Round_Three_SG_Total'])
-
-  # tournament_df['Round_Four_SG_Total'] = round(round_four_total_sg, 1)
-  # round_four_drop = tournament_df.dropna(subset=['Round_Four_SG_Total'])
-  # round_four_drop.drop_duplicates(subset=['Player'], inplace=True)
-  # round_four_results = list(round_four_drop['Round_Four_SG_Total'])
+players_sg_stats_df = pd.DataFrame(sg_statistics)
 
