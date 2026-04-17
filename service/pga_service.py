@@ -539,18 +539,18 @@ sg_statistics = {
 
 players_sg_stats_df = pd.DataFrame(sg_statistics)
 players_sg_stats_df.to_csv('pga_data/sg_performance_totals.csv', index=False)
-# seasonal_golf_df['Player'] = seasonal_golf_df['Player'].str.lower()
-# seasonal_golf_df['Drive Accuracy'] = seasonal_golf_data['DACC'] / 100
-# players_sg_stats_df = players_sg_stats_df.merge(
-#     seasonal_golf_df[['Player', 'Drive Accuracy']],
-#     on='Player',
-#     how='left'
-# )
+seasonal_golf_df['Player'] = seasonal_golf_df['Player'].str.lower()
+seasonal_golf_df['Drive Accuracy'] = seasonal_golf_data['DACC'] / 100
+players_sg_stats_df = players_sg_stats_df.merge(
+    seasonal_golf_df[['Player', 'Drive Accuracy']],
+    on='Player',
+    how='left'
+)
 
-# # Fill any missing accuracy data with the average (so the model doesn't crash)
-# players_sg_stats_df['Drive Accuracy'] = players_sg_stats_df['Drive Accuracy'].fillna(
-#     players_sg_stats_df['Drive Accuracy'].mean()
-# )
+#  Fill any missing accuracy data with the average (so the model doesn't crash)
+players_sg_stats_df['Drive Accuracy'] = players_sg_stats_df['Drive Accuracy'].fillna(
+    players_sg_stats_df['Drive Accuracy'].mean()
+)
 players_sg_stats_df.to_csv('pga_data/seasonal_stats.csv', index=False)
 threshold = players_sg_stats_df['SG Total'].nlargest(20).min()
 players_sg_stats_df['Is_Top_10'] = (players_sg_stats_df['SG Total'] >= threshold).astype(int)
@@ -561,7 +561,8 @@ feature = [
   'SG Putting',
   'SG Around Green',
   'SG Approach',
-  'SG Off The Tee'
+  'SG Off The Tee',
+  'SG Tee To Green'
 ]
 # Prepare and train the model by including potential top 10 finishers.
 X = players_sg_stats_df[feature]
@@ -572,6 +573,7 @@ X['SG Approach'] *= 1.2
 X['SG Around Green'] *= 1.1
 # X['Drive Accuracy'] *= 1.5
 X['SG Putting'] *= 0.7
+X['SG Off The Tee'] *= 0.7
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
