@@ -4,6 +4,7 @@ import csv
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
+from imblearn.over_sampling import SMOTE
 
 def player_expected_score():
 
@@ -340,6 +341,7 @@ valspar_championship_data = pd.read_csv('pga_data/valspar_championship_stats.csv
 texas_childrens_houston_open_data = pd.read_csv('pga_data/texas_childrens_houston_open_stats.csv')
 valero_texas_open_data = pd.read_csv('pga_data/valero_texas_open_stats.csv')
 masters_data = pd.read_csv('pga_data/masters_stats.csv')
+seasonal_golf_data = pd.read_csv('pga_data/seasonal_golf_stats.csv')
 phoenix_df = pd.DataFrame(phoenix_open_data)
 genesis_invitational_df = pd.DataFrame(genesis_invitational_data)
 pebble_beach_df = pd.DataFrame(pebble_data)
@@ -350,6 +352,7 @@ valspar_championship_df = pd.DataFrame(valspar_championship_data)
 texas_childrens_houston_open_df = pd.DataFrame(texas_childrens_houston_open_data)
 valero_texas_open_df = pd.DataFrame(valero_texas_open_data)
 masters_df = pd.DataFrame(masters_data)
+seasonal_golf_df = pd.DataFrame(seasonal_golf_data)
 tournaments = [phoenix_df, genesis_invitational_df, cognizant_classic_df, pebble_beach_df,
               arnold_palmer_df, players_championships_df, valspar_championship_df,
               texas_childrens_houston_open_df, valero_texas_open_df]
@@ -535,4 +538,89 @@ sg_statistics = {
 }
 
 players_sg_stats_df = pd.DataFrame(sg_statistics)
+players_sg_stats_df.to_csv('pga_data/sg_performance_totals.csv', index=False)
+# seasonal_golf_df['Player'] = seasonal_golf_df['Player'].str.lower()
+# seasonal_golf_df['Drive Accuracy'] = seasonal_golf_data['DACC'] / 100
+# players_sg_stats_df = players_sg_stats_df.merge(
+#     seasonal_golf_df[['Player', 'Drive Accuracy']],
+#     on='Player',
+#     how='left'
+# )
 
+# # Fill any missing accuracy data with the average (so the model doesn't crash)
+# players_sg_stats_df['Drive Accuracy'] = players_sg_stats_df['Drive Accuracy'].fillna(
+#     players_sg_stats_df['Drive Accuracy'].mean()
+# )
+players_sg_stats_df.to_csv('pga_data/seasonal_stats.csv', index=False)
+threshold = players_sg_stats_df['SG Total'].nlargest(20).min()
+players_sg_stats_df['Is_Top_10'] = (players_sg_stats_df['SG Total'] >= threshold).astype(int)
+print(f"Data Frame: {players_sg_stats_df}")
+print(f"Average sg total: {threshold}")
+players_sg_stats_df.to_csv('pga_data/seasonal_overall_data.csv', index=False)
+feature = [
+  'SG Putting',
+  'SG Around Green',
+  'SG Approach',
+  'SG Off The Tee'
+]
+# Prepare and train the model by including potential top 10 finishers.
+X = players_sg_stats_df[feature]
+y = players_sg_stats_df['Is_Top_10']
+
+X = players_sg_stats_df[feature].copy()
+X['SG Approach'] *= 1.2
+X['SG Around Green'] *= 1.1
+# X['Drive Accuracy'] *= 1.5
+X['SG Putting'] *= 0.7
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+# Create the model.
+# Include parameters to avoid overfitting to develop a more accurate prediction.
+rf_model = RandomForestClassifier(
+  n_estimators=1000,
+  max_depth=6,
+  class_weight={0: 1, 1: 5},
+  random_state=42)
+
+# 1. Apply SMOTE only to the TRAINING data
+sm = SMOTE(random_state=42, k_neighbors=2) # k_neighbors=2 because you have so few samples
+X_train_res, y_train_res = sm.fit_resample(X_train, y_train)
+
+print(f"Winners in Training: {y_train_res.value_counts()[1]}")
+print(f"Winners in Test: {y_test.value_counts().get(1, 0)}")
+rf_model.fit(X_train_res, y_train_res)
+
+# Get probabilities for all classes (0 = Field, 1 = Top 10)
+# [:, 1] grabs only the probability of finishing in the Top 10
+probabilities = rf_model.predict_proba(X_test)[:, 1]
+
+test_indices = X_test.index
+
+# Create the Leaderboard
+leaderboard = pd.DataFrame({
+    'Player': players_sg_stats_df.loc[test_indices, 'Player'],
+    'Actual_Top_10': y_test,
+    'Probability': probabilities
+}).sort_values(by='Probability', ascending=False)
+
+print(leaderboard)
+leaderboard.to_csv('pga_data/top_ten_probabilities.csv', index=False)
+
+# Predict and Evaluate
+y_pred = (probabilities >= 0.15).astype(int)
+print(f"Y train counts {y_train.value_counts()}")
+
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+# View Feature Importance
+importances = pd.DataFrame({
+    'Metric': X.columns,
+    'Importance': rf_model.feature_importances_
+}).sort_values(by='Importance', ascending=False)
+
+print("\nFeature Importances:")
+print(importances)
