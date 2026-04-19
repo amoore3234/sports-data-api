@@ -27,7 +27,8 @@ def get_pitcher_profile_test():
       'STL@DET',
       'TOR@LAA',
       'CWS@KC',
-      'MIL@CHC'
+      'MIL@CHC',
+      'CWS@KC'
     ],
     'Team': [
       'STL',
@@ -393,7 +394,7 @@ def get_batter_profile_test():
     ]
   })
 
-def get_starting_pitchers_test():
+def get_starting_players_test():
   return pd.DataFrame({
     'Starting Lineup': [
       'D. May R',
@@ -402,17 +403,7 @@ def get_starting_pitchers_test():
       'Anthony Kay L',
       'Chad Patrick R',
       'Tony Bennet L',
-      'Seth Lugo R'
-      '2B J. Wetherholt L',
-      'DH Ivan Herrera R',
-      '1B A. Burleson L',
-      '3B Nolan Gorman L',
-    ]
-  })
-
-def get_starting_hitters_test():
-  return pd.DataFrame({
-    'Starting Lineup': [
+      'Seth Lugo R',
       '2B J. Wetherholt L',
       'DH Ivan Herrera R',
       '1B A. Burleson L',
@@ -461,6 +452,7 @@ def get_player_salary_data_dk():
       'SP',
       'SP',
       'SP',
+      'SP',
       '2B',
       'OF',
       '1B',
@@ -469,7 +461,7 @@ def get_player_salary_data_dk():
       'SS',
       'OF',
       'C',
-      'OF'
+      'OF',
       '3B',
       'SS',
       '2B',
@@ -504,6 +496,7 @@ def get_player_salary_data_dk():
       'Lazaro Estrada (4892888)',
       'Anthony Kay (4892889)',
       'Chad Patrick (4892890)',
+      'Tony Bennet L (4892891)',
       'Seth Lugo (4892892)',
       'J. Wetherholt (4892893)',
       'Ivan Herrera (4892895)',
@@ -548,6 +541,7 @@ def get_player_salary_data_dk():
       'Lazaro Estrada',
       'Anthony Kay',
       'Chad Patrick',
+      'Tony Bennet',
       'Seth Lugo',
       'J. Wetherholt',
       'Ivan Herrera',
@@ -591,6 +585,7 @@ def get_player_salary_data_dk():
       'STL@DET',
       'TOR@LAA',
       'CWS@KC',
+      'MIL@CHC',
       'MIL@CHC',
       'CWS@KC',
       'STL@DET',
@@ -636,6 +631,7 @@ def get_player_salary_data_dk():
       'TOR',
       'CWS',
       'MIL',
+      'CHC',
       'KC',
       'STL',
       'STL',
@@ -680,6 +676,7 @@ def get_player_salary_data_dk():
       9600,
       9000,
       8700,
+      8900,
       8500,
       4500,
       3800,
@@ -985,5 +982,63 @@ def get_player_salary_data_fd():
       3200,
       2700,
       3600
+    ]
+  })
+
+def get_top_order_starters():
+  return pd.DataFrame({
+    'batter_id': [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    'batter_name': [
+      'J. Wetherholt',
+      'Ivan Herrera',
+      'A. Burleson',
+      'Nolan Gorman',
+      'Colt Keith',
+      'K. McGonigle',
+      'G. Torres',
+      'K. Carpenter',
+      'C. Meidroth',
+      'C. Montgomery',
+      'M. Vargas',
+      'A. Benintendi',
+      'M. Garcia',
+      'Bobby Witt',
+      'V. Pasquantino',
+      'S. Perez'
+    ],
+    'batter_team': [
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'DET',
+      'DET',
+      'DET',
+      'DET',
+      'CWS',
+      'CWS',
+      'CWS',
+      'CWS',
+      'KC',
+      'KC',
+      'KC',
+      'KC'
     ]
   })

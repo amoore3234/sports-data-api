@@ -85,8 +85,8 @@ def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_dat
   if is_confirmed_starters:
     batting_lineup_df = generate_starting_lineup(salary_data_df, batting_lineup_df, batting_lineup_df, 'batter_name', 'batting_teamabbrev')
     print(f"Generate lineup: {batting_lineup_df}")
-    pitcher_lineup_df = generate_confirmed_starting_lineups(pitcher_lineup_df, salary_data_df)
-    batting_lineup_df = generate_confirmed_starting_lineups(batting_lineup_df, salary_data_df)
+    pitcher_lineup_df = confirmed_starting_lineups(pitcher_lineup_df, salary_data_df)
+    batting_lineup_df = confirmed_starting_lineups(batting_lineup_df, salary_data_df)
 
   if is_hitter_friendly_park:
     # Don't return pitchers at parks that favor hitters.
@@ -95,8 +95,8 @@ def generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_dat
   batting_lineup_df = get_missing_hitters(batting_lineup_df)
   generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df, is_hitter_friendly_park, is_fanduel_lineup)
 
-def generate_confirmed_starting_lineups(lineup_df, salary_data_df) -> pd.DataFrame:
-  """Confirms that players are starting in the game.
+def confirmed_starting_lineups(lineup_df, salary_data_df, is_stacking) -> pd.DataFrame:
+  """Confirms which players are starting in the game.
 
   Parameters:
     lineup_df: Pitcher or hitter Data Frame.
@@ -104,21 +104,15 @@ def generate_confirmed_starting_lineups(lineup_df, salary_data_df) -> pd.DataFra
   Returns:
       DataFrame: Returns a new data frame with players that are officially starting in the game.
   """
-  starting_lineup_data = pd.read_csv('mlb_data/confirmed_starting_lineups.csv')
-  starting_lineup_df = pd.DataFrame(starting_lineup_data)
-  is_stacking = False
-  dk_pitcher = (lineup_df['position'].str.contains('SP')).any()
-  fd_pitcher = (lineup_df['position'].str.contains('P')).any()
+  starting_lineup_df = data.get_starting_lineup()
 
-  if dk_pitcher or fd_pitcher:
-    return get_pitcher_starters(lineup_df, starting_lineup_df)
-  elif is_stacking:
+  if is_stacking:
     # hitter_profile_df = stats_util.load_mlb_batting_profiles()
     # batting_lineup_df = generate_starting_lineup(salary_data_df, hitter_profile_df, hitter_profile_df, 'batter_name', 'batting_teamabbrev')
     batting_starting_lineup = generate_top_order_starters(lineup_df)
     return generate_stack_lineup(batting_starting_lineup, starting_lineup_df, salary_data_df)
   else:
-    return get_batter_starters(lineup_df)
+    return get_starting_batters_or_pitchers(lineup_df)
 
 def get_missing_hitters(batting_lineup_df) -> pd.DataFrame:
   """Generates a list of hitters to fill in open positions.
@@ -148,18 +142,16 @@ def get_missing_hitters(batting_lineup_df) -> pd.DataFrame:
       multi_position = starting_position.split('/')
       position_splits.append(multi_position[0])
       position_splits.append(multi_position[-1])
+    position_splits.append(starting_position)
 
   #Include the position splits with the current list of positions in the Data Frame.
   merged_list = starting_lineup_positions + position_splits
 
   frequency_map = Counter(positions) + Counter(merged_list)
-
+  print(frequency_map)
   for position in positions:
     if position not in frequency_map:
-      new_hitter_roster_df = get_starting_batters_or_pitchers(batting_lineup_df, position)
-      batting_lineup_df = pd.concat([batting_lineup_df, new_hitter_roster_df], ignore_index=True)
-
-  batting_lineup_df = batting_lineup_df.fillna('')
+      batting_lineup_df = get_starting_batters_or_pitchers(batting_lineup_df, position)
 
   return batting_lineup_df
 
@@ -190,7 +182,7 @@ def get_missing_hitters(batting_lineup_df) -> pd.DataFrame:
 #   new_batting_lineup_df = new_batting_lineup_df[new_batting_lineup_df[average_pts_per_game] > average_fts_pts]
 #   return new_batting_lineup_df
 
-def get_starting_batters_or_pitchers(lineup_df, position):
+def get_starting_batters_or_pitchers(lineup_df):
   """Generate starting hitters and pitchers.
 
   Parameters:
@@ -203,13 +195,10 @@ def get_starting_batters_or_pitchers(lineup_df, position):
   if 'batter_name' in lineup_df.columns:
     positions = 'C|1B|2B|3B|SS|CF|LF|RF|DH'
     hitters_list = get_list_of_hitters(positions)
-    if position:
-      hitters_list = get_list_of_hitters(position)
 
     return get_starters(lineup_df, hitters_list, column_name='batter_name', length_value=4, index=2)
   else:
     pitchers_list = list(data.get_starting_lineup()['Starting Lineup'])
-
     return get_starters(lineup_df, pitchers_list, column_name='pitcher_name', length_value=3, index=1)
 
 def get_starters(lineup_df, starting_list, column_name, length_value, index) -> pd.DataFrame:
