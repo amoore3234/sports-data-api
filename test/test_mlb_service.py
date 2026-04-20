@@ -8,17 +8,43 @@ import test_data as data
 class TestMlbService(unittest.TestCase):
 
   @patch('util.data_util.get_starting_lineup')
+  def test_confirmed_starting_lineups_stackingz_true(self, mock_get_starting_lineup):
+
+    # Arrange
+    expected_pitchers_df = data.get_pitcher_profile_test_dk()
+    dk_salary_df = data.get_player_salary_data_dk()
+    mock_get_starting_lineup.return_value = data.get_top_order_starters
+
+    actual = service.confirmed_starting_lineups(expected_pitchers_df, dk_salary_df, False)
+    players = ['D. May (4892886)']
+    assert len(actual['pitcher_name']) == 6
+    assert actual['Name + ID'].isin(players).any()
+
+  @patch('util.data_util.get_starting_lineup')
   def test_confirmed_starting_lineups_dk_pitchers(self, mock_get_starting_lineup):
 
     # Arrange
-    expected_pitchers_df = data.get_pitcher_profile_test()
+    expected_pitchers_df = data.get_pitcher_profile_test_dk()
     dk_salary_df = data.get_player_salary_data_dk()
     mock_get_starting_lineup.return_value = data.get_starting_players_test()
 
     actual = service.confirmed_starting_lineups(expected_pitchers_df, dk_salary_df, False)
-    print(actual)
+    players = ['D. May (4892886)']
+    assert len(actual['pitcher_name']) == 6
+    assert actual['Name + ID'].isin(players).any()
+
+  @patch('util.data_util.get_starting_lineup')
+  def test_confirmed_starting_lineups_fd_pitchers(self, mock_get_starting_lineup):
+
+    # Arrange
+    expected_pitchers_df = data.get_pitcher_profile_test_fd()
+    fd_salary_df = data.get_player_salary_data_fd()
+    mock_get_starting_lineup.return_value = data.get_starting_players_test()
+
+    actual = service.confirmed_starting_lineups(expected_pitchers_df, fd_salary_df, False)
 
     assert len(actual['pitcher_name']) == 6
+    assert actual['Name + ID'].str.contains('128430-119414:D. May').any()
 
   @patch('service.mlb_service.get_starting_batters_or_pitchers')
   def test_get_missing_hitters(self, mock_get_starting_batters_or_pitchers):
@@ -37,10 +63,24 @@ class TestMlbService(unittest.TestCase):
     assert exptected_hitters_df['batter_name'].all() == actual['batter_name'].all()
 
   @patch('util.data_util.get_starting_lineup')
-  def test_get_starting_pitchers(self, mock_get_starting_lineup):
+  def test_get_starting_pitchers_dk(self, mock_get_starting_lineup):
 
     #Arrange
-    expected = data.get_pitcher_profile_test()
+    expected = data.get_pitcher_profile_test_dk()
+    mock_get_starting_lineup.return_value = data.get_starting_players_test()
+
+    #Act
+    actual = service.get_starting_batters_or_pitchers(expected)
+
+    #Assert
+    assert len(actual) == 6
+    assert expected['pitcher_name'].all() == actual['pitcher_name'].all()
+
+  @patch('util.data_util.get_starting_lineup')
+  def test_get_starting_pitchers_fd(self, mock_get_starting_lineup):
+
+    #Arrange
+    expected = data.get_pitcher_profile_test_fd()
     mock_get_starting_lineup.return_value = data.get_starting_players_test()
 
     #Act

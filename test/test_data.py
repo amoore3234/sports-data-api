@@ -1,6 +1,6 @@
 import pandas as pd
 
-def get_pitcher_profile_test():
+def get_pitcher_profile_test_dk():
   return pd.DataFrame({
     'pitcher_id': [1, 2, 3, 4, 5, 6],
     'pitcher_name': ['Dustin May', 'Jack Flaherty', 'Lazaro Estrada', 'Anthony Kay', 'Chad Patrick', 'Seth Lugo'],
@@ -13,6 +13,54 @@ def get_pitcher_profile_test():
       'Anthony Kay (4892889)',
       'Chad Patrick (4892890)',
       'Seth Lugo (4892892)'
+    ],
+    'Name': [
+      'D. May',
+      'Jack Flaherty',
+      'Lazaro Estrada',
+      'Anthony Kay',
+      'Chad Patrick',
+      'Seth Lugo'
+    ],
+    'Game Info': [
+      'STL@DET',
+      'STL@DET',
+      'TOR@LAA',
+      'CWS@KC',
+      'MIL@CHC',
+      'CWS@KC'
+    ],
+    'Team': [
+      'STL',
+      'DET',
+      'TOR',
+      'CWS',
+      'MIL',
+      'KC'
+    ],
+    'Salary': [
+      9900,
+      9700,
+      9600,
+      9000,
+      8700,
+      8500
+    ]
+  })
+
+def get_pitcher_profile_test_fd():
+  return pd.DataFrame({
+    'pitcher_id': [1, 2, 3, 4, 5, 6],
+    'pitcher_name': ['Dustin May', 'Jack Flaherty', 'Lazaro Estrada', 'Anthony Kay', 'Chad Patrick', 'Seth Lugo'],
+    'pitcher_team': ['STL', 'DET', 'TOR', 'CWS', 'MIL', 'KC'],
+    'position': ['SP', 'SP', 'SP', 'SP', 'SP', 'SP'],
+    'Name + ID': [
+      '128430-119414:D. May',
+      '128430-113564:Jack Flaherty',
+      '128430-115623:Lazaro Estrada',
+      '128430-107611:Anthony Kay',
+      '128430-102743:Chad Patrick',
+      '128430-103289:Seth Lugo',
     ],
     'Name': [
       'D. May',
