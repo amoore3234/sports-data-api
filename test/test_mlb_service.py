@@ -7,29 +7,52 @@ import test_data as data
 
 class TestMlbService(unittest.TestCase):
 
-  @patch('util.data_util.get_starting_lineup')
-  def test_confirmed_starting_lineups_stackingz_true(self, mock_get_starting_lineup):
+  @patch('util.data_util.get_starting_lineup', 'service.mlb_service.generate_stack_lineup')
+  def test_confirmed_starting_lineups_stacking_true(self, mock_get_top_order_starters, mock_generate_stack_lineup, mock_get_starting_lineup):
 
     # Arrange
-    expected_pitchers_df = data.get_pitcher_profile_test_dk()
+    expected_hitters_df = data.get_batter_profile_data()
     dk_salary_df = data.get_player_salary_data_dk()
-    mock_get_starting_lineup.return_value = data.get_top_order_starters
+    mock_get_top_order_starters.return_value = data.get_top_order_starters()
+    mock_generate_stack_lineup.return_value = data.get_hitter_stack_lineup_data_dk()
+    mock_get_starting_lineup.return_value = data.get_starting_players_data()
+    expected_starting_hitters = [
+      'J. Wetherholt',
+      'Ivan Herrera',
+      'A. Burleson',
+      'Nolan Gorman',
+      'J. Walker',
+      'T. Saggese',
+      'N. Church',
+      'Pedro Pages',
+      'Victor Scott',
+      'Colt Keith',
+      'K. McGonigle',
+      'G. Torres',
+      'K. Carpenter',
+      'Riley Greene',
+      'D. Dingler',
+      'Z. McKinstry',
+      'S. Torkelson',
+      'P. Meadows'
+    ]
 
-    actual = service.confirmed_starting_lineups(expected_pitchers_df, dk_salary_df, False)
-    players = ['D. May (4892886)']
-    assert len(actual['pitcher_name']) == 6
-    assert actual['Name + ID'].isin(players).any()
+    actual = service.confirmed_starting_lineups(expected_hitters_df, dk_salary_df, True)
+
+    assert len(actual['batter_name']) == len(expected_starting_hitters)
+    assert actual['batter'].isin(expected_starting_hitters).all()
 
   @patch('util.data_util.get_starting_lineup')
   def test_confirmed_starting_lineups_dk_pitchers(self, mock_get_starting_lineup):
 
     # Arrange
-    expected_pitchers_df = data.get_pitcher_profile_test_dk()
+    expected_pitchers_df = data.get_pitcher_profile_data_dk()
     dk_salary_df = data.get_player_salary_data_dk()
-    mock_get_starting_lineup.return_value = data.get_starting_players_test()
+    mock_get_starting_lineup.return_value = data.get_starting_players_data()
+    players = ['D. May (4892886)']
 
     actual = service.confirmed_starting_lineups(expected_pitchers_df, dk_salary_df, False)
-    players = ['D. May (4892886)']
+
     assert len(actual['pitcher_name']) == 6
     assert actual['Name + ID'].isin(players).any()
 
@@ -37,23 +60,24 @@ class TestMlbService(unittest.TestCase):
   def test_confirmed_starting_lineups_fd_pitchers(self, mock_get_starting_lineup):
 
     # Arrange
-    expected_pitchers_df = data.get_pitcher_profile_test_fd()
+    expected_pitchers_df = data.get_pitcher_profile_data_fd()
     fd_salary_df = data.get_player_salary_data_fd()
-    mock_get_starting_lineup.return_value = data.get_starting_players_test()
+    mock_get_starting_lineup.return_value = data.get_starting_players_data()
+    players = ['128430-119414:D. May']
 
     actual = service.confirmed_starting_lineups(expected_pitchers_df, fd_salary_df, False)
 
     assert len(actual['pitcher_name']) == 6
-    assert actual['Name + ID'].str.contains('128430-119414:D. May').any()
+    assert actual['Name + ID'].isin(players).any()
 
   @patch('service.mlb_service.get_starting_batters_or_pitchers')
   def test_get_missing_hitters(self, mock_get_starting_batters_or_pitchers):
 
     # Arrange
-    exptected_hitters_df = data.get_batter_profile_test()
+    exptected_hitters_df = data.get_batter_profile_data()
     positions_to_exclude = ['C']
     exptected_hitters_df = exptected_hitters_df[~exptected_hitters_df['position'].isin(positions_to_exclude)]
-    mock_get_starting_batters_or_pitchers.return_value = data.get_batter_profile_test()
+    mock_get_starting_batters_or_pitchers.return_value = data.get_batter_profile_data()
 
     # Act
     actual = service.get_missing_hitters(exptected_hitters_df)
@@ -66,8 +90,8 @@ class TestMlbService(unittest.TestCase):
   def test_get_starting_pitchers_dk(self, mock_get_starting_lineup):
 
     #Arrange
-    expected = data.get_pitcher_profile_test_dk()
-    mock_get_starting_lineup.return_value = data.get_starting_players_test()
+    expected = data.get_pitcher_profile_data_dk()
+    mock_get_starting_lineup.return_value = data.get_starting_players_data()
 
     #Act
     actual = service.get_starting_batters_or_pitchers(expected)
@@ -80,8 +104,8 @@ class TestMlbService(unittest.TestCase):
   def test_get_starting_pitchers_fd(self, mock_get_starting_lineup):
 
     #Arrange
-    expected = data.get_pitcher_profile_test_fd()
-    mock_get_starting_lineup.return_value = data.get_starting_players_test()
+    expected = data.get_pitcher_profile_data_fd()
+    mock_get_starting_lineup.return_value = data.get_starting_players_data()
 
     #Act
     actual = service.get_starting_batters_or_pitchers(expected)
@@ -94,8 +118,8 @@ class TestMlbService(unittest.TestCase):
   def test_get_starting_batters(self, mock_get_list_of_hitters):
 
     #Arrange
-    expected = data.get_batter_profile_test()
-    mock_get_list_of_hitters.return_value = list(data.get_starting_players_test()['Starting Lineup'])
+    expected = data.get_batter_profile_data()
+    mock_get_list_of_hitters.return_value = list(data.get_starting_players_data()['Starting Lineup'])
 
     #Act
     actual = service.get_starting_batters_or_pitchers(expected)
@@ -108,8 +132,8 @@ class TestMlbService(unittest.TestCase):
   @patch('service.mlb_service.get_list_of_hitters')
   def test_generate_top_order_starters(self, mock_get_list_of_hitters):
     #Arrange
-    hitter_lineup_df = data.get_batter_profile_test()
-    hitters_list = list(data.get_starting_players_test()['Starting Lineup'])
+    hitter_lineup_df = data.get_batter_profile_data()
+    hitters_list = list(data.get_starting_players_data()['Starting Lineup'])
     mock_get_list_of_hitters.return_value = hitters_list
     expected = data.get_top_order_starters()
 
@@ -124,7 +148,7 @@ class TestMlbService(unittest.TestCase):
   def test_get_list_of_hitters_one_position(self, mock_get_starting_lineup):
     #Arrange
     position = 'C'
-    mock_get_starting_lineup.return_value = data.get_starting_players_test()
+    mock_get_starting_lineup.return_value = data.get_starting_players_data()
     expected = ['C Pedro Pages R', 'C D. Dingler R', 'C Edgar Quero S', 'C S. Perez R']
 
     #Act
@@ -138,7 +162,7 @@ class TestMlbService(unittest.TestCase):
 def test_get_list_of_hitters_multiple_position(mock_get_starting_lineup):
   #Arrange
   position = '1B|2B'
-  mock_get_starting_lineup.return_value = data.get_starting_players_test()
+  mock_get_starting_lineup.return_value = data.get_starting_players_data()
   expected = [
     '2B J. Wetherholt L',
     '1B A. Burleson L',
