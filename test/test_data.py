@@ -1184,6 +1184,8 @@ def get_starting_players_data():
       'RF Z. McKinstry L',
       '1B S. Torkelson R',
       'CF P. Meadows L',
+      'LINE STL -163',
+      'O/U 8.0 Runs',
       '2B C. Meidroth R',
       'SS C. Montgomery L',
       '3B M. Vargas R',
@@ -1202,6 +1204,8 @@ def get_starting_players_data():
       '2B J. India R',
       'LF I. Collins S',
       'CF Kyle Isbel L'
+      'LINE CWS -163',
+      'O/U 6.0 Runs',
     ]
   })
 
@@ -1804,3 +1808,15 @@ def get_top_order_starters():
       'KC'
     ]
   })
+
+def get_list_of_game_matchups():
+  return [
+    {
+      'home_team': 'STL',
+      'away_team': 'DET'
+    },
+    {
+      'home_team': 'CWS',
+      'away_team': 'KC'
+    }
+  ]

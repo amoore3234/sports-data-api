@@ -7,40 +7,64 @@ import test_data as data
 
 class TestMlbService(unittest.TestCase):
 
-  @patch('util.data_util.get_starting_lineup', 'service.mlb_service.generate_stack_lineup')
-  def test_confirmed_starting_lineups_stacking_true(self, mock_get_top_order_starters, mock_generate_stack_lineup, mock_get_starting_lineup):
+  @patch('service.mlb_service.generate_top_order_starters')
+  @patch('service.mlb_service.generate_stack_lineup')
+  @patch('util.data_util.get_starting_lineup')
+  def test_confirmed_starting_lineups_stacking_true(
+    self, mock_generate_top_order_starters, mock_generate_stack_lineup, mock_get_starting_lineup):
 
     # Arrange
     expected_hitters_df = data.get_batter_profile_data()
     dk_salary_df = data.get_player_salary_data_dk()
-    mock_get_top_order_starters.return_value = data.get_top_order_starters()
+    mock_generate_top_order_starters.return_value = data.get_top_order_starters()
     mock_generate_stack_lineup.return_value = data.get_hitter_stack_lineup_data_dk()
     mock_get_starting_lineup.return_value = data.get_starting_players_data()
+    # STL vs DET
     expected_starting_hitters = [
       'J. Wetherholt',
       'Ivan Herrera',
       'A. Burleson',
       'Nolan Gorman',
-      'J. Walker',
-      'T. Saggese',
-      'N. Church',
-      'Pedro Pages',
-      'Victor Scott',
       'Colt Keith',
       'K. McGonigle',
       'G. Torres',
-      'K. Carpenter',
-      'Riley Greene',
-      'D. Dingler',
-      'Z. McKinstry',
-      'S. Torkelson',
-      'P. Meadows'
+      'K. Carpenter'
     ]
 
+    # Act
     actual = service.confirmed_starting_lineups(expected_hitters_df, dk_salary_df, True)
 
+    # Assert
     assert len(actual['batter_name']) == len(expected_starting_hitters)
-    assert actual['batter'].isin(expected_starting_hitters).all()
+    assert actual['batter_name'].isin(expected_starting_hitters).all()
+
+  @patch('service.mlb_service.get_list_of_team_game_matchups')
+  def test_generate_stack_lineups(self, mock_get_list_of_team_game_matchups):
+
+    # Arrange
+    dk_salary_df = data.get_player_salary_data_dk()
+    top_order_players_df = data.get_top_order_starters()
+    starting_lineup_df = data.get_starting_players_data()
+    mock_get_list_of_team_game_matchups.return_value = data.get_list_of_game_matchups()
+
+    # STL vs DET
+    expected_starting_hitters = [
+      'J. Wetherholt',
+      'Ivan Herrera',
+      'A. Burleson',
+      'Nolan Gorman',
+      'Colt Keith',
+      'K. McGonigle',
+      'G. Torres',
+      'K. Carpenter'
+    ]
+
+    # Act
+    actual = service.generate_stack_lineup(top_order_players_df, starting_lineup_df, dk_salary_df)
+
+    # Assert
+    assert len(actual['batter_name']) == len(expected_starting_hitters)
+    assert actual['batter_name'].isin(expected_starting_hitters).all()
 
   @patch('util.data_util.get_starting_lineup')
   def test_confirmed_starting_lineups_dk_pitchers(self, mock_get_starting_lineup):
@@ -51,8 +75,10 @@ class TestMlbService(unittest.TestCase):
     mock_get_starting_lineup.return_value = data.get_starting_players_data()
     players = ['D. May (4892886)']
 
+    # Act
     actual = service.confirmed_starting_lineups(expected_pitchers_df, dk_salary_df, False)
 
+    # Assert
     assert len(actual['pitcher_name']) == 6
     assert actual['Name + ID'].isin(players).any()
 
@@ -65,8 +91,10 @@ class TestMlbService(unittest.TestCase):
     mock_get_starting_lineup.return_value = data.get_starting_players_data()
     players = ['128430-119414:D. May']
 
+    # Act
     actual = service.confirmed_starting_lineups(expected_pitchers_df, fd_salary_df, False)
 
+    # Assert
     assert len(actual['pitcher_name']) == 6
     assert actual['Name + ID'].isin(players).any()
 

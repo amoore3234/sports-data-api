@@ -107,8 +107,9 @@ def confirmed_starting_lineups(lineup_df, salary_data_df, is_stacking) -> pd.Dat
   starting_lineup_df = data.get_starting_lineup()
 
   if is_stacking:
-    # hitter_profile_df = stats_util.load_mlb_batting_profiles()
-    # batting_lineup_df = generate_starting_lineup(salary_data_df, hitter_profile_df, hitter_profile_df, 'batter_name', 'batting_teamabbrev')
+    # TODO: Find other ways to use the top order and stack lineup logic.
+    # A toggle can be created within the method for determining when to generate the top order starters.
+    # A stack lineup can be used elsewhere or stay here to generate a stack lineup when true.
     batting_starting_lineup = generate_top_order_starters(lineup_df)
     return generate_stack_lineup(batting_starting_lineup, starting_lineup_df, salary_data_df)
   else:
