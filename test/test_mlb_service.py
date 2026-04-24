@@ -15,7 +15,6 @@ class TestMlbService(unittest.TestCase):
 
     # Arrange
     expected_hitters_df = data.get_batter_profile_data()
-    dk_salary_df = data.get_player_salary_data_dk()
     mock_generate_top_order_starters.return_value = data.get_top_order_starters()
     mock_generate_stack_lineup.return_value = data.get_hitter_stack_lineup_data_dk()
     mock_get_starting_lineup.return_value = data.get_starting_players_data()
@@ -42,7 +41,7 @@ class TestMlbService(unittest.TestCase):
     ]
 
     # Act
-    actual = service.confirmed_starting_lineups(expected_hitters_df, dk_salary_df, True)
+    actual = service.confirmed_starting_lineups(expected_hitters_df, True)
 
     # Assert
     assert len(actual['batter_name']) == len(expected_starting_hitters)
@@ -56,7 +55,6 @@ class TestMlbService(unittest.TestCase):
 
     # Arrange
     expected_hitters_df = data.get_batter_profile_data()
-    dk_salary_df = data.get_player_salary_data_dk()
     mock_generate_top_order_starters.return_value = data.get_top_order_starters()
     mock_generate_stack_lineup.return_value = data.get_hitter_stack_lineup_top_order_data_dk()
     mock_get_starting_lineup.return_value = data.get_starting_players_data()
@@ -73,7 +71,7 @@ class TestMlbService(unittest.TestCase):
     ]
 
     # Act
-    actual = service.confirmed_starting_lineups(expected_hitters_df, dk_salary_df, True)
+    actual = service.confirmed_starting_lineups(expected_hitters_df, True)
 
     # Assert
     assert len(actual['batter_name']) == len(expected_starting_hitters)
@@ -83,7 +81,6 @@ class TestMlbService(unittest.TestCase):
   def test_generate_stack_lineups(self, mock_get_list_of_team_game_matchups):
 
     # Arrange
-    dk_salary_df = data.get_player_salary_data_dk()
     top_order_players_df = data.get_top_order_starters()
     starting_lineup_df = data.get_starting_players_data()
     mock_get_list_of_team_game_matchups.return_value = data.get_list_of_game_matchups()
@@ -101,7 +98,7 @@ class TestMlbService(unittest.TestCase):
     ]
 
     # Act
-    actual = service.generate_stack_lineup(top_order_players_df, starting_lineup_df, dk_salary_df)
+    actual = service.generate_stack_lineup(top_order_players_df, starting_lineup_df)
 
     # Assert
     assert len(actual['batter_name']) == len(expected_starting_hitters)
@@ -112,12 +109,11 @@ class TestMlbService(unittest.TestCase):
 
     # Arrange
     expected_pitchers_df = data.get_pitcher_profile_data_dk()
-    dk_salary_df = data.get_player_salary_data_dk()
     mock_get_starting_lineup.return_value = data.get_starting_players_data()
     players = ['D. May (4892886)']
 
     # Act
-    actual = service.confirmed_starting_lineups(expected_pitchers_df, dk_salary_df, False)
+    actual = service.confirmed_starting_lineups(expected_pitchers_df, False)
 
     # Assert
     assert len(actual['pitcher_name']) == 6
@@ -133,11 +129,11 @@ class TestMlbService(unittest.TestCase):
     players = ['128430-119414:D. May']
 
     # Act
-    actual = service.confirmed_starting_lineups(expected_pitchers_df, fd_salary_df, False)
+    actual = service.confirmed_starting_lineups(expected_pitchers_df, False)
 
     # Assert
     assert len(actual['pitcher_name']) == 6
-    assert actual['Name + ID'].isin(players).any()
+    assert actual['name_id'].isin(players).any()
 
   @patch('service.mlb_service.get_starting_batters_or_pitchers')
   def test_get_missing_hitters(self, mock_get_starting_batters_or_pitchers):

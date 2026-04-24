@@ -54,7 +54,7 @@ def get_pitcher_profile_data_fd():
     'pitcher_name': ['Dustin May', 'Jack Flaherty', 'Lazaro Estrada', 'Anthony Kay', 'Chad Patrick', 'Seth Lugo'],
     'pitcher_team': ['STL', 'DET', 'TOR', 'CWS', 'MIL', 'KC'],
     'position': ['SP', 'SP', 'SP', 'SP', 'SP', 'SP'],
-    'Name + ID': [
+    'name_id': [
       '128430-119414:D. May',
       '128430-113564:Jack Flaherty',
       '128430-115623:Lazaro Estrada',
@@ -62,15 +62,7 @@ def get_pitcher_profile_data_fd():
       '128430-102743:Chad Patrick',
       '128430-103289:Seth Lugo',
     ],
-    'Name': [
-      'D. May',
-      'Jack Flaherty',
-      'Lazaro Estrada',
-      'Anthony Kay',
-      'Chad Patrick',
-      'Seth Lugo'
-    ],
-    'Game Info': [
+    'game_info': [
       'STL@DET',
       'STL@DET',
       'TOR@LAA',
@@ -78,7 +70,7 @@ def get_pitcher_profile_data_fd():
       'MIL@CHC',
       'CWS@KC'
     ],
-    'Team': [
+    'pitcher_teamabbrev': [
       'STL',
       'DET',
       'TOR',
@@ -86,14 +78,16 @@ def get_pitcher_profile_data_fd():
       'MIL',
       'KC'
     ],
-    'Salary': [
+    'salary': [
       9900,
       9700,
       9600,
       9000,
       8700,
       8500
-    ]
+    ],
+    'pitcher_strike_K_percent': [0.42, 0.32, 0.15, 0.25, 0.43, 0.22],
+    'elite_strikeout_K': [True, True, False, False, True, False]
   })
 
 def get_batter_profile_data():
@@ -1014,17 +1008,7 @@ def get_hitter_stack_lineup_top_order_data_fd():
       '2B',
       'OF',
     ],
-    'Name': [
-      'J. Wetherholt',
-      'Ivan Herrera',
-      'A. Burleson',
-      'Nolan Gorman',
-      'Colt Keith',
-      'K. McGonigle',
-      'G. Torres',
-      'K. Carpenter',
-    ],
-    'Name + ID': [
+    'name_id': [
       '128430-124722:J. Wetherholt',
       '128430-125635:Ivan Herrera',
       '128430-122253:A. Burleson',
@@ -1034,7 +1018,7 @@ def get_hitter_stack_lineup_top_order_data_fd():
       '128430-153015:G. Torres',
       '128430-167272:K. Carpenter'
     ],
-    'Game Info': [
+    'game_info': [
       'STL@DET',
       'STL@DET',
       'STL@DET',
@@ -1043,7 +1027,7 @@ def get_hitter_stack_lineup_top_order_data_fd():
       'STL@DET',
       'STL@DET',
     ],
-    'Team': [
+    'batting_teamabbrev': [
       'STL',
       'STL',
       'STL',
@@ -1053,7 +1037,7 @@ def get_hitter_stack_lineup_top_order_data_fd():
       'DET',
       'DET'
     ],
-    'Salary': [
+    'salary': [
       4500,
       3800,
       4500,
@@ -1107,17 +1091,17 @@ def get_hitter_stack_lineup_top_order_data_dk():
       '2B',
       'OF',
     ],
-    'Name': [
-      'J. Wetherholt',
-      'Ivan Herrera',
-      'A. Burleson',
-      'Nolan Gorman',
-      'Colt Keith',
-      'K. McGonigle',
-      'G. Torres',
-      'K. Carpenter',
-    ],
-    'Name + ID': [
+    # 'Name': [
+    #   'J. Wetherholt',
+    #   'Ivan Herrera',
+    #   'A. Burleson',
+    #   'Nolan Gorman',
+    #   'Colt Keith',
+    #   'K. McGonigle',
+    #   'G. Torres',
+    #   'K. Carpenter',
+    # ],
+    'name_id': [
       'J. Wetherholt (4892893)',
       'Ivan Herrera (4892895)',
       'A. Burleson (4892898)',
@@ -1127,7 +1111,7 @@ def get_hitter_stack_lineup_top_order_data_dk():
       'G. Torres (4892922)',
       'K. Carpenter (4892923)',
     ],
-    'Game Info': [
+    'game_info': [
       'STL@DET',
       'STL@DET',
       'STL@DET',
@@ -1135,8 +1119,9 @@ def get_hitter_stack_lineup_top_order_data_dk():
       'STL@DET',
       'STL@DET',
       'STL@DET',
+      'STL@DET'
     ],
-    'Team': [
+    'batting_teamabbrev': [
       'STL',
       'STL',
       'STL',
@@ -1146,7 +1131,7 @@ def get_hitter_stack_lineup_top_order_data_dk():
       'DET',
       'DET'
     ],
-    'Salary': [
+    'salary': [
       4500,
       3800,
       4500,
@@ -2086,7 +2071,25 @@ def get_top_order_starters():
       'KC',
       'KC',
       'KC'
-    ]
+    ],
+    'game_info': [
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC',
+      'CWS@KC'
+    ],
   })
 
 def get_list_of_game_matchups():
@@ -2100,3 +2103,10 @@ def get_list_of_game_matchups():
       'away_team': 'KC'
     }
   ]
+
+def get_mlb_national_league_averages():
+  return pd.DataFrame({
+    'league_pitcher_k_bb_average': [
+      0.29
+    ]
+  })
