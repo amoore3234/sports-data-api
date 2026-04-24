@@ -10,7 +10,7 @@ class TestMlbService(unittest.TestCase):
   @patch('service.mlb_service.generate_top_order_starters')
   @patch('service.mlb_service.generate_stack_lineup')
   @patch('util.data_util.get_starting_lineup')
-  def test_confirmed_starting_lineups_stacking_true(
+  def test_confirmed_starting_lineups_stacking_dk_true(
     self, mock_generate_top_order_starters, mock_generate_stack_lineup, mock_get_starting_lineup):
 
     # Arrange
@@ -20,6 +20,47 @@ class TestMlbService(unittest.TestCase):
     mock_generate_stack_lineup.return_value = data.get_hitter_stack_lineup_data_dk()
     mock_get_starting_lineup.return_value = data.get_starting_players_data()
     # STL vs DET
+    expected_starting_hitters = [
+      'J. Wetherholt',
+      'Ivan Herrera',
+      'A. Burleson',
+      'Nolan Gorman',
+      'J. Walker',
+      'T. Saggese',
+      'N. Church',
+      'Pedro Pages',
+      'Victor Scott',
+      'Colt Keith',
+      'K. McGonigle',
+      'G. Torres',
+      'K. Carpenter',
+      'Riley Greene',
+      'D. Dingler',
+      'Z. McKinstry',
+      'S. Torkelson',
+      'P. Meadows',
+    ]
+
+    # Act
+    actual = service.confirmed_starting_lineups(expected_hitters_df, dk_salary_df, True)
+
+    # Assert
+    assert len(actual['batter_name']) == len(expected_starting_hitters)
+    assert actual['batter_name'].isin(expected_starting_hitters).all()
+
+  @patch('service.mlb_service.generate_top_order_starters')
+  @patch('service.mlb_service.generate_stack_lineup')
+  @patch('util.data_util.get_starting_lineup')
+  def test_confirmed_starting_lineups_stacking_top_order_dk_true(
+    self, mock_generate_top_order_starters, mock_generate_stack_lineup, mock_get_starting_lineup):
+
+    # Arrange
+    expected_hitters_df = data.get_batter_profile_data()
+    dk_salary_df = data.get_player_salary_data_dk()
+    mock_generate_top_order_starters.return_value = data.get_top_order_starters()
+    mock_generate_stack_lineup.return_value = data.get_hitter_stack_lineup_top_order_data_dk()
+    mock_get_starting_lineup.return_value = data.get_starting_players_data()
+    # STL vs DET - Top 4 hitters on each team
     expected_starting_hitters = [
       'J. Wetherholt',
       'Ivan Herrera',

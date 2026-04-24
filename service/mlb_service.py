@@ -254,6 +254,7 @@ def get_list_of_hitters(position) -> list[str]:
 def generate_stack_lineup(hitter_lineup_df, starting_lineup_df, salary_data_df):
   odds_title = 'LINE|O/U'
   odds_df = starting_lineup_df[starting_lineup_df['Starting Lineup'].str.contains(odds_title)]
+  print(f"Filter odds: {odds_df}")
   odds_list = list(odds_df['Starting Lineup'])
 
   winner_odds = []

@@ -972,6 +972,192 @@ def get_hitter_stack_lineup_data_fd():
     ]
   })
 
+def get_hitter_stack_lineup_top_order_data_fd():
+  return pd.DataFrame({
+    'batter_id': [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    'batter_name': [
+      'J. Wetherholt',
+      'Ivan Herrera',
+      'A. Burleson',
+      'Nolan Gorman',
+      'Colt Keith',
+      'K. McGonigle',
+      'G. Torres',
+      'K. Carpenter'
+    ],
+    'batter_team': [
+      'STL',
+      'STL',
+      'STL',
+      'STL'
+      'DET',
+      'DET',
+      'DET',
+      'DET'
+    ],
+    'position': [
+      '2B',
+      'OF',
+      '1B',
+      '3B',
+      '3B',
+      'SS',
+      '2B',
+      'OF',
+    ],
+    'Name': [
+      'J. Wetherholt',
+      'Ivan Herrera',
+      'A. Burleson',
+      'Nolan Gorman',
+      'Colt Keith',
+      'K. McGonigle',
+      'G. Torres',
+      'K. Carpenter',
+    ],
+    'Name + ID': [
+      '128430-124722:J. Wetherholt',
+      '128430-125635:Ivan Herrera',
+      '128430-122253:A. Burleson',
+      '128430-137734:Nolan Gorman',
+      '128430-156625:Colt Keith',
+      '128430-159003:K. McGonigle',
+      '128430-153015:G. Torres',
+      '128430-167272:K. Carpenter'
+    ],
+    'Game Info': [
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+    ],
+    'Team': [
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'DET',
+      'DET',
+      'DET',
+      'DET'
+    ],
+    'Salary': [
+      4500,
+      3800,
+      4500,
+      3100,
+      3900,
+      3900,
+      4900,
+      3100
+    ]
+  })
+
+def get_hitter_stack_lineup_top_order_data_dk():
+  return pd.DataFrame({
+    'batter_id': [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    'batter_name': [
+      'J. Wetherholt',
+      'Ivan Herrera',
+      'A. Burleson',
+      'Nolan Gorman',
+      'Colt Keith',
+      'K. McGonigle',
+      'G. Torres',
+      'K. Carpenter'
+    ],
+    'batter_team': [
+      'STL',
+      'STL',
+      'STL',
+      'STL'
+      'DET',
+      'DET',
+      'DET',
+      'DET'
+    ],
+    'position': [
+      '2B',
+      'OF',
+      '1B',
+      '3B',
+      '3B',
+      'SS',
+      '2B',
+      'OF',
+    ],
+    'Name': [
+      'J. Wetherholt',
+      'Ivan Herrera',
+      'A. Burleson',
+      'Nolan Gorman',
+      'Colt Keith',
+      'K. McGonigle',
+      'G. Torres',
+      'K. Carpenter',
+    ],
+    'Name + ID': [
+      'J. Wetherholt (4892893)',
+      'Ivan Herrera (4892895)',
+      'A. Burleson (4892898)',
+      'Nolan Gorman (4892891)',
+      'Colt Keith (4892920)',
+      'K. McGonigle (4892921)',
+      'G. Torres (4892922)',
+      'K. Carpenter (4892923)',
+    ],
+    'Game Info': [
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+    ],
+    'Team': [
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'DET',
+      'DET',
+      'DET',
+      'DET'
+    ],
+    'Salary': [
+      4500,
+      3800,
+      4500,
+      3100,
+      3900,
+      3900,
+      4900,
+      3100
+    ]
+  })
+
 def get_hitter_stack_lineup_data_dk():
   return pd.DataFrame({
     'batter_id': [
@@ -1156,6 +1342,100 @@ def get_hitter_stack_lineup_data_dk():
     ]
   })
 
+def get_hitter_stack_lineup_top_order_data_dk():
+  return pd.DataFrame({
+    'batter_id': [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    'batter_name': [
+      'J. Wetherholt',
+      'Ivan Herrera',
+      'A. Burleson',
+      'Nolan Gorman',
+      'Colt Keith',
+      'K. McGonigle',
+      'G. Torres',
+      'K. Carpenter'
+    ],
+    'batter_team': [
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'DET',
+      'DET',
+      'DET',
+      'DET'
+    ],
+    'position': [
+      '2B',
+      'OF',
+      '1B',
+      '3B',
+      '3B',
+      'SS',
+      '2B',
+      'OF',
+    ],
+    'Name': [
+      'J. Wetherholt',
+      'Ivan Herrera',
+      'A. Burleson',
+      'Nolan Gorman',
+      'Colt Keith',
+      'K. McGonigle',
+      'G. Torres',
+      'K. Carpenter'
+    ],
+    'Name + ID': [
+      'J. Wetherholt (4892893)',
+      'Ivan Herrera (4892895)',
+      'A. Burleson (4892898)',
+      'Nolan Gorman (4892891)',
+      'Colt Keith (4892920)',
+      'K. McGonigle (4892921)',
+      'G. Torres (4892922)',
+      'K. Carpenter (4892923)'
+    ],
+    'Game Info': [
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET',
+      'STL@DET'
+    ],
+    'Team': [
+      'STL',
+      'STL',
+      'STL',
+      'STL',
+      'DET',
+      'DET',
+      'DET',
+      'DET'
+    ],
+    'Salary': [
+      4500,
+      3800,
+      4500,
+      3100,
+      3900,
+      3900,
+      4900,
+      3100
+    ]
+  })
+
 def get_starting_players_data():
   return pd.DataFrame({
     'Starting Lineup': [
@@ -1203,7 +1483,7 @@ def get_starting_players_data():
       'DH J. Caglianone L',
       '2B J. India R',
       'LF I. Collins S',
-      'CF Kyle Isbel L'
+      'CF Kyle Isbel L',
       'LINE CWS -163',
       'O/U 6.0 Runs',
     ]
