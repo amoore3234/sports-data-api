@@ -6,7 +6,7 @@ def get_pitcher_profile_data_dk():
     'pitcher_name': ['Dustin May', 'Jack Flaherty', 'Lazaro Estrada', 'Anthony Kay', 'Chad Patrick', 'Seth Lugo'],
     'pitcher_team': ['STL', 'DET', 'TOR', 'CWS', 'MIL', 'KC'],
     'position': ['SP', 'SP', 'SP', 'SP', 'SP', 'SP'],
-    'Name + ID': [
+    'name_id': [
       'D. May (4892886)',
       'Jack Flaherty (4892887)',
       'Lazaro Estrada (4892888)',
@@ -14,15 +14,7 @@ def get_pitcher_profile_data_dk():
       'Chad Patrick (4892890)',
       'Seth Lugo (4892892)'
     ],
-    'Name': [
-      'D. May',
-      'Jack Flaherty',
-      'Lazaro Estrada',
-      'Anthony Kay',
-      'Chad Patrick',
-      'Seth Lugo'
-    ],
-    'Game Info': [
+    'game_id': [
       'STL@DET',
       'STL@DET',
       'TOR@LAA',
@@ -30,7 +22,7 @@ def get_pitcher_profile_data_dk():
       'MIL@CHC',
       'CWS@KC'
     ],
-    'Team': [
+    'team': [
       'STL',
       'DET',
       'TOR',
@@ -38,7 +30,7 @@ def get_pitcher_profile_data_dk():
       'MIL',
       'KC'
     ],
-    'Salary': [
+    'salary': [
       9900,
       9700,
       9600,
@@ -88,6 +80,36 @@ def get_pitcher_profile_data_fd():
     ],
     'pitcher_strike_K_percent': [0.42, 0.32, 0.15, 0.25, 0.43, 0.22],
     'elite_strikeout_K': [True, True, False, False, True, False]
+  })
+
+def elite_pitchers_data():
+  return pd.DataFrame({
+    'pitcher_id': [1, 2, 5],
+    'pitcher_name': ['Dustin May', 'Jack Flaherty', 'Chad Patrick'],
+    'pitcher_team': ['STL', 'DET', 'MIL'],
+    'position': ['SP', 'SP', 'SP'],
+    'name_id': [
+      '128430-119414:D. May',
+      '128430-113564:Jack Flaherty',
+      '128430-102743:Chad Patrick'
+    ],
+    'game_info': [
+      'STL@DET',
+      'STL@DET',
+      'MIL@CHC'
+    ],
+    'pitcher_teamabbrev': [
+      'STL',
+      'DET',
+      'MIL'
+    ],
+    'salary': [
+      9900,
+      9700,
+      8700
+    ],
+    'pitcher_strike_K_percent': [0.42, 0.32, 0.43],
+    'elite_strikeout_K': [True, True, True]
   })
 
 def get_batter_profile_data():

@@ -27,12 +27,12 @@ def generate_mlb_lineup() -> dict:
 
   salary_data = pd.read_csv('mlb_data/dk_mlb_salaries.csv')
   salary_data_df = pd.DataFrame(salary_data)
-  salary_data_df.rename(columns={'TeamAbbrev': 'Team'}, inplace=True)
+  salary_data_df.rename(columns={'Name': 'name', 'TeamAbbrev': 'team', 'Name + ID': 'name_id', 'Salary': 'salary', 'Game Info': 'game_info'}, inplace=True)
 
   if is_fanduel_lineup:
     salary_data = pd.read_csv('mlb_data/fd_mlb_salaries.csv')
     salary_data_df = pd.DataFrame(salary_data)
-    salary_data_df.rename(columns={'Nickname': 'Name', 'Player ID + Player Name': 'Name + ID', 'TeamAbbrev': 'Team', 'Game': 'Game Info'}, inplace=True)
+    salary_data_df.rename(columns={'Nickname': 'name', 'Player ID + Player Name': 'name_id', 'TeamAbbrev': 'team', 'Game': 'game_info', 'Salary': 'salary'}, inplace=True)
 
   pitcher_profile_df = stats_util.load_mlb_pitching_profiles()
   pitcher_lineup_df = pitcher_profile_df.dropna()
