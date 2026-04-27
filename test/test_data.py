@@ -1498,7 +1498,7 @@ def get_starting_players_data():
 
 def get_player_salary_data_dk():
   return pd.DataFrame({
-    'Position': [
+    'position': [
       'SP',
       'SP',
       'SP',
@@ -1543,7 +1543,7 @@ def get_player_salary_data_dk():
       'OF',
       'OF'
     ],
-    'Name + ID': [
+    'name_id': [
       'D. May (4892886)',
       'Jack Flaherty (4892887)',
       'Lazaro Estrada (4892888)',
@@ -1588,7 +1588,7 @@ def get_player_salary_data_dk():
       'I. Collins (4892945)',
       'Kyle Isbel (4892946)',
     ],
-    'Name': [
+    'name': [
       'D. May',
       'Jack Flaherty',
       'Lazaro Estrada',
@@ -1633,7 +1633,7 @@ def get_player_salary_data_dk():
       'I. Collins',
       'Kyle Isbel'
     ],
-    'Game Info': [
+    'game_info': [
       'STL@DET',
       'STL@DET',
       'TOR@LAA',
@@ -1678,7 +1678,7 @@ def get_player_salary_data_dk():
       'CWS@KC',
       'CWS@KC'
     ],
-    'Team': [
+    'team': [
       'STL',
       'DET',
       'TOR',
@@ -1723,7 +1723,7 @@ def get_player_salary_data_dk():
       'KC',
       'KC'
     ],
-    'Salary': [
+    'salary': [
       9900,
       9700,
       9600,

@@ -183,16 +183,32 @@ class TestMlbService(unittest.TestCase):
   def test_get_starting_batters(self, mock_get_list_of_hitters):
 
     #Arrange
-    expected = data.get_batter_profile_data()
+    expected = data.get_player_salary_data_dk()
+    salary_df_dk = data.get_player_salary_data_dk()
     mock_get_list_of_hitters.return_value = list(data.get_starting_players_data()['Starting Lineup'])
 
     #Act
-    actual = service.get_starting_batters_or_pitchers(expected)
+    actual = service.get_starting_batters_or_pitchers('hitters', salary_df_dk)
 
     #Assert
     # Size of data frame. Index starts at 0.
     assert len(actual) == 35
-    assert expected['batter_name'].all() == actual['batter_name'].all()
+    assert expected['name'].all() == actual['name'].all()
+
+  def test_get_starters_hitters(self):
+
+    #Arrange
+    positions = 'C|1B|2B|3B|SS|CF|LF|RF|DH'
+    salary_df_dk = data.get_player_salary_data_dk()
+    starting_lineup_df = starting_lineup_df[starting_lineup_df['Starting Lineup'].str.contains(positions)]
+    hitters_list = list(starting_lineup_df['Starting Lineup'])
+
+    #Act
+    actual = service.get_starters(salary_df_dk, hitters_list, length_value=4, index=2)
+
+    #Assert
+    # Size of data frame. Index starts at 0.
+    assert len(actual) == 35
 
   @patch('service.mlb_service.get_list_of_hitters')
   def test_generate_top_order_starters(self, mock_get_list_of_hitters):
