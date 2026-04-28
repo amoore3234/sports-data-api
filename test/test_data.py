@@ -1481,7 +1481,7 @@ def get_starting_players_data():
       '1B M. Murakami L',
       'RF E. Pereira R',
       'C Edgar Quero S',
-      'CF L. Acuna',
+      'CF L. Acuna R',
       '3B M. Garcia R',
       'SS Bobby Witt R',
       '1B V. Pasquantino L',
@@ -1772,7 +1772,8 @@ def get_player_salary_data_dk():
 
 def get_player_salary_data_fd():
   return pd.DataFrame({
-    'Position': [
+    'position': [
+      'SP',
       'SP',
       'SP',
       'SP',
@@ -1816,12 +1817,13 @@ def get_player_salary_data_fd():
       'OF',
       'OF'
     ],
-    'Name + ID': [
+    'name_id': [
       '128430-119414:D. May',
       '128430-113564:Jack Flaherty',
       '128430-115623:Lazaro Estrada',
       '128430-107611:Anthony Kay',
       '128430-102743:Chad Patrick',
+      '128430-102895:Tony Bennet',
       '128430-103289:Seth Lugo',
       '128430-124722:J. Wetherholt',
       '128430-125635:Ivan Herrera',
@@ -1860,12 +1862,13 @@ def get_player_salary_data_fd():
       '128430-137453:I. Collins',
       '128430-134421:Kyle Isbel'
     ],
-    'Name': [
+    'name': [
       'D. May',
       'Jack Flaherty',
       'Lazaro Estrada',
       'Anthony Kay',
       'Chad Patrick',
+      'Tony Bennet',
       'Seth Lugo',
       'J. Wetherholt',
       'Ivan Herrera',
@@ -1904,11 +1907,12 @@ def get_player_salary_data_fd():
       'I. Collins',
       'Kyle Isbel'
     ],
-    'Game Info': [
+    'game_info': [
       'STL@DET',
       'STL@DET',
       'TOR@LAA',
       'CWS@KC',
+      'MIL@CHC',
       'MIL@CHC',
       'CWS@KC',
       'STL@DET',
@@ -1948,12 +1952,13 @@ def get_player_salary_data_fd():
       'CWS@KC',
       'CWS@KC'
     ],
-    'Team': [
+    'team': [
       'STL',
       'DET',
       'TOR',
       'CWS',
       'MIL',
+      'CHC',
       'KC',
       'STL',
       'STL',
@@ -1992,12 +1997,13 @@ def get_player_salary_data_fd():
       'KC',
       'KC'
     ],
-    'Salary': [
+    'salary': [
       9900,
       9700,
       9600,
       9000,
       8700,
+      8900,
       8500,
       3400,
       2900,

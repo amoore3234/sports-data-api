@@ -81,8 +81,8 @@ def generate_elite_ball_players(
   # pitcher_lineup_df = map_players_salary(salary_data_df, pitcher_lineup_df, elite_pitchers, 'pitcher_name')
   # batting_lineup_df = map_players_salary(salary_data_df, batting_lineup_df, batting_lineup_df, 'batter_name')
   is_stacking = False
-  pitcher_lineup_df = confirmed_starting_lineups('hitters', is_stacking=False)
-  batting_lineup_df = confirmed_starting_lineups('pitchers', is_stacking)
+  pitcher_lineup_df = confirmed_starting_lineups(salary_data_df, 'hitters', is_stacking=False)
+  batting_lineup_df = confirmed_starting_lineups(salary_data_df, 'pitchers', is_stacking)
 
   if is_hitter_friendly_park:
     # Don't return pitchers at parks that favor hitters.
@@ -91,7 +91,7 @@ def generate_elite_ball_players(
   batting_lineup_df = get_missing_hitters(batting_lineup_df)
   generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df, is_hitter_friendly_park, is_fanduel_lineup)
 
-def confirmed_starting_lineups(group_position_name, is_stacking) -> pd.DataFrame:
+def confirmed_starting_lineups(salary_data_df, group_position_name, is_stacking) -> pd.DataFrame:
   """Confirms which players are starting in the game.
 
   Parameters:
@@ -106,10 +106,10 @@ def confirmed_starting_lineups(group_position_name, is_stacking) -> pd.DataFrame
     # TODO: Find other ways to use the top order and stack lineup logic.
     # A toggle can be created within the method for determining when to generate the top order starters.
     # A stack lineup can be used elsewhere or stay here to generate a stack lineup when true.
-    batting_starting_lineup = generate_top_order_starters(lineup_df)
+    batting_starting_lineup = generate_top_order_starters(salary_data_df)
     return generate_stack_lineup(batting_starting_lineup, starting_lineup_df)
   else:
-    return get_starting_batters_or_pitchers(group_position_name)
+    return get_starting_batters_or_pitchers(group_position_name, salary_data_df)
 
 def get_missing_hitters(batting_lineup_df) -> pd.DataFrame:
   """Generates a list of hitters to fill in open positions.
@@ -216,7 +216,7 @@ def get_starters(salary_df, starting_list, length_value, index) -> pd.DataFrame:
   return lineup_df
 
 
-def generate_top_order_starters(hitter_lineup_df) -> pd.DataFrame:
+def generate_top_order_starters(salary_data_df) -> pd.DataFrame:
   positions = 'C|1B|2B|3B|SS|CF|LF|RF|DH'
 
   hitters_list = get_list_of_hitters(positions)
@@ -235,7 +235,7 @@ def generate_top_order_starters(hitter_lineup_df) -> pd.DataFrame:
     end += 9
 
   hitter_lastname_lookup = '|'.join(top_order_list)
-  hitter_lineup_df = hitter_lineup_df[hitter_lineup_df['batter_name'].str.contains(hitter_lastname_lookup)]
+  hitter_lineup_df = salary_data_df[salary_data_df['batter_name'].str.contains(hitter_lastname_lookup)]
   hitter_lineup_df = hitter_lineup_df.dropna()
 
   return hitter_lineup_df
