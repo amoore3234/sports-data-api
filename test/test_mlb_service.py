@@ -238,7 +238,7 @@ class TestMlbService(unittest.TestCase):
     assert expected == actual
 
 @patch('util.data_util.get_starting_lineup')
-def test_get_list_of_hitters_multiple_position(mock_get_starting_lineup):
+def test_get_list_of_hitters_multiple_positions(mock_get_starting_lineup):
   #Arrange
   position = '1B|2B'
   mock_get_starting_lineup.return_value = data.get_starting_players_data()
@@ -260,16 +260,40 @@ def test_get_list_of_hitters_multiple_position(mock_get_starting_lineup):
   assert len(actual) == 8
   assert expected == actual
 
-# @patch('service.mlb_service.get_pitcher_starters')
-# def test_get_pitchers(mock_get_pitchers):
+def test_filter_hitters_against_pitchers_home():
+  #Arrange
+  batters_away = 'DET'
+  batting_lineup_df = data.get_batter_profile_data()
+  expected = [
+    'J. Wetherholt',
+    'Ivan Herrera',
+    'A. Burleson',
+    'Nolan Gorman',
+    'J. Walker',
+    'T. Saggese',
+    'N. Church',
+    'Pedro Pages',
+    'Victor Scott'
+  ]
 
-#   # Arrange
-#   pitcher_data = data.get_pitcher_profile_test()
-#   starting_lineup_data = data.get_starting_pitchers_test()
-#   mock_get_pitchers.return_value = pitcher_data
+  #Act
+  actual = service.filter_hitters_against_pitchers(batters_away, batting_lineup_df)
+  print(f"Actual: {actual}")
+  actual = actual[actual['team'].str.contains('STL')]
+  print(f"Filtered applied: {actual}")
+  
 
-#   # Act
-#   actual = service.get_pitcher_starters(pitcher_data, starting_lineup_data)
+  #Assert
+  assert expected == list(actual['name'])
 
-#   # Assert
-#   assert len(actual) == 5
+# def test_filter_hitters_against_pitchers_away():
+#   #Arrange
+#   game_matchups = data.get_list_of_game_matchups()
+#   pitcher_home = game_matchups[0].get('away_team')
+#   batting_lineup_df = data.get_batter_profile_data()
+
+#   #Act
+#   actual = service.filter_hitters_against_pitchers(pitcher_home, batting_lineup_df)
+
+#   #Assert
+#   assert(len(actual))

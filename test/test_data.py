@@ -2,10 +2,38 @@ import pandas as pd
 
 def get_pitcher_profile_data_dk():
   return pd.DataFrame({
-    'pitcher_id': [1, 2, 3, 4, 5, 6],
-    'pitcher_name': ['Dustin May', 'Jack Flaherty', 'Lazaro Estrada', 'Anthony Kay', 'Chad Patrick', 'Seth Lugo'],
-    'pitcher_team': ['STL', 'DET', 'TOR', 'CWS', 'MIL', 'KC'],
-    'position': ['SP', 'SP', 'SP', 'SP', 'SP', 'SP'],
+    'pitcher_id': [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    'name': [
+      'Dustin May',
+      'Jack Flaherty',
+      'Lazaro Estrada',
+      'Anthony Kay',
+      'Chad Patrick',
+      'Seth Lugo'
+    ],
+    'team': [
+      'STL',
+      'DET',
+      'TOR',
+      'CWS',
+      'MIL',
+      'KC'
+    ],
+    'position': [
+      'SP',
+      'SP',
+      'SP',
+      'SP',
+      'SP',
+      'SP'
+    ],
     'name_id': [
       'D. May (4892886)',
       'Jack Flaherty (4892887)',
@@ -22,14 +50,6 @@ def get_pitcher_profile_data_dk():
       'MIL@CHC',
       'CWS@KC'
     ],
-    'team': [
-      'STL',
-      'DET',
-      'TOR',
-      'CWS',
-      'MIL',
-      'KC'
-    ],
     'salary': [
       9900,
       9700,
@@ -42,10 +62,38 @@ def get_pitcher_profile_data_dk():
 
 def get_pitcher_profile_data_fd():
   return pd.DataFrame({
-    'pitcher_id': [1, 2, 3, 4, 5, 6],
-    'pitcher_name': ['Dustin May', 'Jack Flaherty', 'Lazaro Estrada', 'Anthony Kay', 'Chad Patrick', 'Seth Lugo'],
-    'pitcher_team': ['STL', 'DET', 'TOR', 'CWS', 'MIL', 'KC'],
-    'position': ['SP', 'SP', 'SP', 'SP', 'SP', 'SP'],
+    'pitcher_id': [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    'name': [
+      'Dustin May',
+      'Jack Flaherty',
+      'Lazaro Estrada',
+      'Anthony Kay',
+      'Chad Patrick',
+      'Seth Lugo'
+    ],
+    'team': [
+      'STL',
+      'DET',
+      'TOR',
+      'CWS',
+      'MIL',
+      'KC'
+    ],
+    'position': [
+      'SP',
+      'SP',
+      'SP',
+      'SP',
+      'SP',
+      'SP'
+    ],
     'name_id': [
       '128430-119414:D. May',
       '128430-113564:Jack Flaherty',
@@ -61,14 +109,6 @@ def get_pitcher_profile_data_fd():
       'CWS@KC',
       'MIL@CHC',
       'CWS@KC'
-    ],
-    'pitcher_teamabbrev': [
-      'STL',
-      'DET',
-      'TOR',
-      'CWS',
-      'MIL',
-      'KC'
     ],
     'salary': [
       9900,
@@ -152,45 +192,7 @@ def get_batter_profile_data():
       35,
       36
     ],
-    'batter_name': [
-      'J. Wetherholt',
-      'Ivan Herrera',
-      'A. Burleson',
-      'Nolan Gorman',
-      'J. Walker',
-      'T. Saggese',
-      'N. Church',
-      'Pedro Pages',
-      'Victor Scott',
-      'Colt Keith',
-      'K. McGonigle',
-      'G. Torres',
-      'K. Carpenter',
-      'Riley Greene',
-      'D. Dingler',
-      'Z. McKinstry',
-      'S. Torkelson',
-      'P. Meadows',
-      'C. Meidroth',
-      'C. Montgomery',
-      'M. Vargas',
-      'A. Benintendi',
-      'Austin Hays',
-      'M. Murakami',
-      'E. Pereira',
-      'Edgar Quero',
-      'L. Acuna',
-      'M. Garcia',
-      'Bobby Witt',
-      'V. Pasquantino',
-      'S. Perez',
-      'Lane Thomas',
-      'J. Caglianone',
-      'J. India',
-      'I. Collins',
-      'Kyle Isbel'
-    ],
-    'batter_team': [
+    'team': [
       'STL',
       'STL',
       'STL',
@@ -266,7 +268,7 @@ def get_batter_profile_data():
       'OF',
       'OF'
     ],
-    'Name': [
+    'name': [
       'J. Wetherholt',
       'Ivan Herrera',
       'A. Burleson',
@@ -304,7 +306,7 @@ def get_batter_profile_data():
       'I. Collins',
       'Kyle Isbel'
     ],
-    'Name + ID': [
+    'name_id': [
       'J. Wetherholt (4892893)',
       'Ivan Herrera (4892895)',
       'A. Burleson (4892898)',
@@ -342,7 +344,7 @@ def get_batter_profile_data():
       'I. Collins (4892945)',
       'Kyle Isbel (4892946)'
     ],
-    'Game Info': [
+    'game_info': [
       'STL@DET',
       'STL@DET',
       'STL@DET',
@@ -380,7 +382,7 @@ def get_batter_profile_data():
       'CWS@KC',
       'CWS@KC'
     ],
-    'Team': [
+    'team': [
       'STL',
       'STL',
       'STL',
@@ -418,7 +420,7 @@ def get_batter_profile_data():
       'KC',
       'KC'
     ],
-    'Salary': [
+    'salary': [
       4500,
       3800,
       4500,
@@ -498,45 +500,7 @@ def get_batter_profile_data_fd():
       35,
       36
     ],
-    'batter_name': [
-      'J. Wetherholt',
-      'Ivan Herrera',
-      'A. Burleson',
-      'Nolan Gorman',
-      'J. Walker',
-      'T. Saggese',
-      'N. Church',
-      'Pedro Pages',
-      'Victor Scott',
-      'Colt Keith',
-      'K. McGonigle',
-      'G. Torres',
-      'K. Carpenter',
-      'Riley Greene',
-      'D. Dingler',
-      'Z. McKinstry',
-      'S. Torkelson',
-      'P. Meadows',
-      'C. Meidroth',
-      'C. Montgomery',
-      'M. Vargas',
-      'A. Benintendi',
-      'Austin Hays',
-      'M. Murakami',
-      'E. Pereira',
-      'Edgar Quero',
-      'L. Acuna',
-      'M. Garcia',
-      'Bobby Witt',
-      'V. Pasquantino',
-      'S. Perez',
-      'Lane Thomas',
-      'J. Caglianone',
-      'J. India',
-      'I. Collins',
-      'Kyle Isbel'
-    ],
-    'batter_team': [
+    'team': [
       'STL',
       'STL',
       'STL',
@@ -612,7 +576,7 @@ def get_batter_profile_data_fd():
       'OF',
       'OF'
     ],
-    'Name': [
+    'name': [
       'J. Wetherholt',
       'Ivan Herrera',
       'A. Burleson',
@@ -650,7 +614,7 @@ def get_batter_profile_data_fd():
       'I. Collins',
       'Kyle Isbel'
     ],
-    'Name + ID': [
+    'name_id': [
       '128430-124722:J. Wetherholt',
       '128430-125635:Ivan Herrera',
       '128430-122253:A. Burleson',
@@ -688,7 +652,7 @@ def get_batter_profile_data_fd():
       '128430-137453:I. Collins',
       '128430-134421:Kyle Isbel'
     ],
-    'Game Info': [
+    'game_info': [
       'STL@DET',
       'STL@DET',
       'STL@DET',
@@ -726,45 +690,7 @@ def get_batter_profile_data_fd():
       'CWS@KC',
       'CWS@KC'
     ],
-    'Team': [
-      'STL',
-      'STL',
-      'STL',
-      'STL',
-      'STL',
-      'STL',
-      'STL',
-      'STL',
-      'STL',
-      'DET',
-      'DET',
-      'DET',
-      'DET',
-      'DET',
-      'DET',
-      'DET',
-      'DET',
-      'DET',
-      'CWS',
-      'CWS',
-      'CWS',
-      'CWS',
-      'CWS',
-      'CWS',
-      'CWS',
-      'CWS',
-      'CWS',
-      'KC',
-      'KC',
-      'KC',
-      'KC',
-      'KC',
-      'KC',
-      'KC',
-      'KC',
-      'KC'
-    ],
-    'Salary': [
+    'salary': [
       4500,
       3800,
       4500,

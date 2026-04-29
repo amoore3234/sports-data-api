@@ -60,7 +60,7 @@ def generate_mlb_lineup() -> dict:
 
 def generate_elite_ball_players(
       pitcher_lineup_df, batting_lineup_df, salary_data_df,
-      is_hitter_friendly_park, is_fanduel_lineup):
+      is_hitter_friendly_park, is_fanduel_lineup, is_stacking):
   """Generates a list of top pitchers and hitters in the league.
 
   Parameters:
@@ -75,14 +75,12 @@ def generate_elite_ball_players(
       void: Updates the pitcher and batting Data Frames.
   """
 
-  elite_pitchers = apply_elite_statistical_pitcher_filters(pitcher_lineup_df)
-
   #TODO: Change naming of the method from 'generate_starting_lineup' to 'map_player_salary' or something similar. Move this at the end of method before generate_optimal_lineup.
   # pitcher_lineup_df = map_players_salary(salary_data_df, pitcher_lineup_df, elite_pitchers, 'pitcher_name')
   # batting_lineup_df = map_players_salary(salary_data_df, batting_lineup_df, batting_lineup_df, 'batter_name')
-  is_stacking = False
-  pitcher_lineup_df = confirmed_starting_lineups(salary_data_df, 'hitters', is_stacking=False)
-  batting_lineup_df = confirmed_starting_lineups(salary_data_df, 'pitchers', is_stacking)
+  pitcher_lineup_df = confirmed_starting_lineups(salary_data_df, 'pitchers', is_stacking=False)
+  batting_lineup_df = confirmed_starting_lineups(salary_data_df, 'hitters', is_stacking)
+  elite_pitchers = apply_elite_statistical_pitcher_filters(pitcher_lineup_df)
 
   if is_hitter_friendly_park:
     # Don't return pitchers at parks that favor hitters.
@@ -211,7 +209,6 @@ def get_starters(salary_df, starting_list, length_value, index) -> pd.DataFrame:
 
   lineup_df = salary_df[salary_df['name'].str.contains(lookup_table)]
   lineup_df = lineup_df.dropna()
-  print(f"Starting lineup: {lineup_df}")
 
   return lineup_df
 
@@ -546,16 +543,16 @@ def drop_hitters_against_pitchers(salary_data_df, pitcher_idx, pitcher_lineup_df
   Returns:
       List: A list of updated indices.
   """
-  game_matchups = get_list_of_team_game_matchups(salary_data_df['Game Info'].unique())
+  game_matchups = get_list_of_team_game_matchups(salary_data_df['game_info'].unique())
 
-  pitcher_matchup = pitcher_lineup_df.loc[pitcher_idx]['team_abbrev']
+  pitcher_matchup = pitcher_lineup_df.loc[pitcher_idx]['team']
   pitcher_home_team = next((home for home in game_matchups if home.get('home_team') == pitcher_matchup), None)
   pitcher_away_team = next((away for away in game_matchups if away.get('away_team') == pitcher_matchup), None)
 
   if is_pitcher_friendly_park:
     if pitcher_home_team:
-      home_team = pitcher_home_team.get('home_team')
-      filter_hitters_against_pitchers(home_team, batting_lineup_df)
+      batters_away = pitcher_home_team.get('away_team')
+      filter_hitters_against_pitchers(batters_away, batting_lineup_df)
 
     if pitcher_away_team:
       away_team = pitcher_away_team.get('away_team')
@@ -611,7 +608,10 @@ def filter_hitters_against_pitchers(team_matchup, batting_lineup_df):
   Returns:
     void: Drops hitters that are facing the opposing team.
   """
-  batting_lineup_df.drop(batting_lineup_df[batting_lineup_df['team_abbrev'] == team_matchup].index, inplace=True)
+  batting_lineup_df.drop(batting_lineup_df[batting_lineup_df['team'] == team_matchup].index, inplace=True)
+  print(f"Applied filter: {batting_lineup_df}")
+  print(f"Size: {len(batting_lineup_df)}")
+  return batting_lineup_df
 
 def generate_statistically_weak_pitchers(pitcher_lineup_df):
   pitcher_national_average = stats_util.get_mlb_pitcher_national_averages()
