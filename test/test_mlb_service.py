@@ -101,8 +101,8 @@ class TestMlbService(unittest.TestCase):
     actual = service.generate_stack_lineup(top_order_players_df, starting_lineup_df)
 
     # Assert
-    assert len(actual['batter_name']) == len(expected_starting_hitters)
-    assert actual['batter_name'].isin(expected_starting_hitters).all()
+    assert len(actual['name']) == len(expected_starting_hitters)
+    assert actual['name'].isin(expected_starting_hitters).all()
 
   @patch('util.data_util.get_starting_lineup')
   def test_confirmed_starting_lineups_dk_pitchers(self, mock_get_starting_lineup):
@@ -148,7 +148,7 @@ class TestMlbService(unittest.TestCase):
 
     # Assert
     assert len(actual) == 36
-    assert exptected_hitters_df['batter_name'].all() == actual['batter_name'].all()
+    assert exptected_hitters_df['name'].all() == actual['name'].all()
 
   @patch('util.data_util.get_starting_lineup')
   def test_get_starting_pitchers_dk(self, mock_get_starting_lineup):
@@ -212,8 +212,7 @@ class TestMlbService(unittest.TestCase):
   def test_generate_top_order_starters(self, mock_get_list_of_hitters):
     #Arrange
     hitter_lineup_df = data.get_batter_profile_data()
-    hitters_list = list(data.get_starting_players_data()['Starting Lineup'])
-    mock_get_list_of_hitters.return_value = hitters_list
+    mock_get_list_of_hitters.return_value = list(data.get_starting_players_data()['Starting Lineup'])
     expected = data.get_top_order_starters()
 
     #Act
@@ -221,7 +220,7 @@ class TestMlbService(unittest.TestCase):
 
     #Assert
     assert len(actual) == 16
-    assert expected['batter_name'].all() == actual['batter_name'].all()
+    assert expected['name'].all() == actual['name'].all()
 
   @patch('util.data_util.get_starting_lineup')
   def test_get_list_of_hitters_one_position(self, mock_get_starting_lineup):
@@ -281,7 +280,7 @@ def test_filter_hitters_against_pitchers_home():
   print(f"Actual: {actual}")
   actual = actual[actual['team'].str.contains('STL')]
   print(f"Filtered applied: {actual}")
-  
+
 
   #Assert
   assert expected == list(actual['name'])

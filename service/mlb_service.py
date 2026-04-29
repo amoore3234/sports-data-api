@@ -232,7 +232,7 @@ def generate_top_order_starters(salary_data_df) -> pd.DataFrame:
     end += 9
 
   hitter_lastname_lookup = '|'.join(top_order_list)
-  hitter_lineup_df = salary_data_df[salary_data_df['batter_name'].str.contains(hitter_lastname_lookup)]
+  hitter_lineup_df = salary_data_df[salary_data_df['name'].str.contains(hitter_lastname_lookup)]
   hitter_lineup_df = hitter_lineup_df.dropna()
 
   return hitter_lineup_df
@@ -276,7 +276,7 @@ def generate_stack_lineup(hitter_lineup_df, starting_lineup_df):
   print(f"Game matches: {game_matchups}")
   teams = list(odds_details_df['favorite_to_win'])
   print(f"Teams favored to win: {teams}")
-  team_list = []
+
   home_team = []
   away_team = []
 
@@ -296,12 +296,6 @@ def generate_stack_lineup(hitter_lineup_df, starting_lineup_df):
   print(f"Today's game: {game_matchups_df}")
 
   matchup_lookup = '|'.join(teams)
-  # for team in teams:
-  #   if team in game_matchups_df:
-  #     team_list.append(game.get('away_team'))
-  #   else:
-  #     team_list.append(game.get('home_team'))
-
   game_matchups_df = game_matchups_df[(game_matchups_df['home_team'].str.contains(matchup_lookup)) | (game_matchups_df['away_team'].str.contains(matchup_lookup))]
 
   home_away_games = list(game_matchups_df['home_team']) + list(game_matchups_df['away_team'])
@@ -311,7 +305,7 @@ def generate_stack_lineup(hitter_lineup_df, starting_lineup_df):
 
   print(f"Update matchups: {game_matchups_df}")
 
-  hitter_lineup_df = hitter_lineup_df[hitter_lineup_df['batter_team'].str.contains(hitter_team_lookup)]
+  hitter_lineup_df = hitter_lineup_df[hitter_lineup_df['team'].str.contains(hitter_team_lookup)]
   print(f"New starting lineup: {hitter_lineup_df}")
   return hitter_lineup_df
 
@@ -557,17 +551,9 @@ def drop_hitters_against_pitchers(salary_data_df, pitcher_idx, pitcher_lineup_df
     if pitcher_away_team:
       away_team = pitcher_away_team.get('away_team')
       filter_hitters_against_pitchers(away_team, batting_lineup_df)
-  else:
-    if pitcher_home_team:
-      away_team = pitcher_home_team.get('away_team')
-      filter_hitters_against_pitchers(away_team, batting_lineup_df)
-
-    if pitcher_away_team:
-      home_team = pitcher_away_team.get('home_team')
-      filter_hitters_against_pitchers(home_team, batting_lineup_df)
 
   player_salary.append(pitcher_lineup_df.loc[pitcher_idx]['salary'])
-  pitcher_lineup_df.drop(pitcher_lineup_df[pitcher_lineup_df['team_abbrev'] == pitcher_lineup_df.loc[pitcher_idx]['team_abbrev']].index, inplace=True)
+  pitcher_lineup_df.drop(pitcher_lineup_df[pitcher_lineup_df['team'] == pitcher_lineup_df.loc[pitcher_idx]['team']].index, inplace=True)
 
   pitcher_indices[:] = list(pitcher_lineup_df.index)
 

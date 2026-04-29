@@ -1990,7 +1990,7 @@ def get_top_order_starters():
       15,
       16
     ],
-    'batter_name': [
+    'name': [
       'J. Wetherholt',
       'Ivan Herrera',
       'A. Burleson',
@@ -2008,7 +2008,7 @@ def get_top_order_starters():
       'V. Pasquantino',
       'S. Perez'
     ],
-    'batter_team': [
+    'team': [
       'STL',
       'STL',
       'STL',
