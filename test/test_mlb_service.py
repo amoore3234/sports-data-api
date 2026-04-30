@@ -104,47 +104,49 @@ class TestMlbService(unittest.TestCase):
     assert len(actual['name']) == len(expected_starting_hitters)
     assert actual['name'].isin(expected_starting_hitters).all()
 
-  @patch('util.data_util.get_starting_lineup')
-  def test_confirmed_starting_lineups_dk_pitchers(self, mock_get_starting_lineup):
+  # @patch('util.data_util.get_starting_lineup')
+  # def test_confirmed_starting_lineups_dk_pitchers(self, mock_get_starting_lineup):
 
-    # Arrange
-    expected_salary = data.get_player_salary_data_dk()
-    mock_get_starting_lineup.return_value = data.get_starting_players_data()
-    players = ['D. May (4892886)']
+  #   # Arrange
+  #   expected_salary = data.get_player_salary_data_dk()
+  #   mock_get_starting_lineup.return_value = data.get_starting_players_data()
+  #   players = ['D. May (4892886)']
 
-    # Act
-    actual = service.confirmed_starting_lineups(expected_salary, 'pitchers', False)
+  #   # Act
+  #   actual = service.confirmed_starting_lineups(expected_salary, 'pitchers', False)
 
-    # Assert
-    assert len(actual['name']) == 7
-    assert actual['name_id'].isin(players).any()
+  #   # Assert
+  #   assert len(actual['name']) == 7
+  #   assert actual['name_id'].isin(players).any()
 
-  @patch('util.data_util.get_starting_lineup')
-  def test_confirmed_starting_lineups_fd_pitchers(self, mock_get_starting_lineup):
+  # @patch('util.data_util.get_starting_lineup')
+  # def test_confirmed_starting_lineups_fd_pitchers(self, mock_get_starting_lineup):
 
-    # Arrange
-    salary_df = data.get_player_salary_data_fd()
-    mock_get_starting_lineup.return_value = data.get_starting_players_data()
-    players = ['128430-119414:D. May']
+  #   # Arrange
+  #   salary_df = data.get_player_salary_data_fd()
+  #   mock_get_starting_lineup.return_value = data.get_starting_players_data()
+  #   players = ['128430-119414:D. May']
 
-    # Act
-    actual = service.confirmed_starting_lineups(salary_df, 'pitchers', False)
+  #   # Act
+  #   actual = service.confirmed_starting_lineups(salary_df, 'pitchers', False)
 
-    # Assert
-    assert len(actual['name']) == 7
-    assert actual['name_id'].isin(players).any()
+  #   # Assert
+  #   assert len(actual['name']) == 7
+  #   assert actual['name_id'].isin(players).any()
 
-  @patch('service.mlb_service.get_starting_batters_or_pitchers')
-  def test_get_missing_hitters(self, mock_get_starting_batters_or_pitchers):
+  @patch('service.mlb_service.get_starters')
+  def test_get_missing_hitters(self, mock_generate_starting_lineups):
 
     # Arrange
     exptected_hitters_df = data.get_batter_profile_data()
     positions_to_exclude = ['C']
     exptected_hitters_df = exptected_hitters_df[~exptected_hitters_df['position'].isin(positions_to_exclude)]
-    mock_get_starting_batters_or_pitchers.return_value = data.get_batter_profile_data()
+    print(f"Expected hitters: {exptected_hitters_df}")
+    salary_df = data.get_player_salary_data_dk()
+    mock_generate_starting_lineups.return_value = data.get_batter_profile_data()
 
     # Act
-    actual = service.get_missing_hitters(exptected_hitters_df)
+    actual = service.get_missing_hitters(exptected_hitters_df, salary_df)
 
     # Assert
     assert len(actual) == 36
@@ -158,7 +160,7 @@ class TestMlbService(unittest.TestCase):
     mock_get_starting_lineup.return_value = data.get_starting_players_data()
 
     #Act
-    actual = service.get_starting_batters_or_pitchers('pitchers', expected_salary)
+    actual = service.generate_starting_lineups('pitchers', expected_salary)
 
     #Assert
     assert len(actual) == 7
@@ -172,7 +174,7 @@ class TestMlbService(unittest.TestCase):
     mock_get_starting_lineup.return_value = data.get_starting_players_data()
 
     #Act
-    actual = service.get_starting_batters_or_pitchers('pitchers', expected_salary)
+    actual = service.generate_starting_lineups('pitchers', expected_salary)
 
     #Assert
     assert len(actual) == 7
@@ -187,7 +189,7 @@ class TestMlbService(unittest.TestCase):
     mock_get_list_of_hitters.return_value = list(data.get_starting_players_data()['Starting Lineup'])
 
     #Act
-    actual = service.get_starting_batters_or_pitchers('hitters', salary_df_dk)
+    actual = service.generate_starting_lineups('hitters', salary_df_dk)
 
     #Assert
     assert len(actual) == 36
@@ -259,11 +261,11 @@ def test_get_list_of_hitters_multiple_positions(mock_get_starting_lineup):
   assert len(actual) == 8
   assert expected == actual
 
-def test_filter_hitters_against_pitchers_home():
+def test_filter_hitters_against_pitchers_at_home():
   #Arrange
   batters_away = 'DET'
   batting_lineup_df = data.get_batter_profile_data()
-  expected = [
+  expected_batting_lineup = [
     'J. Wetherholt',
     'Ivan Herrera',
     'A. Burleson',
@@ -277,22 +279,32 @@ def test_filter_hitters_against_pitchers_home():
 
   #Act
   actual = service.filter_hitters_against_pitchers(batters_away, batting_lineup_df)
-  print(f"Actual: {actual}")
   actual = actual[actual['team'].str.contains('STL')]
-  print(f"Filtered applied: {actual}")
 
 
   #Assert
-  assert expected == list(actual['name'])
+  assert expected_batting_lineup == list(actual['name'])
 
-# def test_filter_hitters_against_pitchers_away():
-#   #Arrange
-#   game_matchups = data.get_list_of_game_matchups()
-#   pitcher_home = game_matchups[0].get('away_team')
-#   batting_lineup_df = data.get_batter_profile_data()
+def test_filter_hitters_against_pitchers_away():
+  #Arrange
+  batters_home = 'STL'
+  batting_lineup_df = data.get_batter_profile_data()
+  expected_batting_lineup = [
+    'Colt Keith',
+    'K. McGonigle',
+    'G. Torres',
+    'K. Carpenter',
+    'Riley Greene',
+    'D. Dingler',
+    'Z. McKinstry',
+    'S. Torkelson',
+    'P. Meadows',
+  ]
 
-#   #Act
-#   actual = service.filter_hitters_against_pitchers(pitcher_home, batting_lineup_df)
+  #Act
+  actual = service.filter_hitters_against_pitchers(batters_home, batting_lineup_df)
+  actual = actual[actual['team'].str.contains('DET')]
 
-#   #Assert
-#   assert(len(actual))
+
+  #Assert
+  assert expected_batting_lineup == list(actual['name'])

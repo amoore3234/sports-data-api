@@ -40,6 +40,15 @@ def generate_mlb_lineup() -> dict:
   batting_profile_df = stats_util.load_mlb_batting_profiles()
   batting_lineup_df = batting_profile_df.dropna()
 
+  starting_lineup_df = data.get_starting_lineup()
+
+  #TODO: Change naming of the method from 'generate_starting_lineup' to 'map_player_salary' or something similar. Move this at the end of method before generate_optimal_lineup.
+  # pitcher_lineup_df = map_players_salary(salary_data_df, pitcher_lineup_df, elite_pitchers, 'pitcher_name')
+  # batting_lineup_df = map_players_salary(salary_data_df, batting_lineup_df, batting_lineup_df, 'batter_name')
+  pitcher_lineup_df = generate_starting_lineups('pitchers', salary_data_df)
+  batting_lineup_df = generate_starting_lineups('hitters', salary_data_df)
+  pitcher_lineup_df = apply_elite_statistical_pitcher_filters(pitcher_lineup_df)
+
   # Return pitcher-friendly parks that favor pitchers.
   if is_pitcher_friendly_park:
     pitcher_lineup_df = stats_util.get_pitcher_friendly_ballpark(pitcher_lineup_df)
@@ -49,67 +58,76 @@ def generate_mlb_lineup() -> dict:
   if is_hitter_friendly_park:
     batting_lineup_df = stats_util.get_hitter_friendly_ballpark(batting_lineup_df)
     pitcher_lineup_df = stats_util.drop_pitchers_at_hitter_friendly_ballpark(pitcher_lineup_df, batting_lineup_df)
-
-  if is_stacking:
-    weak_pitchers_df = generate_statistically_weak_pitchers(pitcher_lineup_df)
-    weak_lineup_df = map_players_salary(salary_data_df, pitcher_lineup_df, weak_pitchers_df, 'pitcher_name', 'team_abbrev')
-    print(f"Weaker pitchers: {weak_lineup_df}")
-  is_stacking = False
-  generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df, is_hitter_friendly_park,
-                              is_confirmed_starters, is_fanduel_lineup, is_stacking)
-
-def generate_elite_ball_players(
-      pitcher_lineup_df, batting_lineup_df, salary_data_df,
-      is_hitter_friendly_park, is_fanduel_lineup, is_stacking):
-  """Generates a list of top pitchers and hitters in the league.
-
-  Parameters:
-    pitcher_lineup_df: Data Frame containing a list of pitchers.
-    batting_lineup_df: Data Frame containing a list of hitters.
-    salary_data_df: Data Frame containing a list of players with their relative prices.
-    is_hitter_friendly_park: Boolean for checking hitter ball park.
-    is_confirmed_starters: Boolean to confirm starters.
-    is_fanduel_lineup: Boolean to create fanduel lineup.
-
-  Returns:
-      void: Updates the pitcher and batting Data Frames.
-  """
-
-  #TODO: Change naming of the method from 'generate_starting_lineup' to 'map_player_salary' or something similar. Move this at the end of method before generate_optimal_lineup.
-  # pitcher_lineup_df = map_players_salary(salary_data_df, pitcher_lineup_df, elite_pitchers, 'pitcher_name')
-  # batting_lineup_df = map_players_salary(salary_data_df, batting_lineup_df, batting_lineup_df, 'batter_name')
-  pitcher_lineup_df = confirmed_starting_lineups(salary_data_df, 'pitchers', is_stacking=False)
-  batting_lineup_df = confirmed_starting_lineups(salary_data_df, 'hitters', is_stacking)
-  elite_pitchers = apply_elite_statistical_pitcher_filters(pitcher_lineup_df)
-
-  if is_hitter_friendly_park:
-    # Don't return pitchers at parks that favor hitters.
-    pitcher_lineup_df = drop_pitchers(pitcher_lineup_df, batting_lineup_df, salary_data_df)
-
-  batting_lineup_df = get_missing_hitters(batting_lineup_df)
-  generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df, is_hitter_friendly_park, is_fanduel_lineup)
-
-def confirmed_starting_lineups(salary_data_df, group_position_name, is_stacking) -> pd.DataFrame:
-  """Confirms which players are starting in the game.
-
-  Parameters:
-    lineup_df: Pitcher or hitter Data Frame.
-
-  Returns:
-      DataFrame: Returns a new data frame with players that are officially starting in the game.
-  """
-  starting_lineup_df = data.get_starting_lineup()
-
+  
   if is_stacking:
     # TODO: Find other ways to use the top order and stack lineup logic.
     # A toggle can be created within the method for determining when to generate the top order starters.
     # A stack lineup can be used elsewhere or stay here to generate a stack lineup when true.
     batting_starting_lineup = generate_top_order_starters(salary_data_df)
     return generate_stack_lineup(batting_starting_lineup, starting_lineup_df)
-  else:
-    return get_starting_batters_or_pitchers(group_position_name, salary_data_df)
 
-def get_missing_hitters(batting_lineup_df) -> pd.DataFrame:
+  # if is_stacking:
+  #   weak_pitchers_df = generate_statistically_weak_pitchers(pitcher_lineup_df)
+  #   weak_lineup_df = map_players_salary(salary_data_df, pitcher_lineup_df, weak_pitchers_df, 'pitcher_name', 'team_abbrev')
+  #   print(f"Weaker pitchers: {weak_lineup_df}")
+  # is_stacking = False
+  # generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df, is_hitter_friendly_park,
+  #                             is_confirmed_starters, is_fanduel_lineup, is_stacking)
+  batting_lineup_df = get_missing_hitters(batting_lineup_df, salary_data_df)
+  generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df, is_hitter_friendly_park, is_fanduel_lineup)
+
+# def generate_elite_ball_players(
+#       pitcher_lineup_df, batting_lineup_df, salary_data_df,
+#       is_hitter_friendly_park, is_fanduel_lineup, is_stacking):
+#   """Generates a list of top pitchers and hitters in the league.
+
+#   Parameters:
+#     pitcher_lineup_df: Data Frame containing a list of pitchers.
+#     batting_lineup_df: Data Frame containing a list of hitters.
+#     salary_data_df: Data Frame containing a list of players with their relative prices.
+#     is_hitter_friendly_park: Boolean for checking hitter ball park.
+#     is_confirmed_starters: Boolean to confirm starters.
+#     is_fanduel_lineup: Boolean to create fanduel lineup.
+
+#   Returns:
+#       void: Updates the pitcher and batting Data Frames.
+#   """
+
+#   #TODO: Change naming of the method from 'generate_starting_lineup' to 'map_player_salary' or something similar. Move this at the end of method before generate_optimal_lineup.
+#   # pitcher_lineup_df = map_players_salary(salary_data_df, pitcher_lineup_df, elite_pitchers, 'pitcher_name')
+#   # batting_lineup_df = map_players_salary(salary_data_df, batting_lineup_df, batting_lineup_df, 'batter_name')
+#   pitcher_lineup_df = confirmed_starting_lineups(salary_data_df, 'pitchers', is_stacking=False)
+#   batting_lineup_df = confirmed_starting_lineups(salary_data_df, 'hitters', is_stacking)
+#   elite_pitchers = apply_elite_statistical_pitcher_filters(pitcher_lineup_df)
+
+#   if is_hitter_friendly_park:
+#     # Don't return pitchers at parks that favor hitters.
+#     pitcher_lineup_df = drop_pitchers(pitcher_lineup_df, batting_lineup_df, salary_data_df)
+
+#   batting_lineup_df = get_missing_hitters(batting_lineup_df)
+#   generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df, is_hitter_friendly_park, is_fanduel_lineup)
+
+# def confirmed_starting_lineups(salary_data_df, group_position_name, is_stacking) -> pd.DataFrame:
+#   """Confirms which players are starting in the game.
+
+#   Parameters:
+#     lineup_df: Pitcher or hitter Data Frame.
+
+#   Returns:
+#       DataFrame: Returns a new data frame with players that are officially starting in the game.
+#   """
+#   starting_lineup_df = data.get_starting_lineup()
+
+#   if is_stacking:
+#     # TODO: Find other ways to use the top order and stack lineup logic.
+#     # A toggle can be created within the method for determining when to generate the top order starters.
+#     # A stack lineup can be used elsewhere or stay here to generate a stack lineup when true.
+#     batting_starting_lineup = generate_top_order_starters(salary_data_df)
+#     return generate_stack_lineup(batting_starting_lineup, starting_lineup_df)
+#   else:
+#     return get_starting_batters_or_pitchers(salary_data_df, group_position_name)
+
+def get_missing_hitters(batting_lineup_df, salary_df) -> pd.DataFrame:
   """Generates a list of hitters to fill in open positions.
 
   Parameters:
@@ -146,7 +164,12 @@ def get_missing_hitters(batting_lineup_df) -> pd.DataFrame:
   print(frequency_map)
   for position in positions:
     if position not in frequency_map:
-      batting_lineup_df = get_starting_batters_or_pitchers(batting_lineup_df, position)
+      missing_hitters_list = get_list_of_hitters(position)
+      missing_starters_df = get_starters(salary_df, missing_hitters_list, length_value=4, index=2)
+      print(f"Missing starters: {missing_starters_df}")
+      batting_lineup_df = pd.concat([batting_lineup_df, missing_starters_df], ignore_index=True)
+      print(f"Concat lineup: {batting_lineup_df}")
+      print(f"Length: {len(batting_lineup_df)}")
 
   return batting_lineup_df
 
@@ -177,7 +200,7 @@ def get_missing_hitters(batting_lineup_df) -> pd.DataFrame:
 #   new_batting_lineup_df = new_batting_lineup_df[new_batting_lineup_df[average_pts_per_game] > average_fts_pts]
 #   return new_batting_lineup_df
 
-def get_starting_batters_or_pitchers(group_position_name, salary_df) -> pd.DataFrame:
+def generate_starting_lineups(group_position_name, salary_df) -> pd.DataFrame:
   """Generate starting hitters and pitchers.
 
   Parameters:
@@ -314,7 +337,7 @@ def drop_pitchers(pitcher_lineup_df, batting_lineup_df, salary_data_df) -> pd.Da
   """Drop opposing pitchers.
 
   This function filters out pitchers that are facing opposing hitters.
-  This ensures that opposing pitchers and hitters are not in the starting lineup in the same game.
+  This ensures that opposing pitchers and hitters are not playing in the same game.
 
   Parameters:
     pitcher_lineup_df: Data Frame containing a list of pitchers.
@@ -549,8 +572,16 @@ def drop_hitters_against_pitchers(salary_data_df, pitcher_idx, pitcher_lineup_df
       filter_hitters_against_pitchers(batters_away, batting_lineup_df)
 
     if pitcher_away_team:
-      away_team = pitcher_away_team.get('away_team')
-      filter_hitters_against_pitchers(away_team, batting_lineup_df)
+      batters_home = pitcher_away_team.get('home_team')
+      filter_hitters_against_pitchers(batters_home, batting_lineup_df)
+  # else:
+  #   if pitcher_home_team:
+  #     away_team = pitcher_home_team.get('away_team')
+  #     filter_hitters_against_pitchers(away_team, batting_lineup_df)
+
+  #   if pitcher_away_team:
+  #     home_team = pitcher_away_team.get('home_team')
+  #     filter_hitters_against_pitchers(home_team, batting_lineup_df)
 
   player_salary.append(pitcher_lineup_df.loc[pitcher_idx]['salary'])
   pitcher_lineup_df.drop(pitcher_lineup_df[pitcher_lineup_df['team'] == pitcher_lineup_df.loc[pitcher_idx]['team']].index, inplace=True)
@@ -595,8 +626,6 @@ def filter_hitters_against_pitchers(team_matchup, batting_lineup_df):
     void: Drops hitters that are facing the opposing team.
   """
   batting_lineup_df.drop(batting_lineup_df[batting_lineup_df['team'] == team_matchup].index, inplace=True)
-  print(f"Applied filter: {batting_lineup_df}")
-  print(f"Size: {len(batting_lineup_df)}")
   return batting_lineup_df
 
 def generate_statistically_weak_pitchers(pitcher_lineup_df):
