@@ -460,6 +460,52 @@ def get_batter_profile_data():
     ]
   })
 
+def get_missing_hitters_data():
+  return pd.DataFrame({
+    'batter_id': [
+      8,
+      15,
+      26,
+      31
+    ],
+    'team': [
+      'STL',
+      'DET',
+      'CWS',
+      'KC'
+    ],
+    'position': [
+      'C',
+      'C',
+      'C',
+      'C'
+    ],
+    'name': [
+      'Pedro Pages',
+      'D. Dingler',
+      'Edgar Quero',
+      'S. Perez'
+    ],
+    'name_id': [
+      'Pedro Pages (4892911)',
+      'D. Dingler (4892925)',
+      'Edgar Quero (4892936)',
+      'S. Perez (4892941)'
+    ],
+    'game_info': [
+      'STL@DET',
+      'STL@DET',
+      'CWS@KC',
+      'CWS@KC'
+    ],
+    'salary': [
+      2500,
+      3900,
+      2100,
+      3600
+    ]
+  })
+
 def get_batter_profile_data_fd():
   return pd.DataFrame({
     'batter_id': [
@@ -1990,7 +2036,7 @@ def get_top_order_starters():
       15,
       16
     ],
-    'batter_name': [
+    'name': [
       'J. Wetherholt',
       'Ivan Herrera',
       'A. Burleson',
@@ -2008,7 +2054,7 @@ def get_top_order_starters():
       'V. Pasquantino',
       'S. Perez'
     ],
-    'batter_team': [
+    'team': [
       'STL',
       'STL',
       'STL',

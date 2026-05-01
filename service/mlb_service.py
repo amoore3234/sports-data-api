@@ -53,6 +53,7 @@ def generate_mlb_lineup() -> dict:
   if is_pitcher_friendly_park:
     pitcher_lineup_df = stats_util.get_pitcher_friendly_ballpark(pitcher_lineup_df)
     pitcher_lineup_df = pitcher_lineup_df.dropna()
+    # batting_lineup_df = stats_util.drop_hitters_at_pitcher_friendly_ballpark(pitcher_lineup_df, batting_lineup_df)
 
   # Return hitter-friendly parks that favor hitters.
   if is_hitter_friendly_park:
@@ -74,7 +75,8 @@ def generate_mlb_lineup() -> dict:
   # generate_elite_ball_players(pitcher_lineup_df, batting_lineup_df, salary_data_df, is_hitter_friendly_park,
   #                             is_confirmed_starters, is_fanduel_lineup, is_stacking)
   batting_lineup_df = get_missing_hitters(batting_lineup_df, salary_data_df)
-  generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df, is_hitter_friendly_park, is_fanduel_lineup)
+  generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df,
+                          is_hitter_friendly_park, is_pitcher_friendly_park, is_fanduel_lineup)
 
 # def generate_elite_ball_players(
 #       pitcher_lineup_df, batting_lineup_df, salary_data_df,
@@ -166,10 +168,7 @@ def get_missing_hitters(batting_lineup_df, salary_df) -> pd.DataFrame:
     if position not in frequency_map:
       missing_hitters_list = get_list_of_hitters(position)
       missing_starters_df = get_starters(salary_df, missing_hitters_list, length_value=4, index=2)
-      print(f"Missing starters: {missing_starters_df}")
       batting_lineup_df = pd.concat([batting_lineup_df, missing_starters_df], ignore_index=True)
-      print(f"Concat lineup: {batting_lineup_df}")
-      print(f"Length: {len(batting_lineup_df)}")
 
   return batting_lineup_df
 
@@ -333,35 +332,35 @@ def generate_stack_lineup(hitter_lineup_df, starting_lineup_df):
   return hitter_lineup_df
 
 
-def drop_pitchers(pitcher_lineup_df, batting_lineup_df, salary_data_df) -> pd.DataFrame:
-  """Drop opposing pitchers.
+# def drop_pitchers(pitcher_lineup_df, batting_lineup_df, salary_data_df) -> pd.DataFrame:
+#   """Drop opposing pitchers.
 
-  This function filters out pitchers that are facing opposing hitters.
-  This ensures that opposing pitchers and hitters are not playing in the same game.
+#   This function filters out pitchers that are facing opposing hitters.
+#   This ensures that opposing pitchers and hitters are not playing in the same game.
 
-  Parameters:
-    pitcher_lineup_df: Data Frame containing a list of pitchers.
-    batting_lineup_df: Data Frame containing a list of hitters.
-    salary_data_df: Data Frame containing a list of players with their relative prices.
+#   Parameters:
+#     pitcher_lineup_df: Data Frame containing a list of pitchers.
+#     batting_lineup_df: Data Frame containing a list of hitters.
+#     salary_data_df: Data Frame containing a list of players with their relative prices.
 
-  Returns:
-      DataFrame: Returns updated Data Frame.
-  """
-  game_matchups = get_list_of_team_game_matchups(salary_data_df['Game Info'].unique())
+#   Returns:
+#       DataFrame: Returns updated Data Frame.
+#   """
+#   game_matchups = get_list_of_team_game_matchups(salary_data_df['Game Info'].unique())
 
-  teams = set(batting_lineup_df['team_abbrev'])
-  seen = set()
-  pitcher_matchups = list(pitcher_lineup_df['team_abbrev'])
+#   teams = set(batting_lineup_df['team_abbrev'])
+#   seen = set()
+#   pitcher_matchups = list(pitcher_lineup_df['team_abbrev'])
 
-  for pitcher_matchup in pitcher_matchups:
-    pitcher_away_team = next((away for away in game_matchups if away.get('away_team') == pitcher_matchup), None)
+#   for pitcher_matchup in pitcher_matchups:
+#     pitcher_away_team = next((away for away in game_matchups if away.get('away_team') == pitcher_matchup), None)
 
-    if pitcher_away_team and pitcher_away_team.get('away_team') not in seen and pitcher_away_team.get('home_team') in teams:
-      pitcher_lineup_df = pitcher_lineup_df.drop(pitcher_lineup_df[pitcher_lineup_df['team_abbrev'] == pitcher_away_team.get('away_team')].index)
+#     if pitcher_away_team and pitcher_away_team.get('away_team') not in seen and pitcher_away_team.get('home_team') in teams:
+#       pitcher_lineup_df = pitcher_lineup_df.drop(pitcher_lineup_df[pitcher_lineup_df['team_abbrev'] == pitcher_away_team.get('away_team')].index)
 
-      seen.add(pitcher_away_team.get('away_team'))
+#       seen.add(pitcher_away_team.get('away_team'))
 
-  return pitcher_lineup_df
+#   return pitcher_lineup_df
 
 def apply_elite_statistical_pitcher_filters(pitcher_lineup_df) -> pd.DataFrame:
   """Gather statistical data for pitchers.
@@ -400,7 +399,7 @@ def apply_elite_statistical_pitcher_filters(pitcher_lineup_df) -> pd.DataFrame:
 #   return elite_hitters_df
 
 def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df,
-                            is_pitcher_friendly_park, is_fanduel_lineup) -> list[dict]:
+                            is_hitter_friendly_park, is_pitcher_friendly_park, is_fanduel_lineup) -> list[dict]:
   """Lineup Generator.
 
   Builds a lineup based on the data being filtered.
@@ -430,8 +429,9 @@ def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df
       pitcher_one_idx = np.random.choice(pitcher_indices)
       starting_lineup['pitcher_one'] = pitcher_starting_lineup_df.loc[pitcher_one_idx]['name_id']
 
-      drop_hitters_against_pitchers(salary_data_df, pitcher_one_idx, pitcher_starting_lineup_df, batting_starting_lineup_df,
-                                    player_salary, pitcher_indices, is_pitcher_friendly_park)
+      if is_hitter_friendly_park is not True or is_pitcher_friendly_park is not True:
+        drop_hitters_against_pitchers(salary_data_df, pitcher_one_idx, pitcher_starting_lineup_df, batting_starting_lineup_df,
+                                      player_salary, pitcher_indices)
 
     if is_fanduel_lineup:
       multi_position = 'C|1B'
@@ -441,8 +441,9 @@ def generate_optimal_lineup(salary_data_df, pitcher_lineup_df, batting_lineup_df
         pitcher_two_idx = np.random.choice(pitcher_indices)
         starting_lineup['pitcher_two'] = pitcher_starting_lineup_df.loc[pitcher_two_idx]['name_id']
 
-        drop_hitters_against_pitchers(salary_data_df, pitcher_two_idx, pitcher_starting_lineup_df, batting_starting_lineup_df,
-                                      player_salary, pitcher_indices, is_pitcher_friendly_park)
+        if is_hitter_friendly_park is not True or is_pitcher_friendly_park is not True:
+          drop_hitters_against_pitchers(salary_data_df, pitcher_one_idx, pitcher_starting_lineup_df, batting_starting_lineup_df,
+                                        player_salary, pitcher_indices)
       starting_lineup['catcher'] = get_starting_players(player_salary, starting_players, batting_starting_lineup_df, roster.PositionType.CATCHER.value)
       starting_lineup['first_base'] = get_starting_players(player_salary, starting_players, batting_starting_lineup_df, roster.PositionType.FIRSTBASE.value)
     starting_lineup['second_base'] = get_starting_players(player_salary, starting_players, batting_starting_lineup_df, roster.PositionType.SECONDBASE.value)
@@ -542,7 +543,7 @@ def map_players_salary(salary_data_df, lineup_df, elite_players, column_name) ->
   return lineup_df
 
 def drop_hitters_against_pitchers(salary_data_df, pitcher_idx, pitcher_lineup_df, batting_lineup_df,
-                                  player_salary, pitcher_indices, is_pitcher_friendly_park) -> list[int]:
+                                  player_salary, pitcher_indices) -> None:
   """Do not include hitters that are facing opposing pitchers.
 
   When constructing lineups, it makes sense not to include hitters going against the opposing pitchers.
@@ -566,14 +567,13 @@ def drop_hitters_against_pitchers(salary_data_df, pitcher_idx, pitcher_lineup_df
   pitcher_home_team = next((home for home in game_matchups if home.get('home_team') == pitcher_matchup), None)
   pitcher_away_team = next((away for away in game_matchups if away.get('away_team') == pitcher_matchup), None)
 
-  if is_pitcher_friendly_park:
-    if pitcher_home_team:
-      batters_away = pitcher_home_team.get('away_team')
-      filter_hitters_against_pitchers(batters_away, batting_lineup_df)
+  if pitcher_home_team:
+    batters_away = pitcher_home_team.get('away_team')
+    filter_hitters_against_pitchers(batters_away, batting_lineup_df)
 
-    if pitcher_away_team:
-      batters_home = pitcher_away_team.get('home_team')
-      filter_hitters_against_pitchers(batters_home, batting_lineup_df)
+  if pitcher_away_team:
+    batters_home = pitcher_away_team.get('home_team')
+    filter_hitters_against_pitchers(batters_home, batting_lineup_df)
   # else:
   #   if pitcher_home_team:
   #     away_team = pitcher_home_team.get('away_team')
@@ -584,6 +584,8 @@ def drop_hitters_against_pitchers(salary_data_df, pitcher_idx, pitcher_lineup_df
   #     filter_hitters_against_pitchers(home_team, batting_lineup_df)
 
   player_salary.append(pitcher_lineup_df.loc[pitcher_idx]['salary'])
+
+  # Drop other starters and relieve pitchers on the same team from the dataset.
   pitcher_lineup_df.drop(pitcher_lineup_df[pitcher_lineup_df['team'] == pitcher_lineup_df.loc[pitcher_idx]['team']].index, inplace=True)
 
   pitcher_indices[:] = list(pitcher_lineup_df.index)
