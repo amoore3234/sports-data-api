@@ -1,6 +1,6 @@
 import services.nfl_service as nfl_service
 import services.pga_service as pga_service
-import services.mlb_services as mlb_services
+import services.mlb_service as mlb_service
 
 nfl_service.get_nfl_team_offense_stats()
 nfl_service.get_nfl_player_snap_count()
@@ -10,8 +10,4 @@ nfl_service.get_nfl_odds()
 nfl_service.get_nfl_teams()
 nfl_service.generate_nfl_performance_probabilities()
 pga_service.predict_pga_top_performers()
-mlb_services.get_mlb_pitcher_profile()
-mlb_services.get_mlb_batter_profile()
-mlb_services.get_mlb_pitcher_national_averages()
-mlb_services.get_mlb_batter_national_averages()
-mlb_services.get_mlb_park_stats()
+mlb_service.generate_mlb_performance_probabilities()
